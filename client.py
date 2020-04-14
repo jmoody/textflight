@@ -57,7 +57,7 @@ class Client:
 		self.id = ctup["id"]
 		self.username = ctup["username"]
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
-		self.structure = structure.Structure(c.fetchone())
+		self.structure = structure.load_structure(ctup["structure_id"])		# TODO: Handle client structure being destroyed
 		return True
 
 def register_user(username, passwd) -> None:

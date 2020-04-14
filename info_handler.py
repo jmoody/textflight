@@ -2,7 +2,8 @@ from typing import List
 
 import database
 import system
-from structure import Structure
+import structure
+import production
 from client import Client
 
 conn = database.conn
@@ -11,7 +12,7 @@ def handle_nav(c: Client) -> None:
 	sys = c.structure.system
 	c.send("System: %s", (sys.name,))
 	c.send("Brightness: %s", (sys.brightness,))
-	c.send("Asteroids: %s (density: %d)", (sys.asteroid_type.name.lower(), sys.asteroid_richness))
+	c.send("Asteroids: %s (density: %d)", (c.translate(sys.asteroid_type.name.lower()), sys.asteroid_richness))
 	c.send("Links:")
 	for link in sys.get_links():
 		xo, yo, drag = link
@@ -36,17 +37,17 @@ def handle_rename(c: Client, args: List[str]) -> None:
 def handle_scan(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if len(args) == 1:
-		ctup = conn.execute("SELECT * FROM structures WHERE id = ?", (args[0],)).fetchone()
-		if ctup == None:
+		s = structure.load_structure(args[0])
+		if s == None:
 			c.send("Unable to locate structure.")
 			return
-		s = Structure(ctup)
-		if s.system.id != c.structure.system.id:
+		elif s.system.id != c.structure.system.id:
 			c.send("Unable to locate structure.")
 			return
 	elif len(args) > 1:
 		c.send("Usage: scan [target ID]")
 		return
+	production.update(s)
 	c.send("Callsign: %d %s", (s.id, s.name))
 	if s.planet_id != None:
 		c.send("Landed on %s", (s.system.planets[0].name,))
@@ -61,14 +62,36 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	c.send("Outfits:")
 	index = 0
 	for out in s.outfits:
-		c.send("	[%d] %s mark %d (setting %d)", (index, out.type, out.mark, out.setting))
+		c.send("	[%d] %s mark %d (setting %d)", (index, c.translate(out.type), out.mark, out.setting))
 		index+= 1
 	c.send("Cargo:")
 	index = 0
 	for car in s.cargo:
 		if car.extra != None:
-			c.send("	[%d] %s (%s) x%d", (index, car.type, car.extra, car.count))
+			c.send("	[%d] %s (%s) x%d", (index, c.translate(car.type), car.extra, car.count))
 		else:
-			c.send("	[%d] %s x%d", (index, car.type, car.count))
+			c.send("	[%d] %s x%d", (index, c.translate(car.type), car.count))
 		index+= 1
+
+def handle_status(c: Client) -> None:
+	s = c.structure
+	report = production.update(s)
+	if report.overheat_time == None:
+		c.send("Cooling status: Stable.")
+	elif report.overheat_time > report.now:
+		c.send("Cooling status: Overheat in %d seconds!" % (report.overheat_time - report.now,))
+	else:
+		c.send("Cooling status: OVERHEATED!")
+	c.send("Net heat generation: %d/s.", (report.heat_rate,))
+	if report.powerloss_time == None:
+		c.send("Power status: Stable.")
+	elif report.powerloss_time > report.now:
+		c.send("Power status: System failure in %d seconds!" % (report.powerloss_time - report.now,))
+	else:
+		c.send("Power status: SYSTEM FAILURE!")
+	c.send("Net power consumption: %d/s.", (report.energy_rate,))
+	if report.mining_interval > 0:
+		c.send("Mining beam power: %d.", (report.mining_power,))
+		progress = s.mining_progress / report.mining_interval * 100
+		c.send("Mining progress: %.2f%% (%.2f second interval).", (progress, report.mining_interval))
 

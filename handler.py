@@ -23,6 +23,7 @@ COMMANDS = {
 	"rename": "Rename structure.",
 	"scan": "Scan nearby structures for outfits and cargo.",
 	"set": "Change the power setting of installed outfits.",
+	"status": "Show status of local structure.",
 	"uninstall": "Uninstall an outfit into cargo.",
 }
 
@@ -40,10 +41,12 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 		info_handler.handle_nav(c)
 	elif cmd == "rename":
 		info_handler.handle_rename(c, args)
-	elif cmd == "set":
-		struct_handler.handle_set(c, args)
 	elif cmd == "scan":
 		info_handler.handle_scan(c, args)
+	elif cmd == "set":
+		struct_handler.handle_set(c, args)
+	elif cmd == "status":
+		info_handler.handle_status(c)
 	elif cmd == "uninstall":
 		struct_handler.handle_uninstall(c, args)
 	else:

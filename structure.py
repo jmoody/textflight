@@ -1,9 +1,13 @@
+import weakref
+
 import database
 import cargo
 import outfit
 from system import System
 
 conn = database.conn
+
+registry = weakref.WeakValueDictionary()
 
 class Structure:
 	
@@ -20,8 +24,9 @@ class Structure:
 		self.heat = stup["heat"]
 		self.energy = stup["energy"]
 		self.shield = stup["shield"]
-		self.mining_interrupt = stup["mining_interrupt"]
+		self.interrupt = stup["interrupt"]
 		self.warp_charge = stup["warp_charge"]
+		self.mining_progress = stup["mining_progress"]
 		
 		# Load position info
 		self.system = System(stup["sys_id"])
@@ -64,11 +69,19 @@ class Structure:
 		self.name = name
 		conn.commit()
 
+def load_structure(sid: int) -> Structure:
+	if sid in registry:
+		return registry[sid]
+	stup = conn.execute("SELECT * FROM structures WHERE id = ?;", (sid,)).fetchone()
+	if stup == None:
+		return None
+	s = Structure(stup)
+	registry[sid] = s
+	return s
+
 def create_structure(name, owner, stype, outfit_space, sys_id, planet_id = None, dock_id = None) -> Structure:
-	c = conn.cursor()
-	c.execute("INSERT INTO structures (name, owner_id, type, outfit_space, sys_id, planet_id, dock_id) VALUES (?, ?, ?, ?, ?, ?, ?);",
+	c = conn.execute("INSERT INTO structures (name, owner_id, type, outfit_space, sys_id, planet_id, dock_id) VALUES (?, ?, ?, ?, ?, ?, ?);",
 		(name, owner, stype, outfit_space, sys_id, planet_id, dock_id))
-	c.execute("SELECT * FROM structures WHERE id = ?;", (c.lastrowid,))
 	conn.commit()
-	return Structure(c.fetchone())
+	return load_structure(c.lastrowid)
 

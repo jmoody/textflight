@@ -23,11 +23,12 @@ create_table("""structures (
 	type TEXT NOT NULL,
 	outfit_space INTEGER NOT NULL,
 	
+	interrupt REAL DEFAULT 0 NOT NULL,
 	heat INTEGER DEFAULT 0 NOT NULL,
 	energy INTEGER DEFAULT 0 NOT NULL,
 	shield INTEGER DEFAULT 0 NOT NULL,
-	mining_interrupt INTEGER DEFAULT 0 NOT NULL,
 	warp_charge INTEGER DEFAULT 0 NOT NULL,
+	mining_progress REAL DEFAULT 0 NOT NULL,
 	
 	sys_id INTEGER NOT NULL,
 	planet_id INTEGER,
