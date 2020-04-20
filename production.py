@@ -8,19 +8,28 @@ from cargo import Cargo
 
 conn = database.conn
 
-OVERHEAT = 256
-MAX_ENERGY = 1024
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
 MINING_INTERVAL_BASE = 60
 
 class StatusReport:
 	
+	mass = 0
 	heat_rate = 0
+	max_heat = 0
 	energy_rate = 0
-	mining_power = 0
-	mining_interval = 0
+	max_energy = 0
 	overheat_time = None
 	powerloss_time = None
+	
+	shield_rate = 0
+	max_shield = 0
+	has_shields = False
+	
+	warp_rate = 0
+	has_warp = False
+	
+	mining_power = 0
+	mining_interval = 0
 	
 	def __init__(self):
 		self.now = time.time()
@@ -28,49 +37,75 @@ class StatusReport:
 def update(s: Structure) -> None:
 	report = StatusReport()
 	
-	# Parse outfits
+	# Parse outfits and cargo
+	for cargo in s.cargo:
+		try:
+			report.mass+= int(cargo.extra) * cargo.count
+		except:
+			report.mass+= cargo.count
 	for outfit in s.outfits:
+		report.mass+= outfit.mark
 		report.energy_rate+= outfit.power_rate()
 		report.heat_rate+= outfit.heat_rate()
-		if outfit.type == "Mining Beam":
+		if outfit.type == "Capacitor":
+			report.max_energy+= 64 * outfit.mark
+		elif outfit.type == "Coolant Pump":
+			report.max_heat+= 64 * outfit.mark
+		elif outfit.type == "Mining Beam":
 			report.mining_power+= outfit.operation_power()
+		elif outfit.type == "Shield Matrix":
+			report.has_shields = True
+			report.max_shield+= 64 * outfit.mark
+			report.shield_rate+= outfit.operation_power()
+		elif outfit.type == "Warp Engine":
+			report.has_warp = True
+			report.warp_rate+= outfit.operation_power()
 	
 	# Determine stime
 	stime = report.now
 	if report.heat_rate >= 0:
-		if s.heat == OVERHEAT:
+		if s.heat == report.max_heat:
 			report.overheat_time = s.interrupt
-		else:
-			report.overheat_time = s.interrupt + (OVERHEAT - s.heat) / report.heat_rate
-		if report.overheat_time < stime:
+		elif report.heat_rate > 0:
+			report.overheat_time = s.interrupt + (report.max_heat - s.heat) / report.heat_rate
+		if report.overheat_time != None and report.overheat_time < stime:
 			stime = report.overheat_time
-	elif report.energy_rate >= 0:
+	if report.energy_rate >= 0:
 		if s.energy == 0:
 			report.powerloss_time = s.interrupt
-		else:
+		elif report.energy_rate > 0:
 			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
-		if report.powerloss_time < stime:
+		if report.powerloss_time != None and report.powerloss_time < stime:
 			stime = report.powerloss_time
 	
-	# Update to stime
+	# Update if systems have not failed
 	if s.interrupt != stime:
 		active = stime - s.interrupt
 		report.mining_interval = update_mining(s, report.mining_power, active)
 		s.heat+= active * report.heat_rate
 		s.energy-= active * report.energy_rate
+		s.shield+= active * report.shield_rate
+		s.warp_charge+= active * report.warp_rate
 	
-	# Update to now
+	# Handle system failure
 	if stime < report.now:
 		for outfit in s.outfits:
 			outfit.set_setting(0)
 		report.energy_rate = 0
 		report.heat_rate = 0
+		report.shield_rate = 0
+		report.warp_rate = 0
+	if report.warp_rate == 0:
+		s.warp_charge = 0
 	
 	# Write to database
-	s.heat = max(min(OVERHEAT, s.heat), 0)
-	s.energy = max(min(MAX_ENERGY, s.energy), 0)
+	s.heat = max(min(report.max_heat * 2, s.heat), 0)
+	s.energy = max(min(report.max_energy, s.energy), 0)
+	s.shield = max(min(report.max_shield, s.shield), 0)
+	s.warp_charge = max(min(report.mass, s.warp_charge), 0)
 	s.interrupt = report.now
-	conn.execute("UPDATE structures SET heat = ?, energy = ?, interrupt = ? WHERE id = ?;", (s.heat, s.energy, s.interrupt, s.id))
+	conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
+		(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))
 	conn.commit()
 	
 	return report
@@ -85,7 +120,7 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	elapsed = s.mining_progress + active
 	interval = (MAX_ASTEROID_RICHNESS - s.system.asteroid_richness) * MINING_INTERVAL_BASE / beam_power
 	count = int(elapsed / interval)
-	set_mining_progress(s, elapsed - interval * count)
+	s.mining_progress = elapsed - interval * count
 	if count > 0:
 		Cargo(s.system.asteroid_type.value, count).add(s)
 	return interval

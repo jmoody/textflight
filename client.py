@@ -4,6 +4,7 @@ from typing import Tuple
 
 import database
 import structure
+from outfit import Outfit
 
 WELCOME_MESSAGE = "Welcome to textflight!"
 MOTD = "We're full of bugs!"
@@ -62,6 +63,13 @@ class Client:
 
 def register_user(username, passwd) -> None:
 	ship = structure.create_structure(username + "'s Ship", None, "ship", 16, 0)
+	Outfit("Reactor", 1).install(ship)
+	Outfit("Coolant Pump", 1).install(ship)
+	Outfit("Shield Matrix", 1).install(ship)
+	Outfit("Warp Engine", 1).install(ship)
+	Outfit("Mining Beam", 1).install(ship)
+	Outfit("Capacitor", 1).install(ship)
 	conn.cursor().execute("INSERT INTO users (username, passwd, structure_id) VALUES (?, ?, ?);", (username, passwd, ship.id))
+	# TODO: Set ship owner ID
 	conn.commit()
 

@@ -31,7 +31,7 @@ class Structure:
 		# Load position info
 		self.system = System(stup["sys_id"])
 		self.planet_id = stup["planet_id"]
-		self.dock_id = stup["dock_id"]
+		self.dock_parent = load_structure(stup["dock_id"])
 		
 		# Load outfits
 		self.outfits = []

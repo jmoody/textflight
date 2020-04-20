@@ -24,10 +24,10 @@ create_table("""structures (
 	outfit_space INTEGER NOT NULL,
 	
 	interrupt REAL DEFAULT 0 NOT NULL,
-	heat INTEGER DEFAULT 0 NOT NULL,
-	energy INTEGER DEFAULT 0 NOT NULL,
-	shield INTEGER DEFAULT 0 NOT NULL,
-	warp_charge INTEGER DEFAULT 0 NOT NULL,
+	heat REAL DEFAULT 0 NOT NULL,
+	energy REAL DEFAULT 0 NOT NULL,
+	shield REAL DEFAULT 0 NOT NULL,
+	warp_charge REAL DEFAULT 0 NOT NULL,
 	mining_progress REAL DEFAULT 0 NOT NULL,
 	
 	sys_id INTEGER NOT NULL,

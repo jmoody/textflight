@@ -5,6 +5,7 @@ import client
 import system
 import info_handler
 import struct_handler
+import ship_handler
 from client import Client
 
 COMMANDS = {
@@ -37,6 +38,8 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 		handle_help(c, args)
 	elif cmd == "install":
 		struct_handler.handle_install(c, args)
+	elif cmd == "jump":
+		ship_handler.handle_jump(c, args)
 	elif cmd == "nav":
 		info_handler.handle_nav(c)
 	elif cmd == "rename":
