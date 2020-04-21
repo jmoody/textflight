@@ -10,6 +10,7 @@ conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
 MINING_INTERVAL_BASE = 60
+WARP_RATIO = 16
 
 class StatusReport:
 	
@@ -99,10 +100,10 @@ def update(s: Structure) -> None:
 		s.warp_charge = 0
 	
 	# Write to database
-	s.heat = max(min(report.max_heat * 2, s.heat), 0)
+	s.heat = max(s.heat, 0)
 	s.energy = max(min(report.max_energy, s.energy), 0)
 	s.shield = max(min(report.max_shield, s.shield), 0)
-	s.warp_charge = max(min(report.mass, s.warp_charge), 0)
+	s.warp_charge = max(min(min(WARP_RATIO * report.warp_rate, report.mass), s.warp_charge), 0)
 	s.interrupt = report.now
 	conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
 		(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))
