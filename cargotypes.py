@@ -1,4 +1,5 @@
 heat_rates = {
+	"Assembler": 1,
 	"Capacitor": 0,
 	"Coolant Pump": -4,
 	"Mining Beam": 1,
@@ -8,6 +9,7 @@ heat_rates = {
 }
 
 power_rates = {
+	"Assembler": 1,
 	"Capacitor": 0,
 	"Coolant Pump": 1,
 	"Mining Beam": 1,

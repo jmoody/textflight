@@ -55,6 +55,16 @@ create_table("""cargo (
 	FOREIGN KEY(structure_id) REFERENCES structures(id)
 );""")
 
+create_table("""craft_queue (
+	id INTEGER PRIMARY KEY,
+	type TEXT NOT NULL,
+	extra TEXT,
+	count INTEGER NOT NULL,
+	start REAL NOT NULL,
+	structure_id INTEGER NOT NULL,
+	FOREIGN KEY(structure_id) REFERENCES structures(id)
+);""")
+
 def get_user_by_username(username: str):
 	c = conn.cursor()
 	c.execute("SELECT id FROM users WHERE username = ?", (username,))

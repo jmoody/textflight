@@ -108,7 +108,7 @@ def handle_status(c: Client) -> None:
 			c.send("Shields: Offline (%d/%d).", (s.shield, report.max_shield))
 		else:
 			c.send("Shields: FAILED!")
-	if report.has_warp:
+	if report.normal_warp > 0:
 		if s.warp_charge == report.mass:
 			c.send("Warp engines: Ready to engage.")
 		elif report.warp_rate > 0:
@@ -116,8 +116,6 @@ def handle_status(c: Client) -> None:
 		else:
 			c.send("Warp engines: Offline.")
 	if report.mining_interval > 0:
-		c.send("Mining:")
-		c.send("	Mining beam power: %d.", (report.mining_power,))
 		progress = s.mining_progress / report.mining_interval * 100
-		c.send("	Mining progress: %.2f%% (%.2f second interval).", (progress, report.mining_interval))
+		c.send("Mining progress: %.2f%% (%.2f second interval).", (progress, report.mining_interval))
 

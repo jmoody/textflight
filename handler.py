@@ -3,6 +3,7 @@ from typing import List
 import database
 import client
 import system
+import craft_handler
 import info_handler
 import struct_handler
 import ship_handler
@@ -10,17 +11,21 @@ from client import Client
 
 COMMANDS = {
 	"board": "Board another structure.",
+	"cancel": "Cancels a queued assembly. Yields no resources.",
+	"craft": "Queue an item for assembly.",
 	"dock": "Dock to a nearby structure.",
 	"eject": "Disconnects all docked structures.",
 	"exit": "Disconnects from server.",
 	"help": "Shows list of commands, or usage of a given command.",
 	"install": "Install an outfit from cargo.",
+	"jettison": "Discord cargo into space.",
 	"jump": "Jump to another system.",
 	"land": "Land on a planet.",
 	"language": "Set your language.",
 	"launch": "Launch from planets or docked structures.",
 	"load": "Load cargo onto another structure.",
 	"nav": "Get navigation information such as planets and hyperlinks.",
+	"queue": "Lists the assembly queue.",
 	"rename": "Rename structure.",
 	"scan": "Scan nearby structures for outfits and cargo.",
 	"set": "Change the power setting of installed outfits.",
@@ -31,17 +36,25 @@ COMMANDS = {
 HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
 
 def handle_command(c: Client, cmd: str, args: List[str]) -> None:
-	if cmd == "exit":
+	if cmd == "cancel":
+		craft_handler.handle_cancel(c, args)
+	elif cmd == "craft":
+		craft_handler.handle_craft(c, args)
+	elif cmd == "exit":
 		c.quit()
 		return
 	elif cmd == "help":
 		handle_help(c, args)
 	elif cmd == "install":
 		struct_handler.handle_install(c, args)
+	elif cmd == "jettison":
+		craft_handler.handle_jettison(c, args)
 	elif cmd == "jump":
 		ship_handler.handle_jump(c, args)
 	elif cmd == "nav":
 		info_handler.handle_nav(c)
+	elif cmd == "queue":
+		craft_handler.handle_queue(c)
 	elif cmd == "rename":
 		info_handler.handle_rename(c, args)
 	elif cmd == "scan":

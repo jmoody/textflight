@@ -20,7 +20,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		return
 	try:
 		lindex = int(args[0])
-	except:
+	except ValueError:
 		c.send("Not a number.")
 		return
 	links = s.system.get_links()

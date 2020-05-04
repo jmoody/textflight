@@ -3,6 +3,7 @@ import weakref
 import database
 import cargo
 import outfit
+import queue
 from system import System
 
 conn = database.conn
@@ -42,6 +43,11 @@ class Structure:
 		self.cargo = []
 		for car in conn.execute("SELECT * FROM cargo WHERE structure_id = ?", (self.id,)):
 			self.cargo.append(cargo.load_cargo(car))
+		
+		# Load crafting queue
+		self.craft_queue = []
+		for q in conn.execute("SELECT * FROM craft_queue WHERE structure_id = ?", (self.id,)):
+			self.craft_queue.append(queue.load_craft_queue(q))
 	
 	def land(self, planet_id: int) -> None:
 		conn.execute("UPDATE structures SET planet_id = ? WHERE id = ?;", (planet_id, self.id))

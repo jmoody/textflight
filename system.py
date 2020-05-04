@@ -16,11 +16,11 @@ class PlanetType(enum.Enum):
 	HABITABLE = 4
 
 class AsteroidType(enum.Enum):
-	IRON = "iron ore"
-	CARBON = "carbon ore"
-	COPPER = "copper ore"
-	SILICON = "silicon ore"
-	URANIUM = "uranium ore"
+	IRON = "Iron ore"
+	CARBON = "Carbon Ore"
+	COPPER = "Copper Ore"
+	SILICON = "Silicon Ore"
+	URANIUM = "Uranium Ore"
 
 class System:
 	name = None

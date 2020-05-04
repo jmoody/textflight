@@ -3,6 +3,7 @@ from typing import Tuple
 
 import system
 import database
+import crafting
 from structure import Structure
 from cargo import Cargo
 
@@ -27,10 +28,11 @@ class StatusReport:
 	has_shields = False
 	
 	warp_rate = 0
-	has_warp = False
+	normal_warp = 0
 	
 	mining_power = 0
 	mining_interval = 0
+	assembly_rate = 0
 	
 	def __init__(self):
 		self.now = time.time()
@@ -39,6 +41,7 @@ def update(s: Structure) -> None:
 	report = StatusReport()
 	
 	# Parse outfits and cargo
+	report.mass+= len(s.craft_queue)
 	for cargo in s.cargo:
 		try:
 			report.mass+= int(cargo.extra) * cargo.count
@@ -48,7 +51,9 @@ def update(s: Structure) -> None:
 		report.mass+= outfit.mark
 		report.energy_rate+= outfit.power_rate()
 		report.heat_rate+= outfit.heat_rate()
-		if outfit.type == "Capacitor":
+		if outfit.type == "Assembler":
+			report.assembly_rate+= outfit.operation_power()
+		elif outfit.type == "Capacitor":
 			report.max_energy+= 64 * outfit.mark
 		elif outfit.type == "Coolant Pump":
 			report.max_heat+= 64 * outfit.mark
@@ -59,8 +64,8 @@ def update(s: Structure) -> None:
 			report.max_shield+= 64 * outfit.mark
 			report.shield_rate+= outfit.operation_power()
 		elif outfit.type == "Warp Engine":
-			report.has_warp = True
 			report.warp_rate+= outfit.operation_power()
+			report.normal_warp+= outfit.mark
 	
 	# Determine stime
 	stime = report.now
@@ -83,6 +88,8 @@ def update(s: Structure) -> None:
 	if s.interrupt != stime:
 		active = stime - s.interrupt
 		report.mining_interval = update_mining(s, report.mining_power, active)
+		if report.assembly_rate > 0:
+			update_assembly(s, stime, report.assembly_rate)
 		s.heat+= active * report.heat_rate
 		s.energy-= active * report.energy_rate
 		s.shield+= active * report.shield_rate
@@ -103,7 +110,7 @@ def update(s: Structure) -> None:
 	s.heat = max(s.heat, 0)
 	s.energy = max(min(report.max_energy, s.energy), 0)
 	s.shield = max(min(report.max_shield, s.shield), 0)
-	s.warp_charge = max(min(min(WARP_RATIO * report.warp_rate, report.mass), s.warp_charge), 0)
+	s.warp_charge = max(min(min(report.warp_rate / report.normal_warp * report.mass, report.mass), s.warp_charge), 0)
 	s.interrupt = report.now
 	conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
 		(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))
@@ -125,4 +132,14 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	if count > 0:
 		Cargo(s.system.asteroid_type.value, count).add(s)
 	return interval
+
+def update_assembly(s: Structure, stime: float, assembly_rate: float) -> float:
+	for q in s.craft_queue:
+		elapsed = stime - q.start
+		craft_time = crafting.craft_time(q, assembly_rate)
+		finished = min(q.count, int(elapsed / craft_time))
+		if finished > 0:
+			Cargo(q.type, finished, q.extra).add(s)
+			q.start+= finished * craft_time
+			q.less(finished, s)
 

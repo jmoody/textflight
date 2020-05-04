@@ -13,7 +13,7 @@ def handle_install(c: Client, args: List[str]):
 		return
 	try:
 		cindex = int(args[0])
-	except:
+	except ValueError:
 		c.send("Not a number.")
 		return
 	if cindex >= len(c.structure.cargo):
@@ -39,7 +39,7 @@ def handle_set(c: Client, args: List[str]):
 	try:
 		oindex = int(args[0])
 		setting = int(args[1])
-	except:
+	except ValueError:
 		c.send("Not a number.")
 		return
 	if oindex >= len(c.structure.outfits):
@@ -58,7 +58,7 @@ def handle_uninstall(c: Client, args: List[str]):
 		return
 	try:
 		oindex = int(args[0])
-	except:
+	except ValueError:
 		c.send("Not a number.")
 		return
 	if oindex >= len(c.structure.outfits):

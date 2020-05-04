@@ -69,6 +69,7 @@ def register_user(username, passwd) -> None:
 	Outfit("Warp Engine", 1).install(ship)
 	Outfit("Mining Beam", 1).install(ship)
 	Outfit("Capacitor", 1).install(ship)
+	Outfit("Assembler", 1).install(ship)
 	conn.cursor().execute("INSERT INTO users (username, passwd, structure_id) VALUES (?, ?, ?);", (username, passwd, ship.id))
 	# TODO: Set ship owner ID
 	conn.commit()
