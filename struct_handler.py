@@ -19,6 +19,10 @@ def handle_install(c: Client, args: List[str]):
 	if cindex >= len(c.structure.cargo):
 		c.send("Cargo does not exist.")
 	else:
+		for o in c.structure.outfits:
+			if o.setting != 0:
+				c.send("Structure must be powered down to install outfits.")
+				return
 		cargo = c.structure.cargo[cindex]
 		if not cargo.type in cargotypes.outfits:
 			c.send("This is not an outfit.")
@@ -64,6 +68,10 @@ def handle_uninstall(c: Client, args: List[str]):
 	if oindex >= len(c.structure.outfits):
 		c.send("Outfit does not exist.")
 	else:
+		for o in c.structure.outfits:
+			if o.setting != 0:
+				c.send("Structure must be powered down to uninstall outfits.")
+				return
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.uninstall(c.structure)

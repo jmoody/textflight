@@ -20,15 +20,11 @@ class Outfit:
 			(self.type, self.mark, self.setting, s.id))
 		self.id = c.lastrowid
 		self.structure_id = s.id
-		s.warp_charge = 0
-		conn.execute("UPDATE structures SET warp_charge = 0 WHERE id=?;", (s.id,))
 		conn.commit()
 	
 	def uninstall(self, s) -> None:
 		s.outfits.remove(self)
 		conn.execute("DELETE FROM outfits WHERE id = ?;", (self.id,))
-		s.warp_charge = 0
-		conn.execute("UPDATE structures SET warp_charge = 0 WHERE id=?;", (s.id,))
 		conn.commit()
 	
 	def set_setting(self, setting: int) -> None:
