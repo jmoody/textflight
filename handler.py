@@ -94,7 +94,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	if cmd == "login":
 		if len(args) != 2:
 			c.send("Usage: login <username> <password>.")
-		elif c.login(args[0], args[1]):	# TODO: Hash password, don't store cleartext
+		elif c.login(args[0], args[1]):
 			c.send("Logged in as %s.", (args[0],))
 		else:
 			c.send("Incorrect username or password.")

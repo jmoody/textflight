@@ -12,7 +12,7 @@ create_table("""users (
 	id INTEGER PRIMARY KEY,
 	username TEXT UNIQUE NOT NULL,
 	passwd TEXT,
-	structure_id INTEGER NOT NULL,
+	structure_id INTEGER,
 	FOREIGN KEY(structure_id) REFERENCES structures(id)
 );""")
 

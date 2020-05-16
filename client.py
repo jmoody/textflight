@@ -1,4 +1,5 @@
 import gettext
+import bcrypt
 from threading import Lock
 from typing import Tuple
 
@@ -49,20 +50,23 @@ class Client:
 		self.send("Goodbye.")
 		self.quitting = True
 	
-	def login(self, username, passwd) -> True:
+	def login(self, username, password) -> True:
 		c = conn.cursor()
-		c.execute("SELECT * FROM users WHERE username = ? AND passwd = ?;", (username, passwd))
+		c.execute("SELECT * FROM users WHERE username = ?;", (username,))
 		ctup = c.fetchone()
-		if ctup == None:
+		if ctup == None or not bcrypt.checkpw(password.encode("utf-8"), ctup["passwd"]):
 			return False
 		self.id = ctup["id"]
-		self.username = ctup["username"]
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
-		self.structure = structure.load_structure(ctup["structure_id"])		# TODO: Handle client structure being destroyed
+		self.structure = structure.load_structure(ctup["structure_id"])
+		if self.structure == None:
+			self.structure = create_starter_ship(self.id, ctup["username"])
+			conn.execute("UPDATE users SET structure_id = ? WHERE id = ?", (self.structure.id, self.id))
+			conn.commit()
 		return True
 
-def register_user(username, passwd) -> None:
-	ship = structure.create_structure(username + "'s Ship", None, "ship", 16, 0)
+def create_starter_ship(uid, username) -> structure.Structure:
+	ship = structure.create_structure(username + "'s Ship", uid, "ship", 16, 0)
 	Outfit("Reactor", 1).install(ship)
 	Outfit("Coolant Pump", 1).install(ship)
 	Outfit("Shield Matrix", 1).install(ship)
@@ -71,7 +75,10 @@ def register_user(username, passwd) -> None:
 	Outfit("Mining Beam", 1).install(ship)
 	Outfit("Assembler", 1).install(ship)
 	Outfit("Capacitor", 1).install(ship)
-	user_id = conn.execute("INSERT INTO users (username, passwd, structure_id) VALUES (?, ?, ?);", (username, passwd, ship.id)).lastrowid
-	conn.execute("UPDATE structures SET owner_id = ? WHERE id = ?;", (user_id, ship.id))
+	return ship
+
+def register_user(username, password) -> None:
+	passwd = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+	user_id = conn.execute("INSERT INTO users (username, passwd) VALUES (?, ?);", (username, passwd)).lastrowid
 	conn.commit()
 
