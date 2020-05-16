@@ -7,10 +7,57 @@ from client import Client
 
 conn = database.conn
 
+def handle_land(c: Client, args: List[str]) -> None:
+	if len(args) != 1:
+		c.send("Usage: land <planet ID>")
+		return
+	try:
+		pid = int(args[0])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	if pid > len(c.structure.system.planets):
+		c.send("Planet does not exist.")
+		return
+	elif c.structure.planet_id != None:
+		c.send("Already landed on a planet.")
+		return
+	elif c.structure.dock_parent != None:
+		c.send("Cannot land while docked to a structure.")
+		return
+	report = production.update(c.structure)
+	if report.mass > report.antigravity:
+		if report.antigravity == 0:
+			c.send("Antigravity engines are needed to land on planets.")
+		else:
+			c.send("Antigravity engines are not powerful enough to land.")
+		return
+	c.structure.planet_id = pid
+	conn.execute("UPDATE structures SET planet_id = ? WHERE id = ?;", (pid, c.structure.id))
+	conn.commit()
+	c.send("Landed on planet %d.", (pid,))
+
+def handle_launch(c: Client) -> None:
+	if c.structure.type == "base":
+		c.send("Cannot launch a planetary base.")
+		return
+	report = production.update(c.structure)
+	if report.mass > report.antigravity:
+		if report.antigravity == 0:
+			c.send("Antigravity engines are needed to land on planets.")
+		else:
+			c.send("Antigravity engines are not powerful enough to land.")
+		return
+	c.structure.planet_id = None
+	c.structure.dock_parent = None
+	conn.execute("UPDATE structures SET planet_id = NULL, dock_id = NULL WHERE id = ?;", (c.structure.id,))
+	conn.commit()
+	c.send("Launched from planets and docked structures.")
+
 def handle_jump(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if len(args) != 1:
-		c.send("Usage: jump [link]")
+		c.send("Usage: jump <link ID>")
 		return
 	elif s.planet_id != None:
 		c.send("Cannot engage warp engines in atmosphere.")

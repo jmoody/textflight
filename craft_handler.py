@@ -3,8 +3,13 @@ from typing import List
 
 import crafting
 import production
+import structure
 from cargo import Cargo
 from client import Client
+from system import PlanetType
+
+def handle_base(c: Client, args: List[str]) -> None:
+	handle_construct(c, args, True)
 
 def handle_cancel(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
@@ -21,6 +26,71 @@ def handle_cancel(c: Client, args: List[str]) -> None:
 	else:
 		c.structure.craft_queue[qindex].less(count, c.structure)
 		c.send("Cancelled %d items queued for assembly.", (count,))
+
+def handle_construct(c: Client, args: List[str], base = False) -> None:
+	
+	# Validate input
+	if len(args) < 2:
+		if base:
+			c.send("Usage: base <outfit space> <name>")
+		else:
+			c.send("Usage: construct <outfit space> <name>")
+		return
+	try:
+		outfit_space = int(args.pop(0))
+	except ValueError:
+		c.send("Not a number.")
+		return
+	s = c.structure
+	report = production.update(s)
+	name = " ".join(args)
+	if base:
+		if s.planet_id == None:
+			c.send("Must be landed on a planet to construct a base.")
+			return
+	elif outfit_space > report.shipyard:
+		if report.shipyard == 0:
+			c.send("Shipyard required to construct new structures.")
+		else:
+			c.send("Shipyard not large enough to construct this structure.")
+		return
+	
+	# Determine the cost
+	if not base:
+		cost_factor = 4
+	elif s.system.planets[s.planet_id] == PlanetType.HABITABLE:
+		cost_factor = 1
+	else:
+		cost_factor = 2
+	cost = pow(outfit_space, cost_factor)
+	
+	# Remove the materials
+	has_struct = False
+	has_plating = False
+	for cargo in s.cargo:
+		if cargo.type == "Light Material":
+			has_struct = cargo.count >= cost
+			if not has_struct:
+				break
+		elif cargo.type == "Heavy Plating":
+			has_plating = cargo.count >= outfit_space
+			if not has_plating:
+				break
+	if not has_struct:
+		c.send("Not enough Light Material (needs %d).", (cost,))
+		return
+	if not has_plating:
+		c.send("Not enough Heavy Plating (needs %d).", (outfit_space,))
+		return
+	Cargo("Light Material", cost).remove(s)
+	Cargo("Heavy Plating", outfit_space).remove(s)
+	
+	# Create the structure
+	if base:
+		struct = structure.create_structure(name, c.id, "base", outfit_space, s.system.id, s.planet_id)
+	else:
+		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system.id, s.planet_id, s.id)
+	c.send("Successfully created structure '%s' with size %d.", (name, outfit_space))
 
 def handle_craft(c: Client, args: List[str]) -> None:
 	production.update(c.structure)

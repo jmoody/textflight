@@ -7,6 +7,7 @@ ASTEROID_RICHNESS_BITS = 3
 PLANET_COUNT_BITS = 2
 LINK_BITS = 1
 DRAG_BITS = 8
+SEED = 0
 
 class PlanetType(enum.Enum):
 	GAS = 0
@@ -28,10 +29,8 @@ class System:
 	def __init__(self, sys_id: int) -> None:
 		self.id = sys_id
 		self.x, self.y = to_system_coords(self.id)
-		r = random.Random()
-		r.seed(self.id)
+		r = get_random(self.id)
 		self.brightness = r.getrandbits(BRIGHTNESS_BITS)
-		# TODO: Generate name
 		self.asteroid_type = r.choice(list(AsteroidType))
 		self.asteroid_richness = r.getrandbits(ASTEROID_RICHNESS_BITS)
 		self.planets = []
@@ -54,7 +53,6 @@ class Planet:
 	ptype = None
 	
 	def __init__(self, r: random.Random) -> None:
-		# TODO: Generate name
 		type_roll = r.randint(0, 1000) / 10
 		if type_roll <= 40:
 			self.ptype = PlanetType.GAS
@@ -72,8 +70,7 @@ def get_link_drag(sys1_id: int, sys2_id: int) -> int:
 		link_id = sys1_id << 64 | sys2_id
 	else:
 		link_id = sys2_id << 64 | sys1_id
-	r = random.Random()
-	r.seed(link_id)
+	r = get_random(link_id)
 	if r.getrandbits(LINK_BITS):
 		return 0
 	drag = r.getrandbits(DRAG_BITS)
@@ -87,4 +84,8 @@ def to_system_coords(sys_id: int) -> Tuple[int, int]:
 def to_system_id(x: int, y: int) -> int:
 	return x << 32 | y
 
-# TODO: Use SHA256 to obfuscate a seed
+def get_random(seed: int) -> random.Random:
+	r = random.Random()
+	r.seed(seed + SEED)	# TODO: Use SHA256 to obfuscate a seed
+	return r
+

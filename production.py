@@ -11,7 +11,7 @@ conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
 MINING_INTERVAL_BASE = 60
-WARP_RATIO = 16
+ANTIGRAVITY_MULTIPLIER = 1600
 
 class StatusReport:
 	
@@ -29,10 +29,12 @@ class StatusReport:
 	
 	warp_rate = 0
 	normal_warp = 0
+	antigravity = 0
 	
 	mining_power = 0
 	mining_interval = 0
 	assembly_rate = 0
+	shipyard = 0
 	
 	def __init__(self):
 		self.now = time.time()
@@ -66,6 +68,10 @@ def update(s: Structure) -> None:
 		elif outfit.type == "Warp Engine":
 			report.warp_rate+= outfit.operation_power()
 			report.normal_warp+= outfit.mark
+		elif outfit.type == "Antigravity Engine":
+			report.antigravity+= outfit.operation_power() * ANTIGRAVITY_MULTIPLIER
+		elif outfit.type == "Shipyard":
+			report.shipyard+= min(outfit.mark, outfit.operation_power())
 	
 	# Determine stime
 	stime = report.now
@@ -110,7 +116,8 @@ def update(s: Structure) -> None:
 	s.heat = max(s.heat, 0)
 	s.energy = max(min(report.max_energy, s.energy), 0)
 	s.shield = max(min(report.max_shield, s.shield), 0)
-	s.warp_charge = max(min(min(report.warp_rate / report.normal_warp * report.mass, report.mass), s.warp_charge), 0)
+	if report.normal_warp > 0:
+		s.warp_charge = max(min(min(report.warp_rate / report.normal_warp * report.mass, report.mass), s.warp_charge), 0)
 	s.interrupt = report.now
 	conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
 		(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))

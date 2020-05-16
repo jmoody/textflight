@@ -10,20 +10,27 @@ conn = database.conn
 
 def handle_nav(c: Client) -> None:
 	sys = c.structure.system
-	c.send("System: %s", (sys.name,))
+	if sys.name != None:
+		c.send("System: %s", (sys.name,))
 	c.send("Brightness: %s", (sys.brightness,))
 	c.send("Asteroids: %s (density: %d)", (c.translate(sys.asteroid_type.name.lower()), sys.asteroid_richness))
 	c.send("Links:")
 	index = 0
 	for link in sys.get_links():
 		xo, yo, drag = link
-		sys = system.System(system.to_system_id(sys.x + xo, sys.y + yo))
-		c.send("	[%d] %s (drag: %d)", (index, sys.name, drag))
+		target_sys = system.System(system.to_system_id(sys.x + xo, sys.y + yo))
+		if target_sys.name == None:
+			c.send("	[%d] (drag: %d)", (index, drag))
+		else:
+			c.send("	[%d] %s (drag: %d)", (index, target_sys.name, drag))
 		index+= 1
 	c.send("Planets:")
 	index = 0
 	for planet in sys.planets:
-		c.send("	[%d] %s (%s)", (index, planet.name, c.translate(planet.ptype.name.lower())))
+		if planet.name == None:
+			c.send("	[%d] (%s)", (index, c.translate(planet.ptype.name.lower())))
+		else:
+			c.send("	[%d] %s (%s)", (index, planet.name, c.translate(planet.ptype.name.lower())))
 		index+= 1
 	c.send("Structures:")
 	for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id,)):
@@ -54,7 +61,7 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	production.update(s)
 	c.send("Callsign: %d %s.", (s.id, s.name))
 	if s.planet_id != None:
-		c.send("Landed on %s.", (s.system.planets[0].name,))
+		c.send("Landed on planet %d.", (s.planet_id,))
 	if s.dock_parent != None:
 		c.send("Docked to %d %s.", (s.dock_parent.id, s.dock_parent.name))
 	c.send("Outfit space: %d.", (s.outfit_space,))
@@ -115,6 +122,11 @@ def handle_status(c: Client) -> None:
 			c.send("Warp engines: Charging (%d%%).", s.warp_charge / report.mass * 100)
 		else:
 			c.send("Warp engines: Offline.")
+	if report.antigravity > 0:
+		if report.mass > report.antigravity:
+			c.send("Antigravity engines: OVERLOADED.")
+		else:
+			c.send("Antigravity engines: Online.")
 	if report.mining_interval > 0:
 		progress = s.mining_progress / report.mining_interval * 100
 		c.send("Mining progress: %.2f%% (%.2f second interval).", (progress, report.mining_interval))

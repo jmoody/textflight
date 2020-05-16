@@ -67,10 +67,11 @@ def register_user(username, passwd) -> None:
 	Outfit("Coolant Pump", 1).install(ship)
 	Outfit("Shield Matrix", 1).install(ship)
 	Outfit("Warp Engine", 1).install(ship)
+	Outfit("Antigravity Engine", 1).install(ship)
 	Outfit("Mining Beam", 1).install(ship)
-	Outfit("Capacitor", 1).install(ship)
 	Outfit("Assembler", 1).install(ship)
-	conn.cursor().execute("INSERT INTO users (username, passwd, structure_id) VALUES (?, ?, ?);", (username, passwd, ship.id))
-	# TODO: Set ship owner ID
+	Outfit("Capacitor", 1).install(ship)
+	user_id = conn.execute("INSERT INTO users (username, passwd, structure_id) VALUES (?, ?, ?);", (username, passwd, ship.id)).lastrowid
+	conn.execute("UPDATE structures SET owner_id = ? WHERE id = ?;", (user_id, ship.id))
 	conn.commit()
 

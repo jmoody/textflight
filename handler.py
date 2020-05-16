@@ -10,8 +10,10 @@ import ship_handler
 from client import Client
 
 COMMANDS = {
+	"base": "Constructs a planetary base.",
 	"board": "Board another structure.",
 	"cancel": "Cancels a queued assembly. Yields no resources.",
+	"construct": "Constructs a new structure.",
 	"craft": "Queue an item for assembly.",
 	"dock": "Dock to a nearby structure.",
 	"eject": "Disconnects all docked structures.",
@@ -36,10 +38,14 @@ COMMANDS = {
 HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
 
 def handle_command(c: Client, cmd: str, args: List[str]) -> None:
-	if cmd == "cancel":
+	if cmd == "base":
+		craft_handler.handle_base(c, args)
+	elif cmd == "cancel":
 		craft_handler.handle_cancel(c, args)
 	elif cmd == "craft":
 		craft_handler.handle_craft(c, args)
+	elif cmd == "construct":
+		craft_handler.handle_construct(c, args)
 	elif cmd == "exit":
 		c.quit()
 		return
@@ -51,6 +57,10 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 		craft_handler.handle_jettison(c, args)
 	elif cmd == "jump":
 		ship_handler.handle_jump(c, args)
+	elif cmd == "land":
+		ship_handler.handle_land(c, args)
+	elif cmd == "launch":
+		ship_handler.handle_launch(c)
 	elif cmd == "nav":
 		info_handler.handle_nav(c)
 	elif cmd == "queue":

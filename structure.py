@@ -59,17 +59,6 @@ class Structure:
 		self.dock_id = target_id
 		conn.commit()
 	
-	def launch(self) -> None:
-		conn.execute("UPDATE structures SET planet_id = NULL, dock_id = NULL WHERE id = ?;", (self.id,))
-		self.planet_id = None
-		self.dock_id = None
-		conn.commit()
-	
-	def jump(self, sys_id: int) -> None:
-		conn.execute("UPDATE structures SET warp_charge = 0, system_id = ? WHERE id=?;", (sys_id, self.id))
-		self.system = System(sys_id)
-		conn.commit()
-	
 	def rename(self, name: str) -> None:
 		conn.execute("UPDATE structures SET name = ? WHERE id = ?;", (name, self.id))
 		self.name = name
