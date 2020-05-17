@@ -32,21 +32,23 @@ class Structure:
 		# Load position info
 		self.system = System(stup["sys_id"])
 		self.planet_id = stup["planet_id"]
-		self.dock_parent = load_structure(stup["dock_id"])
+		self._dock_id = stup["dock_id"]
+		self.dock_parent = None
+		self.dock_children = []
 		
 		# Load outfits
 		self.outfits = []
-		for out in conn.execute("SELECT * FROM outfits WHERE structure_id = ?", (self.id,)):
+		for out in conn.execute("SELECT * FROM outfits WHERE structure_id = ?;", (self.id,)):
 			self.outfits.append(outfit.load_outfit(out))
 		
 		# Load cargo
 		self.cargo = []
-		for car in conn.execute("SELECT * FROM cargo WHERE structure_id = ?", (self.id,)):
+		for car in conn.execute("SELECT * FROM cargo WHERE structure_id = ?;", (self.id,)):
 			self.cargo.append(cargo.load_cargo(car))
 		
 		# Load crafting queue
 		self.craft_queue = []
-		for q in conn.execute("SELECT * FROM craft_queue WHERE structure_id = ?", (self.id,)):
+		for q in conn.execute("SELECT * FROM craft_queue WHERE structure_id = ?;", (self.id,)):
 			self.craft_queue.append(queue.load_craft_queue(q))
 	
 	def land(self, planet_id: int) -> None:
@@ -72,6 +74,13 @@ def load_structure(sid: int) -> Structure:
 		return None
 	s = Structure(stup)
 	registry[sid] = s
+	if s._dock_id != None:
+		s.dock_parent = load_structure(s._dock_id)
+		if not s in s.dock_parent.dock_children:
+			s.dock_parent.dock_children.append(s)
+	else:
+		for did in conn.execute("SELECT id FROM structures WHERE dock_id = ?;", (sid,)):
+			s.dock_children.append(load_structure(did["id"]))
 	return s
 
 def create_structure(name, owner, stype, outfit_space, sys_id, planet_id = None, dock_id = None) -> Structure:

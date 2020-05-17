@@ -77,10 +77,10 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			if not has_plating:
 				break
 	if not has_struct:
-		c.send("Not enough Light Material (needs %d).", (cost,))
+		c.send("Insufficient 'Light Material' (needs %d).", (cost,))
 		return
 	if not has_plating:
-		c.send("Not enough Heavy Plating (needs %d).", (outfit_space,))
+		c.send("Insufficient 'Heavy Plating' (needs %d).", (outfit_space,))
 		return
 	Cargo("Light Material", cost).remove(s)
 	Cargo("Heavy Plating", outfit_space).remove(s)
@@ -117,7 +117,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			return
 		q = available[index]
 		if q.count < count * max(1, extra):
-			c.send("Not enough resources.")
+			c.send("Insufficient resources.")
 			return
 		elif extra == 0 and q._rec.has_extra:
 			c.send("Mark not specified.")
@@ -154,7 +154,7 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 		c.structure.cargo[cindex].less(count, c.structure)
 		c.send("Jettisoned %d items from cargo.", (count,))
 
-def handle_queue(c: Client) -> None:
+def handle_queue(c: Client, args: List[str]) -> None:
 	i = 0
 	report = production.update(c.structure)
 	for q in c.structure.craft_queue:

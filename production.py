@@ -16,6 +16,7 @@ ANTIGRAVITY_MULTIPLIER = 1600
 class StatusReport:
 	
 	mass = 0
+	outfit_space = 0
 	heat_rate = 0
 	max_heat = 0
 	energy_rate = 0
@@ -41,6 +42,7 @@ class StatusReport:
 
 def update(s: Structure) -> None:
 	report = StatusReport()
+	report.outfit_space = s.outfit_space
 	
 	# Parse outfits and cargo
 	report.mass+= len(s.craft_queue)
@@ -51,6 +53,7 @@ def update(s: Structure) -> None:
 			report.mass+= cargo.count
 	for outfit in s.outfits:
 		report.mass+= outfit.mark
+		report.outfit_space-= outfit.mark
 		report.energy_rate+= outfit.power_rate()
 		report.heat_rate+= outfit.heat_rate()
 		if outfit.type == "Assembler":

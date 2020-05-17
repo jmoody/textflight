@@ -50,13 +50,34 @@ class Client:
 		self.send("Goodbye.")
 		self.quitting = True
 	
-	def login(self, username, password) -> True:
+	def set_email(self, email: str) -> None:
+		conn.execute("UPDATE users SET email = ? WHERE id = ?;", (email, self.id))
+		conn.commit()
+		self.email = email
+	
+	def set_password(self, password: str) -> None:
+		passwd = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+		conn.execute("UPDATE users SET passwd = ? WHERE id = ?;", (passwd, self.id))
+		conn.commit()
+	
+	def set_username(self, username: str) -> bool:
+		c = conn.cursor()
+		if c.execute("SELECT * FROM users WHERE username = ?;", (username,)).fetchone() != None:
+			return False
+		c.execute("UPDATE users SET username = ? WHERE id = ?;", (username, self.id))
+		conn.commit()
+		self.username = username
+		return True
+	
+	def login(self, username: str, password: str) -> bool:
 		c = conn.cursor()
 		c.execute("SELECT * FROM users WHERE username = ?;", (username,))
 		ctup = c.fetchone()
 		if ctup == None or not bcrypt.checkpw(password.encode("utf-8"), ctup["passwd"]):
 			return False
 		self.id = ctup["id"]
+		self.username = ctup["username"]
+		self.email = ctup["email"]
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:
@@ -66,7 +87,7 @@ class Client:
 		return True
 
 def create_starter_ship(uid, username) -> structure.Structure:
-	ship = structure.create_structure(username + "'s Ship", uid, "ship", 16, 0)
+	ship = structure.create_structure(username + "'s Ship", uid, "ship", 8, 0)
 	Outfit("Reactor", 1).install(ship)
 	Outfit("Coolant Pump", 1).install(ship)
 	Outfit("Shield Matrix", 1).install(ship)

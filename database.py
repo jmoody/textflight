@@ -11,7 +11,8 @@ def create_table(sql: str) -> None:
 create_table("""users (
 	id INTEGER PRIMARY KEY,
 	username TEXT UNIQUE NOT NULL,
-	passwd TEXT,
+	passwd TEXT NOT NULL,
+	email TEXT,
 	structure_id INTEGER,
 	FOREIGN KEY(structure_id) REFERENCES structures(id)
 );""")

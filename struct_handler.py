@@ -7,6 +7,51 @@ from client import Client
 from cargo import Cargo
 from outfit import Outfit
 
+conn = database.conn
+
+def handle_eject(c: Client, args: List[str]):
+	s = c.structure
+	if len(args) == 0:
+		if s.dock_parent == None:
+			for ship in s.dock_children:
+				ship.dock_parent = None
+			s.dock_children = []
+			conn.execute("UPDATE structures SET dock_id = NULL where dock_id = ?;", (s.id,))
+			conn.commit()
+			c.send("Ejected all docked structures.")
+		else:
+			s.dock_parent.dock_children.remove(s)
+			s.dock_parent = None
+			conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
+			conn.commit()
+			c.send("Ejected from docked structure.")
+	elif len(args) == 1:
+		try:
+			sid = int(args[0])
+		except ValueError:
+			c.send("Not a number.")
+			return
+		if s.dock_parent != None:
+			if s.dock_parent.id == sid:
+				s.dock_parent.dock_children.remove(s)
+				s.dock_parent = None
+				conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
+				conn.commit()
+				c.send("Ejected from docked structure.")
+			else:
+				c.send("Unable to locate docked structure.")
+		else:
+			for ship in s.dock_children:
+				if ship.id == sid:
+					s.dock_children.remove(ship)
+					ship.dock_parent = None
+					conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (ship.id,))
+					c.send("Ejected '%d %s'.", (ship.id, ship.name))
+					return
+			c.send("Unable to locate docked structure.")
+	else:
+		c.send("Usage: eject [structure ID]")
+
 def handle_install(c: Client, args: List[str]):
 	if len(args) != 1:
 		c.send("Usage: install <cargo ID>")
@@ -28,7 +73,10 @@ def handle_install(c: Client, args: List[str]):
 			c.send("This is not an outfit.")
 			return
 		mark = int(cargo.extra)
-		production.update(c.structure)
+		report = production.update(c.structure)
+		if report.outfit_space < mark:
+			c.send("Insufficient outfit space.")
+			return
 		Outfit(cargo.type, mark).install(c.structure)
 		cargo.less(1, c.structure)
 		c.send("Installed a mark %d '%s' from cargo.", (mark, c.translate(cargo.type)))

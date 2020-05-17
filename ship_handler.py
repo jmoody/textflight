@@ -3,9 +3,43 @@ from typing import List
 import production
 import system
 import database
+import structure
 from client import Client
 
 conn = database.conn
+
+def handle_dock(c: Client, args: List[str]) -> None:
+	s = c.structure
+	if len(args) != 1:
+		c.send("Usage: dock <structure ID>")
+		return
+	try:
+		sid = int(args[0])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	if sid == s.id:
+		c.send("Cannot dock to yourself.")
+		return
+	elif s.type != "ship":
+		c.send("Only ships can be docked to a structure.")
+		return
+	elif s.dock_parent != None or len(s.dock_children) > 0:
+		c.send("Already docked to a structure.")
+		return
+	target = structure.load_structure(sid)
+	if target == None or target.system.id != s.system.id:
+		c.send("Unable to locate structure.")
+	elif target.dock_parent != None:
+		c.send("Target has no available docking ports.")
+	elif target.owner_id != c.id:
+		c.send("Permission denied.")
+	else:
+		target.dock_children.append(s)
+		s.dock_parent = target
+		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
+		conn.commit()
+		c.send("Docked to structure '%d %s'.", (sid, target.name))
 
 def handle_land(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
@@ -22,8 +56,8 @@ def handle_land(c: Client, args: List[str]) -> None:
 	elif c.structure.planet_id != None:
 		c.send("Already landed on a planet.")
 		return
-	elif c.structure.dock_parent != None:
-		c.send("Cannot land while docked to a structure.")
+	elif c.structure.dock_parent != None or len(c.structure.dock_children) > 0:
+		c.send("Cannot land while docked.")
 		return
 	report = production.update(c.structure)
 	if report.mass > report.antigravity:
@@ -37,20 +71,28 @@ def handle_land(c: Client, args: List[str]) -> None:
 	conn.commit()
 	c.send("Landed on planet %d.", (pid,))
 
-def handle_launch(c: Client) -> None:
-	if c.structure.type == "base":
-		c.send("Cannot launch a planetary base.")
+def handle_launch(c: Client, args: List[str]) -> None:
+	s = c.structure
+	if s.type != "ship":
+		c.send("Only ships can be launched from a planet.")
 		return
-	report = production.update(c.structure)
+	elif s.dock_parent != None or len(s.dock_children) > 0:
+		c.send("Cannot launch while docked.")
+		return
+	report = production.update(s)
 	if report.mass > report.antigravity:
 		if report.antigravity == 0:
 			c.send("Antigravity engines are needed to land on planets.")
 		else:
 			c.send("Antigravity engines are not powerful enough to land.")
 		return
-	c.structure.planet_id = None
-	c.structure.dock_parent = None
-	conn.execute("UPDATE structures SET planet_id = NULL, dock_id = NULL WHERE id = ?;", (c.structure.id,))
+	s.planet_id = None
+	s.dock_parent.dock_children.remove(s)
+	s.dock_parent = None
+	conn.execute("UPDATE structures SET planet_id = NULL, dock_id = NULL WHERE id = ?;", (s.id,))
+	for ship in s.dock_children:
+		ship.dock_parent = None
+	conn.execute("UPDATE structures SET dock_id = NULL WHERE dock_id = ?;", (s.id,))
 	conn.commit()
 	c.send("Launched from planets and docked structures.")
 
@@ -62,7 +104,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	elif s.planet_id != None:
 		c.send("Cannot engage warp engines in atmosphere.")
 		return
-	elif s.dock_parent != None:
+	elif s.dock_parent != None or len(s.dock_children) > 0:
 		c.send("Cannot engage warp engines while docked.")
 		return
 	try:

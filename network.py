@@ -42,8 +42,12 @@ def init():
 		
 		# Call select to get ready clients
 		inputs = clients.copy()
+		outputs = []
+		for client in clients.copy():
+			if len(client.write_buffer) > 0:
+				outputs.append(client)
 		inputs.append(ss)
-		readable, writeable, exceptional = select.select(inputs, clients, clients)
+		readable, writeable, exceptional = select.select(inputs, outputs, outputs)
 		
 		# Read from clients
 		for s in readable:
