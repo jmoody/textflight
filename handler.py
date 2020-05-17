@@ -65,7 +65,7 @@ COMMANDS = {
 	"land": ("Land on a planet.", ship_handler.handle_land),
 	"language": ("Set your language.", None),
 	"launch": ("Launch from planets or docked structures.", ship_handler.handle_launch),
-	"load": ("Load cargo onto another structure.", None),
+	"load": ("Load cargo onto another structure.", struct_handler.handle_load),
 	"nav": ("Get navigation information such as planets and hyperlinks.", info_handler.handle_nav),
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("Lists the assembly queue.", craft_handler.handle_queue),

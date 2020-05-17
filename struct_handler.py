@@ -1,3 +1,4 @@
+import copy
 from typing import List
 
 import cargotypes
@@ -82,7 +83,51 @@ def handle_install(c: Client, args: List[str]):
 		c.send("Installed a mark %d '%s' from cargo.", (mark, c.translate(cargo.type)))
 
 def handle_load(c: Client, args: List[str]):
-	pass
+	
+	# Validate input
+	s = c.structure
+	if len(args) != 3:
+		c.send("Usage: load <structure ID> <cargo ID> <count>")
+		return
+	try:
+		sid = int(args[0])
+		cindex = int(args[1])
+		count = int(args[2])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	if count < 1:
+		c.send("Count must be greater than zero.")
+		return
+	elif cindex >= len(s.cargo):
+		c.send("Cargo does not exist.")
+		return
+	
+	# Find docked target
+	if s.dock_parent != None:
+		if s.dock_parent.id != sid:
+			c.send("Unable to locate docked structure.")
+			return
+		target = s.dock_parent
+	else:
+		target = None
+		for ship in s.dock_children:
+			if ship.id == sid:
+				target = ship
+				break
+		if target == None:
+			c.send("Unable to locate docked structure.")
+			return
+	
+	# Move the cargo
+	car = copy.copy(s.cargo[cindex])
+	if car.count < count:
+		c.send("Insufficient resources.")
+		return
+	s.cargo[cindex].less(count, s)
+	car.count = count
+	car.add(target)
+	c.send("Loaded %d '%s' into '%d %s'", (count, car.type, sid, target.name))
 
 def handle_set(c: Client, args: List[str]):
 	if len(args) != 2:

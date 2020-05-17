@@ -21,7 +21,9 @@ def handle_cancel(c: Client, args: List[str]) -> None:
 	except ValueError:
 		c.send("Not a number.")
 		return
-	if qindex >= len(c.structure.craft_queue):
+	if count < 1:
+		c.send("Count must be greater than zero.")
+	elif qindex >= len(c.structure.craft_queue):
 		c.send("Queue does not exist.")
 	else:
 		c.structure.craft_queue[qindex].less(count, c.structure)
@@ -40,6 +42,9 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		outfit_space = int(args.pop(0))
 	except ValueError:
 		c.send("Not a number.")
+		return
+	if outfit_space < 1:
+		c.send("Outfit space must be greater than zero.")
 		return
 	s = c.structure
 	report = production.update(s)
@@ -112,14 +117,17 @@ def handle_craft(c: Client, args: List[str]) -> None:
 		except ValueError:
 			c.send("Not a number.")
 			return
-		if index >= len(available):
+		if count < 1:
+			c.send("Count must be greater than zero.")
+			return
+		elif index >= len(available):
 			c.send("Recipe does not exist.")
 			return
 		q = available[index]
 		if q.count < count * max(1, extra):
 			c.send("Insufficient resources.")
 			return
-		elif extra == 0 and q._rec.has_extra:
+		elif extra < 1 and q._rec.has_extra:
 			c.send("Mark not specified.")
 			return
 		elif extra != 0 and not q._rec.has_extra:
@@ -140,7 +148,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 
 def handle_jettison(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send("Usage: jettison <queue ID> <count>")
+		c.send("Usage: jettison <cargo ID> <count>")
 		return
 	try:
 		cindex = int(args[0])
@@ -148,7 +156,9 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 	except ValueError:
 		c.send("Not a number.")
 		return
-	if cindex >= len(c.structure.cargo):
+	if count < 1:
+		c.send("Count must be greater than zero.")
+	elif cindex >= len(c.structure.cargo):
 		c.send("Cargo does not exist.")
 	else:
 		c.structure.cargo[cindex].less(count, c.structure)
