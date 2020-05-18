@@ -1,5 +1,6 @@
 import gettext
 import bcrypt
+from enum import Enum
 from threading import Lock
 from typing import Tuple
 
@@ -12,10 +13,17 @@ MOTD = "We're full of bugs!"
 
 conn = database.conn
 
+class MessageType(Enum):
+	SUBSPACE = "SUBS"
+	LOCAL = "LOCL"
+	HAIL = "HAIL"
+	FACTION = "FACT"
+
 class Client:
 	read_buffer = ""
 	write_buffer = bytes()
 	write_lock = Lock()
+	msg_buffer = []
 	quitting = False
 	
 	id = None
@@ -32,8 +40,16 @@ class Client:
 	def translate(self, message: str) -> str:
 		return gettext.gettext(message)
 	
+	def chat(self, mtype: MessageType, author: str, message: str) -> None:
+		msg = "[%s][%s] %s" % (mtype.value, author, message)
+		self.msg_buffer.append(msg)
+	
 	def send(self, message: str, args = None) -> None:
-		msg = self.translate(message) + "\n"	# TODO: Allow setting the language
+		msg = ""
+		for m in self.msg_buffer:
+			msg+= m + "\n"
+		self.msg_buffer = []
+		msg+= self.translate(message) + "\n"	# TODO: Allow setting the language
 		if args != None:
 			msg = msg % args
 		self.send_bytes(msg.encode("utf-8"))

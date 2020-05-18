@@ -5,8 +5,9 @@ import client
 import system
 import craft_handler
 import info_handler
-import struct_handler
 import ship_handler
+import social_handler
+import struct_handler
 from client import Client
 
 HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
@@ -40,13 +41,13 @@ def handle_username(c: Client, args: List[str]) -> None:
 def handle_help(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		for k, v in COMMANDS.items():
-			c.send("%s: %s", (k, c.translate(v)))
+			c.send("%s: %s", (k, c.translate(v[0])))
 	else:
 		cmd = args[0]
 		if not cmd in COMMANDS:
 			c.send("No such command '%s'", (cmd,))
 		else:
-			c.send("%s: %s", (cmd, c.translate(COMMANDS[cmd])))
+			c.send("%s: %s", (cmd, c.translate(COMMANDS[cmd][0])))
 
 COMMANDS = {
 	"base": ("Constructs a planetary base.", craft_handler.handle_base),
@@ -58,6 +59,7 @@ COMMANDS = {
 	"eject": ("Disconnects docked structures.", struct_handler.handle_eject),
 	"email": ("Set your email address.", handle_email),
 	"exit": ("Disconnects from server.", handle_exit),
+	"hail": ("Hail a structure.", social_handler.handle_hail),
 	"help": ("Shows list of commands, or usage of a given command.", handle_help),
 	"install": ("Install an outfit from cargo.", struct_handler.handle_install),
 	"jettison": ("Discord cargo into space.", craft_handler.handle_jettison),
@@ -66,6 +68,7 @@ COMMANDS = {
 	"language": ("Set your language.", None),
 	"launch": ("Launch from planets or docked structures.", ship_handler.handle_launch),
 	"load": ("Load cargo onto another structure.", struct_handler.handle_load),
+	"locl": ("Broadcast a message to the local system.", social_handler.handle_locl),
 	"nav": ("Get navigation information such as planets and hyperlinks.", info_handler.handle_nav),
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("Lists the assembly queue.", craft_handler.handle_queue),
@@ -73,6 +76,7 @@ COMMANDS = {
 	"scan": ("Scan nearby structures for outfits and cargo.", info_handler.handle_scan),
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
 	"status": ("Show status of local structure.", info_handler.handle_status),
+	"subs": ("Send subspace message to another user.", social_handler.handle_subs),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
 	"username": ("Change your username.", handle_username),
 }
