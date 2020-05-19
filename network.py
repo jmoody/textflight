@@ -16,10 +16,10 @@ def client_read(client):
 		clients.remove(client)
 		client.sock.close()
 		return
-	client.read_buffer+= buf.decode("utf-8").lstrip()
+	client.read_buffer+= buf.decode("utf-8")
 	index = client.read_buffer.find('\n')
 	while index != -1:
-		command = client.read_buffer[:index].split(' ')
+		command = client.read_buffer[:index].strip().split(' ')
 		if client.id == None:
 			handler.handle_login(client, command[0], command[1:])
 		else:

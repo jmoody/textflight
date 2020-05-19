@@ -4,6 +4,7 @@ import database
 import system
 import structure
 import production
+import faction
 from client import Client
 
 conn = database.conn
@@ -65,6 +66,16 @@ def handle_scan(c: Client, args: List[str]) -> None:
 		return
 	production.update(s)
 	c.send("Callsign: %d %s", (s.id, s.name))
+	utup = conn.execute("SELECT username, faction_id, structure_id FROM users WHERE id = ?;", (s.owner_id,)).fetchone()
+	fact = faction.get_faction(utup["faction_id"])
+	if fact.name == "":
+		c.send("Owner: %s", (utup["username"],))
+	else:
+		c.send("Owner: %s (%s)", (utup["username"], fact.name))
+	if utup["structure_id"] == s.id:
+		c.send("Piloted.")
+	else:
+		c.send("Automaton.")
 	if s.planet_id != None:
 		c.send("Landed on planet %d.", (s.planet_id,))
 	if s.dock_parent != None:

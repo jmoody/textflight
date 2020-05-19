@@ -94,6 +94,7 @@ class Client:
 		self.id = ctup["id"]
 		self.username = ctup["username"]
 		self.email = ctup["email"]
+		self.faction_id = ctup["faction_id"]
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:

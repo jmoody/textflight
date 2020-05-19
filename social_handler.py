@@ -5,7 +5,14 @@ import structure
 from client import Client, MessageType
 
 def handle_fact(c: Client, args: List[str]) -> None:
-	pass
+	if len(args) < 1:
+		c.send("Usage: fact <message>")
+		return
+	message = " ".join(args)
+	for client in network.clients:
+		if client.faction_id == c.faction_id:
+			client.chat(MessageType.FACTION, c.username, message)
+	c.send("Broadcast message to faction.")
 
 def handle_subs(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
@@ -23,9 +30,11 @@ def handle_locl(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
 		c.send("Usage: locl <message>")
 		return
+	name = "%d %s" % (c.structure.id, c.structure.name)
+	message = " ".join(args)
 	for client in network.clients:
 		if client.structure.system.id == c.structure.system.id:
-			client.chat(MessageType.LOCAL, "%d %s" % (c.structure.id, c.structure.name), " ".join(args))
+			client.chat(MessageType.LOCAL, name, message)
 	c.send("Broadcast message to local system.")
 
 def handle_hail(c: Client, args: List[str]) -> None:
