@@ -27,15 +27,6 @@ create_table("""factions (
 	FOREIGN KEY(owner_id) REFERENCES users(id)
 );""")
 
-create_table("""user_reputation (
-	user_id INTEGER NOT NULL,
-	faction_id INTEGER NOT NULL,
-	value INTEGER NOT NULL,
-	FOREIGN KEY(user_id) REFERENCES users(id),
-	FOREIGN KEY(faction_id) REFERENCES factions(id),
-	PRIMARY KEY(user_id, faction_id)
-);""")
-
 create_table("""faction_reputation (
 	faction_id INTEGER NOT NULL,
 	faction_id2 INTEGER NOT NULL,
@@ -43,6 +34,25 @@ create_table("""faction_reputation (
 	FOREIGN KEY(faction_id) REFERENCES factions(id),
 	FOREIGN KEY(faction_id2) REFERENCES factions(id),
 	PRIMARY KEY(faction_id, faction_id2)
+);""")
+
+create_table("""user_reputation (
+	user_id INTEGER NOT NULL,
+	faction_id INTEGER NOT NULL,
+	faction_dom INTEGER NOT NULL,
+	value INTEGER NOT NULL,
+	FOREIGN KEY(user_id) REFERENCES users(id),
+	FOREIGN KEY(faction_id) REFERENCES factions(id),
+	PRIMARY KEY(user_id, faction_id, faction_dom)
+);""")
+
+create_table("""personal_reputation (
+	user_id INTEGER NOT NULL,
+	user_id2 INTEGER NOT NULL,
+	value INTEGER NOT NULL,
+	FOREIGN KEY(user_id) REFERENCES users(id),
+	FOREIGN KEY(user_id2) REFERENCES users(id),
+	PRIMARY KEY(user_id, user_id2)
 );""")
 
 create_table("""structures (

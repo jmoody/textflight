@@ -10,11 +10,11 @@ def handle_chown(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send("Usage: faction_chown <username>")
 		return
-	fact = faction.get_faction(c.faction_id)
-	if fact.name == "":
+	elif c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
-	elif fact.owner_id != c.id:
+	fact = faction.get_faction(c.faction_id)
+	if fact.owner_id != c.id:
 		c.send("Permission denied.")
 		return
 	utup = conn.execute("SELECT id FROM users WHERE faction_id = ? AND username = ?;",
@@ -28,13 +28,13 @@ def handle_chown(c: Client, args: List[str]) -> None:
 
 def handle_info(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
-		fact = faction.get_faction(c.faction_id)
-		if fact.name == "":
+		if c.faction_id == 0:
 			c.send("You are not in a faction.")
 			return
+		fact = faction.get_faction(c.faction_id)
 	elif len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
-		if fact == None or fact.name == "":
+		if fact == None:
 			c.send("Faction does not exist.")
 			return
 	else:
@@ -75,11 +75,11 @@ def handle_kick(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send("Usage: faction_kick <username>")
 		return
-	fact = faction.get_faction(c.faction_id)
-	if fact.name == "":
+	elif c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
-	elif fact.owner_id != c.id:
+	fact = faction.get_faction(c.faction_id)
+	if fact.owner_id != c.id:
 		c.send("Permission denied.")
 		return
 	rowcount = conn.execute("UPDATE users SET faction_id = 0 WHERE faction_id = ? AND username = ? AND id != ?;",
@@ -113,13 +113,123 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
 		c.send("Usage: faction_passwd <new password>")
 		return
-	fact = faction.get_faction(c.faction_id)
-	if fact.name == "":
+	elif c.faction_id == 0:
 		c.send("You are not in a faction.")
-	elif fact.owner_id != c.id:
+		return
+	fact = faction.get_faction(c.faction_id)
+	if fact.owner_id != c.id:
 		c.send("Permission denied.")
 	else:
 		conn.execute("UPDATE factions SET password = ? WHERE id = ?;", (" ".join(args), fact.id,))
 		conn.commit()
 		c.send("Updated password.")
+
+def handle_repf(c: Client, args: List[str]) -> None:
+	if c.faction_id == 0:
+		c.send("You are not in a faction.")
+		return
+	own = faction.get_faction(c.id)
+	if len(args) == 1:
+		fact = faction.get_faction_by_name(args[0])
+		if fact == None:
+			c.send("Faction does not exist.")
+		else:
+			c.send("Reputation of '%s': %d", (fact.name, own.get_reputation(fact.id)))
+			c.send("Reputation with '%s': %d", (fact.name, fact.get_reputation(own.name)))
+	elif len(args) == 2:
+		if own.owner_id != c.id:
+			c.send("Permission denied.")
+			return
+		try:
+			value = int(args[1])
+		except ValueError:
+			c.send("Not a number.")
+			return
+		fact = faction.get_faction_by_name(args[0])
+		if fact == None or fact.name == "":
+			c.send("Faction does not exist.")
+		else:
+			own.set_reputation(fact.id, value)
+			c.send("Set reputation of '%s' to %d.", (fact.name, value))
+	else:
+		c.send("Usage: repf <faction name> [value]")
+
+def handle_repp(c: Client, args: List[str]) -> None:
+	if len(args) == 1:
+		fact = faction.get_faction_by_name(args[0])
+		if fact == None:
+			c.send("Faction does not exist.")
+		else:
+			c.send("Personal reputation of '%s': %d", (fact.name, fact.get_user_reputation(c.id, False)))
+			c.send("Personal reputation with '%s': %d", (fact.name, fact.get_user_reputation(c.id, True)))
+	elif len(args) == 2:
+		try:
+			value = int(args[1])
+		except ValueError:
+			c.send("Not a number.")
+			return
+		fact = faction.get_faction_by_name(args[0])
+		if fact == None or fact.name == "":
+			c.send("Faction does not exist.")
+		else:
+			fact.set_user_reputation(c.id, False, value)
+			c.send("Set personal reputation of '%s' to %d.", (fact.name, value))
+	else:
+		c.send("Usage: repp <faction name> [value]")
+
+def handle_rep(c: Client, args: List[str]) -> None:
+	if len(args) == 1:
+		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
+		if utup == None:
+			c.send("User does not exist.")
+		else:
+			uid = utup["id"]
+			c.send("Personal reputation of '%s': %d", (args[0], faction.get_personal_reputation(c.id, uid)))
+			c.send("Personal reputation with '%s': %d", (args[0], faction.get_personal_reputation(uid, c.id)))
+	elif len(args) == 2:
+		try:
+			value = int(args[1])
+		except ValueError:
+			c.send("Not a number.")
+			return
+		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
+		if utup == None:
+			c.send("User does not exist.")
+		else:
+			faction.set_personal_reputation(c.id, utup["id"], value)
+			c.send("Set personal reputation of '%s' to %d.", (args[0], value))
+	else:
+		c.send("Usage: rep <username> [value]")
+
+
+def handle_repu(c: Client, args: List[str]) -> None:
+	if c.faction_id == 0:
+		c.send("You are not in a faction.")
+		return
+	own = faction.get_faction(c.id)
+	if len(args) == 1:
+		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
+		if utup == None:
+			c.send("User does not exist.")
+		else:
+			uid = utup["id"]
+			c.send("Reputation of '%s': %d", (args[0], own.get_user_reputation(uid, True)))
+			c.send("Reputation with '%s': %d", (args[0], own.get_user_reputation(uid, False)))
+	elif len(args) == 2:
+		if own.owner_id != c.id:
+			c.send("Permission denied.")
+			return
+		try:
+			value = int(args[1])
+		except ValueError:
+			c.send("Not a number.")
+			return
+		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
+		if utup == None:
+			c.send("User does not exist.")
+		else:
+			own.set_user_reputation(utup["id"], True, value)
+			c.send("Set reputation of '%s' to %d.", (args[0], value))
+	else:
+		c.send("Usage: repu <username> [value]")
 

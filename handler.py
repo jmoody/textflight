@@ -68,6 +68,9 @@ COMMANDS = {
 	"faction_leave": ("Leave a faction.", faction_handler.handle_leave),
 	"faction_list": ("List all factions.", faction_handler.handle_list),
 	"faction_passwd": ("Change your faction password.", faction_handler.handle_passwd),
+	"repp": ("View or set personal faction reputations.", faction_handler.handle_repp),
+	"repf": ("View or set faction reputations.", faction_handler.handle_repf),
+	"repu": ("View or set user reputations.", faction_handler.handle_repu),
 	"hail": ("Hail a structure.", social_handler.handle_hail),
 	"help": ("Show list of commands, or usage of a given command.", handle_help),
 	"install": ("Install an outfit from cargo.", struct_handler.handle_install),
@@ -82,6 +85,7 @@ COMMANDS = {
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
 	"rename": ("Rename your structure.", info_handler.handle_rename),
+	"rep": ("View or set personal reputations.", faction_handler.handle_rep),
 	"scan": ("Scan nearby structures.", info_handler.handle_scan),
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
 	"status": ("Show status of your structure.", info_handler.handle_status),
@@ -102,6 +106,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	if cmd == "login":
 		if len(args) < 2:
 			c.send("Usage: login <username> <password>.")
+			c.prompt()
 			return
 		username = args.pop(0)
 		if c.login(username, " ".join(args)):

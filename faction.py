@@ -18,36 +18,36 @@ class Faction:
 			members.append(i["username"])
 		return members
 	
-	def get_reputation(self, fid) -> int:
+	def get_reputation(self, fid: int) -> int:
 		rep = conn.execute("SELECT value FROM faction_reputation WHERE faction_id = ? AND faction_id2 = ?;",
 			(self.id, fid)).fetchone()
 		if rep == None:
 			return 0
 		return rep["value"]
 	
-	def get_user_reputation(self, uid) -> int:
-		rep = conn.execute("SELECT value FROM user_reputation WHERE user_id = ? AND faction_id = ?;",
-			(uid, self.id)).fetchone()
+	def get_user_reputation(self, uid: int, faction_dom: bool) -> int:
+		rep = conn.execute("SELECT value FROM user_reputation WHERE user_id = ? AND faction_id = ? AND faction_dom = ?;",
+			(uid, self.id, int(faction_dom))).fetchone()
 		if rep == None:
 			return 0
 		return rep["value"]
 	
 	def set_reputation(self, fid: int, value: int) -> int:
 		if value == 0:
-			conn.execute("DELETE FROM faction_reputation (faction_id, faction_id2) VALUES (?, ?);",
+			conn.execute("DELETE FROM faction_reputation WHERE faction_id = ? AND faction_id2 = ?;",
 				(self.id, fid))
 		else:
-			conn.execute("INSERT INTO faction_reputation (faction_id, faction_id2, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = ?;",
+			conn.execute("INSERT INTO faction_reputation (faction_id, faction_id2, value) VALUES (?, ?, ?) ON CONFLICT(faction_id, faction_id2) DO UPDATE SET value = ?;",
 				(self.id, fid, value, value))
 		conn.commit()
 	
-	def set_user_reputation(self, uid: int, value: int) -> int:
+	def set_user_reputation(self, uid: int, faction_dom: bool, value: int) -> int:
 		if value == 0:
-			conn.execute("DELETE FROM user_reputation (user_id, faction_id) VALUES (?, ?);",
-				(uid, self.id))
+			conn.execute("DELETE FROM user_reputation WHERE user_id = ? AND faction_id = ? AND faction_dom = ?;",
+				(uid, self.id, int(faction_dom)))
 		else:
-			conn.execute("INSERT INTO user_reputation (user_id, faction_id, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = ?;",
-				(uid, self.id, value, value))
+			conn.execute("INSERT INTO user_reputation (user_id, faction_id, faction_dom, value) VALUES (?, ?, ?, ?) ON CONFLICT(user_id, faction_id, faction_dom) DO UPDATE SET value = ?;",
+				(uid, self.id, int(faction_dom), value, value))
 		conn.commit()
 
 def get_faction_by_user(uid: int) -> Faction:
@@ -65,4 +65,20 @@ def get_faction_by_name(name: str) -> Faction:
 
 def get_faction(fid: int) -> Faction:
 	return Faction(conn.execute("SELECT * FROM factions WHERE id = ?;", (fid,)).fetchone())
+
+def get_personal_reputation(uid: int, uid2: int) -> int:
+	rep = conn.execute("SELECT value FROM personal_reputation WHERE user_id = ? AND user_id2 = ?;",
+		(uid, uid2)).fetchone()
+	if rep == None:
+		return 0
+	return rep["value"]
+
+def set_personal_reputation(uid: int, uid2: int, value: int) -> int:
+	if value == 0:
+		conn.execute("DELETE FROM personal_reputation WHERE user_id = ? AND user_id2 = ?;",
+			(uid, uid2))
+	else:
+		conn.execute("INSERT INTO personal_reputation (user_id, user_id2, value) VALUES (?, ?, ?) ON CONFLICT(user_id, user_id2) DO UPDATE SET value = ?;",
+			(uid, uid2, value, value))
+	conn.commit()
 
