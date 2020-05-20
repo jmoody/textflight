@@ -3,6 +3,7 @@ from typing import List
 import database
 import client
 import system
+import combat_handler
 import craft_handler
 import faction_handler
 import info_handler
@@ -54,8 +55,11 @@ COMMANDS = {
 	"base": ("Construct a planetary base.", craft_handler.handle_base),
 	"board": ("Board another structure.", struct_handler.handle_board),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
+	"capture": ("Capture a nearby structure.", combat_handler.handle_capture),
+	"ceasefire": ("Stop targetting a nearby structure.", combat_handler.handle_ceasefire),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
+	"destroy": ("Destroy a nearby structure.", combat_handler.handle_destroy),
 	"dock": ("Dock to a nearby structure.", ship_handler.handle_dock),
 	"eject": ("Disconnect docked structures.", struct_handler.handle_eject),
 	"email": ("Set your email address.", handle_email),
@@ -90,6 +94,7 @@ COMMANDS = {
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
 	"status": ("Show status of your structure.", info_handler.handle_status),
 	"subs": ("Send subspace message to another user.", social_handler.handle_subs),
+	"target": ("View or add combat targets.", combat_handler.handle_target),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
 	"username": ("Change your username.", handle_username),
 }
@@ -126,9 +131,14 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			client.register_user(args.pop(0), " ".join(args))
 			c.send("Registration successful! Try logging in with 'login [username] [password]'.")
 	elif cmd == "exit":
-		c.quitting = True
+		c.quit()
 		return
 	else:
 		c.send("You are not logged in; use 'login [username] [password]' to log in, or 'register [username] [password]' to create a new account.")
 	c.prompt()
+
+def handle_death(c: Client) -> None:
+	c.send("Your structure was destroyed, and your pilot died.")
+	c.send("Log in again to respawn.")
+	c.quitting = True
 

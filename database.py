@@ -82,7 +82,7 @@ create_table("""outfits (
 	mark INTEGER NOT NULL,
 	setting INTEGER DEFAULT 0 NOT NULL,
 	structure_id INTEGER NOT NULL,
-	FOREIGN KEY(structure_id) REFERENCES structures(id)
+	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")
 
 create_table("""cargo (
@@ -91,7 +91,7 @@ create_table("""cargo (
 	extra TEXT,
 	count INTEGER NOT NULL,
 	structure_id INTEGER NOT NULL,
-	FOREIGN KEY(structure_id) REFERENCES structures(id)
+	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")
 
 create_table("""craft_queue (
@@ -101,7 +101,7 @@ create_table("""craft_queue (
 	count INTEGER NOT NULL,
 	start REAL NOT NULL,
 	structure_id INTEGER NOT NULL,
-	FOREIGN KEY(structure_id) REFERENCES structures(id)
+	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")
 
 try:

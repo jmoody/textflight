@@ -128,14 +128,14 @@ def handle_repf(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
-	own = faction.get_faction(c.id)
+	own = faction.get_faction(c.faction_id)
 	if len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
 			c.send("Faction does not exist.")
 		else:
 			c.send("Reputation of '%s': %d", (fact.name, own.get_reputation(fact.id)))
-			c.send("Reputation with '%s': %d", (fact.name, fact.get_reputation(own.name)))
+			c.send("Reputation with '%s': %d", (fact.name, fact.get_reputation(own.id)))
 	elif len(args) == 2:
 		if own.owner_id != c.id:
 			c.send("Permission denied.")
@@ -206,7 +206,7 @@ def handle_repu(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
-	own = faction.get_faction(c.id)
+	own = faction.get_faction(c.faction_id)
 	if len(args) == 1:
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:

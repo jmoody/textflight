@@ -22,6 +22,8 @@ def client_read(client):
 		command = client.read_buffer[:index].strip().split(' ')
 		if client.id == None:
 			handler.handle_login(client, command[0], command[1:])
+		elif client.structure._destroyed:
+			handler.handle_death(client)
 		else:
 			handler.handle_command(client, command[0], command[1:])
 		client.read_buffer = client.read_buffer[index:].strip()
@@ -54,9 +56,13 @@ def init():
 			if s is ss:
 				sock, addr = ss.accept()
 				sock.setblocking(0)
-				clients.append(Client(sock))
+				c = Client(sock)
+				clients.append(c)
+				writeable.append(c)
 			else:
 				client_read(s)
+				if not s in outputs:
+					writeable.append(s)
 		
 		# Write to clients
 		for s in writeable:

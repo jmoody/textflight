@@ -11,7 +11,10 @@ conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
 MINING_INTERVAL_BASE = 60
-ANTIGRAVITY_MULTIPLIER = 1600
+ANTIGRAVITY_MULTIPLIER = 64
+ELECTRON_MULTIPLIER = 8
+PLASMA_MULTIPLIER = 8
+EMP_MULTIPLIER = 8
 
 class StatusReport:
 	
@@ -31,6 +34,10 @@ class StatusReport:
 	warp_rate = 0
 	normal_warp = 0
 	antigravity = 0
+	
+	electron_damage = 0
+	plasma_damage = 0
+	emp_damage = 0
 	
 	mining_power = 0
 	mining_interval = 0
@@ -75,6 +82,12 @@ def update(s: Structure) -> None:
 			report.antigravity+= outfit.operation_power() * ANTIGRAVITY_MULTIPLIER
 		elif outfit.type == "Shipyard":
 			report.shipyard+= min(outfit.mark, outfit.operation_power())
+		elif outfit.type == "Electron Beam":
+			report.electron_damage = outfit.operation_power() * ELECTRON_MULTIPLIER
+		elif outfit.type == "Plasma Beam":
+			report.plasma_damage = outfit.operation_power() * PLASMA_MULTIPLIER
+		elif outfit.type == "EMP Beam":
+			report.emp_damage = outfit.operation_power() * EMP_MULTIPLIER
 	
 	# Determine stime
 	stime = report.now

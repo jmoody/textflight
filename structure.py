@@ -12,6 +12,8 @@ registry = weakref.WeakValueDictionary()
 
 class Structure:
 	
+	_destroyed = False
+	
 	def __init__(self, stup) -> None:
 		
 		# Load general info

@@ -4,6 +4,10 @@ import database
 
 conn = database.conn
 
+ATTACK_PENALTY = 10
+DESTROY_PENALTY = 100
+CAPTURE_PENALTY = 100
+
 class Faction:
 	
 	def __init__(self, ftup) -> None:
@@ -53,8 +57,6 @@ class Faction:
 def get_faction_by_user(uid: int) -> Faction:
 	ftup = conn.execute("SELECT factions.* FROM users INNER JOIN factions ON users.faction_id = factions.id WHERE users.id = ?",
 		(uid,)).fetchone()
-	if ftup == None:
-		return None
 	return Faction(ftup)
 
 def get_faction_by_name(name: str) -> Faction:
@@ -81,4 +83,19 @@ def set_personal_reputation(uid: int, uid2: int, value: int) -> int:
 		conn.execute("INSERT INTO personal_reputation (user_id, user_id2, value) VALUES (?, ?, ?) ON CONFLICT(user_id, user_id2) DO UPDATE SET value = ?;",
 			(uid, uid2, value, value))
 	conn.commit()
+
+def apply_penalty(uid: int, fid: int, uid2: int, penalty: int) -> None:
+	prep = get_personal_reputation(uid2, uid)
+	set_personal_reputation(uid2, uid, prep - penalty)
+	fact = get_faction_by_user(uid2)
+	if fact.id != 0:
+		urep = fact.get_user_reputation(uid, True)
+		fact.set_user_reputation(uid, True, urep - penalty)
+		if fid != 0:
+			rep = fact.get_reputation(fid)
+			fact.set_reputation(fid, rep - penalty)
+	if fid != 0:
+		own = get_faction(fid)
+		rep = own.get_user_reputation(uid2, False)
+		own.set_user_reputation(uid2, False, rep - penalty)
 
