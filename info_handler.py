@@ -72,10 +72,12 @@ def handle_scan(c: Client, args: List[str]) -> None:
 		c.send("Owner: %s", (utup["username"],))
 	else:
 		c.send("Owner: %s (%s)", (utup["username"], fact.name))
-	if utup["structure_id"] == s.id:
-		c.send("Piloted.")
-	else:
-		c.send("Automaton.")
+	wrote_pilots = False
+	for uname in conn.execute("SELECT username FROM users WHERE structure_id = ?;", (s.id,)):
+		if not wrote_pilots:
+			wrote_pilots = True
+			c.send("Pilots:")
+		c.send("	%s", (uname["username"],))
 	if s.planet_id != None:
 		c.send("Landed on planet %d.", (s.planet_id,))
 	if s.dock_parent != None:

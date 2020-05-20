@@ -4,11 +4,40 @@ from typing import List
 import cargotypes
 import production
 import database
+import faction
 from client import Client
 from cargo import Cargo
 from outfit import Outfit
 
 conn = database.conn
+
+def handle_board(c: Client, args: List[str]):
+	if len(args) != 1:
+		c.send("Usage: board <structure ID>")
+		return
+	try:
+		sid = int(args[0])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	if c.structure.dock_parent == None:
+		s = None
+		for struct in c.structure.dock_children:
+			if struct.id == sid:
+				s = struct
+				break
+		if s == None:
+			c.send("Unable to locate docked structure.")
+			return
+	else:
+		if c.structure.dock_parent.id != sid:
+			c.send("Unable to locate docked structure.")
+			return
+		s = c.structure.dock_parent
+	c.structure = s
+	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
+	conn.commit()
+	c.send("Boarded '%d %s'.", (sid, s.name))
 
 def handle_eject(c: Client, args: List[str]):
 	s = c.structure

@@ -4,6 +4,7 @@ import production
 import system
 import database
 import structure
+import faction
 from client import Client
 
 conn = database.conn
@@ -30,16 +31,20 @@ def handle_dock(c: Client, args: List[str]) -> None:
 	target = structure.load_structure(sid)
 	if target == None or target.system.id != s.system.id:
 		c.send("Unable to locate structure.")
+		return
 	elif target.dock_parent != None:
 		c.send("Target has no available docking ports.")
+		return
 	elif target.owner_id != c.id:
-		c.send("Permission denied.")
-	else:
-		target.dock_children.append(s)
-		s.dock_parent = target
-		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
-		conn.commit()
-		c.send("Docked to structure '%d %s'.", (sid, target.name))
+		fact = faction.get_faction_by_user(target.owner_id)
+		if fact.id == 0 or fact.id != c.faction_id:
+			c.send("Permission denied.")
+			return
+	target.dock_children.append(s)
+	s.dock_parent = target
+	conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
+	conn.commit()
+	c.send("Docked to structure '%d %s'.", (sid, target.name))
 
 def handle_land(c: Client, args: List[str]) -> None:
 	if len(args) != 1:

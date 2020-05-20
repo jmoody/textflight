@@ -93,7 +93,7 @@ def handle_kick(c: Client, args: List[str]) -> None:
 def handle_leave(c: Client, args: List[str]) -> None:
 	fact = faction.get_faction(c.faction_id)
 	members = fact.list_members()
-	if fact.owner_id == c.id and len(members) > 0:
+	if fact.owner_id == c.id and len(members) > 1:
 		c.send("Faction still has members; kick all members or transfer ownership first.")
 		return
 	c.faction_id = 0;

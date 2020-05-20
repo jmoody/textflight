@@ -52,7 +52,7 @@ def handle_help(c: Client, args: List[str]) -> None:
 
 COMMANDS = {
 	"base": ("Construct a planetary base.", craft_handler.handle_base),
-	"board": ("Board another structure.", None),
+	"board": ("Board another structure.", struct_handler.handle_board),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),

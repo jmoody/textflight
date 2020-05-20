@@ -51,7 +51,7 @@ class Faction:
 		conn.commit()
 
 def get_faction_by_user(uid: int) -> Faction:
-	ftup = conn.execute("SELECT factions.* FROM users INNER JOIN factions ON users.faction_id = factions.id WHERE id = ?",
+	ftup = conn.execute("SELECT factions.* FROM users INNER JOIN factions ON users.faction_id = factions.id WHERE users.id = ?",
 		(uid,)).fetchone()
 	if ftup == None:
 		return None
