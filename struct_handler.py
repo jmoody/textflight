@@ -1,7 +1,7 @@
 import copy
 from typing import List
 
-import cargotypes
+import outfittype
 import production
 import database
 import faction
@@ -99,7 +99,7 @@ def handle_install(c: Client, args: List[str]):
 				c.send("Structure must be powered down to install outfits.")
 				return
 		cargo = c.structure.cargo[cindex]
-		if not cargo.type in cargotypes.outfits:
+		if not cargo.type in outfittype.outfits:
 			c.send("This is not an outfit.")
 			return
 		mark = int(cargo.extra)
@@ -176,7 +176,7 @@ def handle_set(c: Client, args: List[str]):
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.set_setting(setting)
-		c.send("Updated setting of outfit '%s' to %d.", (c.translate(outfit.type), setting))
+		c.send("Updated setting of outfit '%s' to %d.", (c.translate(outfit.type.name), setting))
 
 def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:
@@ -197,6 +197,6 @@ def handle_uninstall(c: Client, args: List[str]):
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.uninstall(c.structure)
-		Cargo(outfit.type, 1, str(outfit.mark)).add(c.structure)
-		c.send("Uninstalled outfit '%s' into cargo.", (c.translate(outfit.type),))
+		Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
+		c.send("Uninstalled outfit '%s' into cargo.", (c.translate(outfit.type.name),))
 

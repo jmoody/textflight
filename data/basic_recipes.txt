@@ -1,0 +1,31 @@
+Carbon Alloy
+	Iron 4
+	Carbon 4
+
+Controller
+	Silicon 2
+	Steel 1
+
+Empty Cell
+	Steel 4
+	Thermal Pipe 1
+
+Enriched Uranium
+	Uranium 128
+
+Fuel Cell
+	Empty Cell 1
+	Enriched Uranium 1
+
+Heavy Plating
+	Carbon Alloy 16
+	Thermal Pipe 2
+
+Light Material
+	Carbon Alloy 4
+
+Steel
+	Iron 4
+
+Thermal Pipe
+	Copper 4

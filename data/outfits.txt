@@ -1,0 +1,72 @@
+Antigravity Engine
+	heat 1
+	energy 1
+	antigravity 32
+
+Assembler
+	heat 1
+	energy 1
+	assembler 1
+	recipe
+		Light Material 4
+		Controller 4
+		Heavy Plating 1
+
+Capacitor
+	max_energy 64
+	recipe
+		Silicon 4
+		Copper 8
+
+Coolant Pump
+	heat -4
+	energy 1
+	max_heat 64
+	overcharge 0
+
+Electron Beam
+	heat 1
+	energy 1
+	electron 8
+
+EMP Beam
+	heat 1
+	energy 1
+	emp 8
+
+Mining Beam
+	heat 1
+	energy 1
+	mining 1
+
+Plasma Beam
+	heat 1
+	energy 1
+	plasma 8
+
+Reactor
+	heat 1
+	energy -4
+	recipe
+		Controller 2
+		Heavy Plating 8
+
+Shield Matrix
+	heat 1
+	energy 1
+	shield 1
+	max_shield 64
+	recipe
+		Controller 8
+
+Shipyard
+	heat 1
+	energy 1
+	shipyard 1
+	overcharge 0
+
+Warp Engine
+	heat 1
+	energy 1
+	warp 1
+

@@ -11,10 +11,6 @@ conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
 MINING_INTERVAL_BASE = 60
-ANTIGRAVITY_MULTIPLIER = 64
-ELECTRON_MULTIPLIER = 8
-PLASMA_MULTIPLIER = 8
-EMP_MULTIPLIER = 8
 
 class StatusReport:
 	
@@ -61,33 +57,24 @@ def update(s: Structure) -> None:
 	for outfit in s.outfits:
 		report.mass+= outfit.mark
 		report.outfit_space-= outfit.mark
-		report.energy_rate+= outfit.power_rate()
-		report.heat_rate+= outfit.heat_rate()
-		if outfit.type == "Assembler":
-			report.assembly_rate+= outfit.operation_power()
-		elif outfit.type == "Capacitor":
-			report.max_energy+= 64 * outfit.mark
-		elif outfit.type == "Coolant Pump":
-			report.max_heat+= 64 * outfit.mark
-		elif outfit.type == "Mining Beam":
-			report.mining_power+= outfit.operation_power()
-		elif outfit.type == "Shield Matrix":
+		
+		report.antigravity+= outfit.prop("antigravity")
+		report.assembly_rate+= outfit.prop("assembler")
+		report.electron_damage+= outfit.prop("electron")
+		report.emp_damage+= outfit.prop("emp")
+		report.energy_rate+= outfit.prop("energy")
+		report.heat_rate+= outfit.prop("heat")
+		report.max_energy+= outfit.prop_nocharge("max_energy")
+		report.max_heat+= outfit.prop_nocharge("max_heat")
+		report.max_shield+= outfit.prop_nocharge("max_shield")
+		report.mining_power+= outfit.prop("mining")
+		report.plasma_damage+= outfit.prop("plasma")
+		report.shield_rate+= outfit.prop("shield")
+		report.shipyard+= outfit.prop("shipyard")
+		report.warp_rate+= outfit.prop("warp")
+		report.normal_warp+= outfit.prop_nocharge("warp")
+		if outfit.type.properties["shield"] > 0:
 			report.has_shields = True
-			report.max_shield+= 64 * outfit.mark
-			report.shield_rate+= outfit.operation_power()
-		elif outfit.type == "Warp Engine":
-			report.warp_rate+= outfit.operation_power()
-			report.normal_warp+= outfit.mark
-		elif outfit.type == "Antigravity Engine":
-			report.antigravity+= outfit.operation_power() * ANTIGRAVITY_MULTIPLIER
-		elif outfit.type == "Shipyard":
-			report.shipyard+= min(outfit.mark, outfit.operation_power())
-		elif outfit.type == "Electron Beam":
-			report.electron_damage = outfit.operation_power() * ELECTRON_MULTIPLIER
-		elif outfit.type == "Plasma Beam":
-			report.plasma_damage = outfit.operation_power() * PLASMA_MULTIPLIER
-		elif outfit.type == "EMP Beam":
-			report.emp_damage = outfit.operation_power() * EMP_MULTIPLIER
 	
 	# Determine stime
 	stime = report.now

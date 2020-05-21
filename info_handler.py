@@ -91,7 +91,7 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	c.send("Outfits:")
 	index = 0
 	for out in s.outfits:
-		c.send("	[%d] %s mark %d (setting %d)", (index, c.translate(out.type), out.mark, out.setting))
+		c.send("	[%d] %s mark %d (setting %d)", (index, c.translate(out.type.name), out.mark, out.setting))
 		index+= 1
 	c.send("Cargo:")
 	index = 0

@@ -2,4 +2,5 @@
 !*.py
 !*.md
 !.gitignore
+!data/
 !data/*.txt

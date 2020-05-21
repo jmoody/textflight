@@ -1,5 +1,6 @@
 import copy
 import time
+import outfittype
 from math import inf
 from typing import List, Dict
 
@@ -28,24 +29,13 @@ def load_recipes(name: str) -> Dict[str, Recipe]:
 	f.close()
 	return out
 
-outfit_base = {
-	"Light Material": 4,
-	"Controller": 1,
-}
-
 def load_all_recipes() -> Dict[str, Recipe]:
 	recipes = load_recipes("basic_recipes")
 	
 	# Load outfit recipes
-	outfits = load_recipes("outfit_recipes")
-	for recipe in outfits.values():
-		recipe.has_extra = True
-		for itype in outfit_base:
-			if itype in recipe.inputs:
-				recipe.inputs[itype]+= outfit_base[itype]
-			else:
-				recipe.inputs[itype] = outfit_base[itype]
-	recipes = {**recipes, **outfits}
+	for outfit in outfittype.outfits.values():
+		if outfit.recipe != None:
+			recipes[outfit.name] = outfit.recipe
 	
 	# Load ore recipes
 	for atype in system.AsteroidType:
