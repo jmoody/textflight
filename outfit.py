@@ -34,10 +34,8 @@ class Outfit:
 		mod = self.type.properties["heat"]
 		if self.setting <= 16:
 			return mod * self.operation_power()
-		elif mod > 0:
-			return mod * pow(2, self.setting / 16 - 1) * self.mark
 		else:
-			return mod * pow(0.5, self.setting / 16 - 1) * self.mark
+			return mod * pow(2, self.setting / 16 - 1) * self.mark
 	
 	def prop(self, key: str) -> int:
 		charge = self.setting / 16 * self.mark

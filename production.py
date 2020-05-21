@@ -63,7 +63,7 @@ def update(s: Structure) -> None:
 		report.electron_damage+= outfit.prop("electron")
 		report.emp_damage+= outfit.prop("emp")
 		report.energy_rate+= outfit.prop("energy")
-		report.heat_rate+= outfit.prop("heat")
+		report.heat_rate+= outfit.heat_rate()
 		report.max_energy+= outfit.prop_nocharge("max_energy")
 		report.max_heat+= outfit.prop_nocharge("max_heat")
 		report.max_shield+= outfit.prop_nocharge("max_shield")
