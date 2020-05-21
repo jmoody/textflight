@@ -119,14 +119,14 @@ def handle_status(c: Client, args: List[str]) -> None:
 		c.send("	Cooling status: Overheat in %d seconds!" % (report.overheat_time - report.now,))
 	else:
 		c.send("	Cooling status: OVERHEATED")
-	c.send("	Net heat generation: %d/s.", (report.heat_rate,))
+	c.send("	Net heat generation: %.1f/s.", (report.heat_rate,))
 	if report.powerloss_time == None:
 		c.send("	Power status: Stable")
 	elif report.powerloss_time > report.now:
 		c.send("	Power status: System failure in %d seconds!" % (report.powerloss_time - report.now,))
 	else:
 		c.send("	Power status: BROWNOUT")
-	c.send("	Net power consumption: %d/s.", (report.energy_rate,))
+	c.send("	Net power consumption: %.1f/s.", (report.energy_rate,))
 	
 	# Extra systems
 	if report.has_shields:
@@ -152,5 +152,5 @@ def handle_status(c: Client, args: List[str]) -> None:
 			c.send("Antigravity engines: Online")
 	if report.mining_interval > 0:
 		progress = s.mining_progress / report.mining_interval * 100
-		c.send("Mining progress: %.2f%% (%.2f second interval)", (progress, report.mining_interval))
+		c.send("Mining progress: %.1f%% (%.1f second interval)", (progress, report.mining_interval))
 

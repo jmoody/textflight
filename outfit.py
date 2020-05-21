@@ -33,7 +33,7 @@ class Outfit:
 	def heat_rate(self) -> float:
 		mod = self.type.properties["heat"]
 		if self.setting <= 16:
-			return mod * self.operation_power()
+			return mod * (self.setting / 16 * self.mark)
 		else:
 			return mod * pow(2, self.setting / 16 - 1) * self.mark
 	

@@ -112,8 +112,6 @@ def update(s: Structure) -> None:
 		report.heat_rate = 0
 		report.shield_rate = 0
 		report.warp_rate = 0
-	if report.warp_rate == 0:
-		s.warp_charge = 0
 	
 	# Write to database
 	s.heat = max(s.heat, 0)
