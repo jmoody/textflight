@@ -27,6 +27,22 @@ create_table("""factions (
 	FOREIGN KEY(owner_id) REFERENCES users(id)
 );""")
 
+create_table("""faction_systems (
+	sys_id INTEGER PRIMARY KEY,
+	faction_id INTEGER NOT NULL,
+	name TEXT,
+	FOREIGN KEY(faction_id) REFERENCES factions(id)
+);""")
+
+create_table("""faction_planets (
+	sys_id INTEGER NOT NULL,
+	planet INTEGER NOT NULL,
+	faction_id INTEGER NOT NULL,
+	name TEXT,
+	FOREIGN KEY(faction_id) REFERENCES factions(id),
+	PRIMARY KEY(sys_id, planet)
+);""")
+
 create_table("""faction_reputation (
 	faction_id INTEGER NOT NULL,
 	faction_id2 INTEGER NOT NULL,

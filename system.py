@@ -24,7 +24,6 @@ class AsteroidType(enum.Enum):
 	URANIUM = "Uranium Ore"
 
 class System:
-	name = None
 	
 	def __init__(self, sys_id: int) -> None:
 		self.id = sys_id

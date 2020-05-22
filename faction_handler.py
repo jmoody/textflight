@@ -2,6 +2,7 @@ from typing import List
 
 import database
 import faction
+import territory
 from client import Client
 
 conn = database.conn
@@ -25,6 +26,41 @@ def handle_chown(c: Client, args: List[str]) -> None:
 	conn.execute("UPDATE factions SET owner_id = ? WHERE id = ?;", (utup["id"], fact.id))
 	conn.commit()
 	c.send("Transferred ownership of faction to '%s'.", (args[0],))
+
+def handle_claim(c: Client, args: List[str]) -> None:
+	if c.faction_id == 0:
+		c.send("You are not in a faction.")
+		return
+	if c.structure.planet_id == None:
+		fid, name = territory.get_system(c.structure.system.id)
+		if fid == c.faction_id:
+			c.send("Your faction has already claimed this system.")
+			return
+		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ?;",
+			(c.structure.system.id, c.faction_id,)).fetchall())
+		if rowcount > 0:
+			c.send("Cannot claim system while there are ships from other factions present.")
+		else:
+			territory.set_system(c.structure.system.id, c.faction_id, name)
+			if name != None:
+				c.send("Claimed '%s' for faction.", (name,))
+			else:
+				c.send("Claimed system for faction.")
+	else:
+		fid, name = territory.get_planet(c.structure.system.id, c.structure.planet_id)
+		if fid == c.faction_id:
+			c.send("Your faction has already claimed this planet.")
+			return
+		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ? AND planet_id = ?;",
+			(c.structure.system.id, c.faction_id, c.structure.planet_id)).fetchall())
+		if rowcount > 0:
+			c.send("Cannot claim planet while there are ships from other factions present.")
+		else:
+			territory.set_planet(c.structure.system.id, c.structure.planet_id, c.faction_id, name)
+			if name != None:
+				c.send("Claimed '%s' for faction.", (name,))
+			else:
+				c.send("Claimed planet for faction.")
 
 def handle_info(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
@@ -109,6 +145,9 @@ def handle_list(c: Client, args: List[str]) -> None:
 			continue
 		c.send(row["name"])
 
+def handle_name(c: Client, args: List[str]) -> None:
+	pass
+
 def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
 		c.send("Usage: faction_passwd <new password>")
@@ -123,6 +162,24 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 		conn.execute("UPDATE factions SET password = ? WHERE id = ?;", (" ".join(args), fact.id,))
 		conn.commit()
 		c.send("Updated password.")
+
+def handle_release(c: Client, args: List[str]) -> None:
+	pass
+
+def handle_rename(c: Client, args: List[str]) -> None:
+	if len(args) != 1:
+		c.send("Usage: faction_rename <new name>")
+		return
+	elif c.faction_id == 0:
+		c.send("You are not in a faction")
+		return
+	fact = faction.get_faction(c.faction_id)
+	if fact.owner_id != c.id:
+		c.send("Permission denied.")
+	else:
+		conn.execute("UPDATE factions SET name = ? WHERE id = ?;", (args[0], fact.id))
+		conn.commit()
+		c.send("Renamed '%s' to '%s'.", (fact.name, args[0]))
 
 def handle_repf(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:

@@ -81,6 +81,9 @@ def handle_launch(c: Client, args: List[str]) -> None:
 	if s.type != "ship":
 		c.send("Only ships can be launched from a planet.")
 		return
+	elif s.planet_id == None:
+		c.send("Not landed on a planet.")
+		return
 	elif s.dock_parent != None or len(s.dock_children) > 0:
 		c.send("Cannot launch while docked.")
 		return
@@ -92,14 +95,9 @@ def handle_launch(c: Client, args: List[str]) -> None:
 			c.send("Antigravity engines are not powerful enough to land.")
 		return
 	s.planet_id = None
-	s.dock_parent.dock_children.remove(s)
-	s.dock_parent = None
-	conn.execute("UPDATE structures SET planet_id = NULL, dock_id = NULL WHERE id = ?;", (s.id,))
-	for ship in s.dock_children:
-		ship.dock_parent = None
-	conn.execute("UPDATE structures SET dock_id = NULL WHERE dock_id = ?;", (s.id,))
+	conn.execute("UPDATE structures SET planet_id = NULL WHERE id = ?;", (s.id,))
 	conn.commit()
-	c.send("Launched from planets and docked structures.")
+	c.send("Launched from planet.")
 
 def handle_jump(c: Client, args: List[str]) -> None:
 	s = c.structure
@@ -129,7 +127,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	xo, yo, drag = links[lindex]
 	cost = report.mass / pow(2, system.DRAG_BITS) * drag
 	sys = system.System(system.to_system_id(s.system.x + xo, s.system.y + yo))
-	c.send("Warp engines engaging, destination: %s.", (sys.name,))
+	c.send("Warp engines engaging.")
 	s.system = sys
 	s.warp_charge-= cost
 	conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id, s.warp_charge, s.id))

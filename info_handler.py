@@ -5,14 +5,19 @@ import system
 import structure
 import production
 import faction
+import territory
 from client import Client
 
 conn = database.conn
 
 def handle_nav(c: Client, args: List[str]) -> None:
 	sys = c.structure.system
-	if sys.name != None:
-		c.send("System: %s", (sys.name,))
+	fid, name = territory.get_system(sys.id)
+	if name != None:
+		c.send("System: %s", (name,))
+	if fid != None:
+		fact = faction.get_faction(fid)
+		c.send("Claimed by '%s'.", (fact.name,))
 	c.send("Brightness: %s", (sys.brightness,))
 	c.send("Asteroids: %s (density: %d)", (c.translate(sys.asteroid_type.name.lower()), sys.asteroid_richness))
 	c.send("Links:")
@@ -20,18 +25,28 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	for link in sys.get_links():
 		xo, yo, drag = link
 		target_sys = system.System(system.to_system_id(sys.x + xo, sys.y + yo))
-		if target_sys.name == None:
-			c.send("	[%d] (drag: %d)", (index, drag))
+		tfid, tname = territory.get_system(target_sys.id)
+		if tname != None:
+			tfact = faction.get_faction(tfid)
+			c.send("	[%d] %s (faction: %s) (drag: %d)", (index, tname, tfact.name, drag))
+		elif tfid != None:
+			tfact = faction.get_faction(tfid)
+			c.send("	[%d] (faction: %s) (drag: %d)", (index, tfact.name, drag))
 		else:
-			c.send("	[%d] %s (drag: %d)", (index, target_sys.name, drag))
+			c.send("	[%d] (drag: %d)", (index, drag))
 		index+= 1
 	c.send("Planets:")
 	index = 0
 	for planet in sys.planets:
-		if planet.name == None:
-			c.send("	[%d] (%s)", (index, c.translate(planet.ptype.name.lower())))
+		pfid, pname = territory.get_planet(sys.id, index)
+		if pname != None:
+			pfact = faction.get_faction(pfid)
+			c.send("	[%d] %s (faction: %s) (%s)", (index, pname, pfact.name, c.translate(planet.ptype.name.lower())))
+		elif pfid != None:
+			pfact = faction.get_faction(pfid)
+			c.send("	[%d] (faction: %s) (%s)", (index, pfact.name, c.translate(planet.ptype.name.lower())))
 		else:
-			c.send("	[%d] %s (%s)", (index, planet.name, c.translate(planet.ptype.name.lower())))
+			c.send("	[%d] (%s)", (index, c.translate(planet.ptype.name.lower())))
 		index+= 1
 	c.send("Structures:")
 	for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id,)):
