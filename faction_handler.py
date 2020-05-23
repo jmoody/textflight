@@ -215,7 +215,7 @@ def handle_rename(c: Client, args: List[str]) -> None:
 		conn.commit()
 		c.send("Renamed '%s' to '%s'.", (fact.name, args[0]))
 
-def handle_repf(c: Client, args: List[str]) -> None:
+def handle_frepf(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
@@ -243,9 +243,9 @@ def handle_repf(c: Client, args: List[str]) -> None:
 			own.set_reputation(fact.id, value)
 			c.send("Set reputation of '%s' to %d.", (fact.name, value))
 	else:
-		c.send("Usage: repf <faction name> [value]")
+		c.send("Usage: faction_repf <faction name> [value]")
 
-def handle_repp(c: Client, args: List[str]) -> None:
+def handle_repf(c: Client, args: List[str]) -> None:
 	if len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
@@ -266,7 +266,7 @@ def handle_repp(c: Client, args: List[str]) -> None:
 			fact.set_user_reputation(c.id, False, value)
 			c.send("Set personal reputation of '%s' to %d.", (fact.name, value))
 	else:
-		c.send("Usage: repp <faction name> [value]")
+		c.send("Usage: repf <faction name> [value]")
 
 def handle_rep(c: Client, args: List[str]) -> None:
 	if len(args) == 1:
@@ -293,7 +293,7 @@ def handle_rep(c: Client, args: List[str]) -> None:
 		c.send("Usage: rep <username> [value]")
 
 
-def handle_repu(c: Client, args: List[str]) -> None:
+def handle_frep(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
 		return
@@ -322,5 +322,5 @@ def handle_repu(c: Client, args: List[str]) -> None:
 			own.set_user_reputation(utup["id"], True, value)
 			c.send("Set reputation of '%s' to %d.", (args[0], value))
 	else:
-		c.send("Usage: repu <username> [value]")
+		c.send("Usage: faction_rep <username> [value]")
 
