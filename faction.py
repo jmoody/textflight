@@ -99,3 +99,23 @@ def apply_penalty(uid: int, fid: int, uid2: int, penalty: int) -> None:
 		rep = own.get_user_reputation(uid2, False)
 		own.set_user_reputation(uid2, False, rep - penalty)
 
+def get_net_reputation(uid: int, fid: int, uid2: int, fid2: int) -> None:
+	rep = get_personal_reputation(uid, uid2)
+	if rep != 0:
+		return rep
+	fact = None
+	fact2 = None
+	if fid2 != 0:
+		fact2 = get_faction(fid2)
+		rep = fact2.get_user_reputation(uid, True)
+		if rep != 0:
+			return rep
+	if fid != 0:
+		fact = get_faction(fid)
+		rep = fact.get_user_reputation(uid2, False)
+		if rep != 0:
+			return rep
+	if fid != 0 and fid2 != 0:
+		return fact2.get_reputation(fact.id)
+	return 0
+

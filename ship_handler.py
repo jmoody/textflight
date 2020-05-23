@@ -37,9 +37,11 @@ def handle_dock(c: Client, args: List[str]) -> None:
 		return
 	elif target.owner_id != c.id:
 		fact = faction.get_faction_by_user(target.owner_id)
-		if fact.id == 0 or fact.id != c.faction_id:
-			c.send("Permission denied.")
-			return
+		if fact.id != c.faction_id:
+			rep = faction.get_net_reputation(c.id, c.faction_id, target.owner_id, fact.id)
+			if rep < 1:
+				c.send("Permission denied.")
+				return
 	target.dock_children.append(s)
 	s.dock_parent = target
 	conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
