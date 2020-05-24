@@ -98,6 +98,7 @@ COMMANDS = {
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
 	"status": ("Show status of your structure.", info_handler.handle_status),
 	"subs": ("Send subspace message to another user.", social_handler.handle_subs),
+	"supply": ("Supply energy to a docked structure. Negative values draw energy.", struct_handler.handle_supply),
 	"target": ("View or add combat targets.", combat_handler.handle_target),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
 	"username": ("Change your username.", handle_username),

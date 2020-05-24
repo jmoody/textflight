@@ -125,6 +125,7 @@ def handle_load(c: Client, args: List[str]):
 	except ValueError:
 		c.send("Not a number.")
 		return
+	production.update(s)
 	if count < 1:
 		c.send("Count must be greater than zero.")
 		return
@@ -177,6 +178,59 @@ def handle_set(c: Client, args: List[str]):
 		production.update(c.structure)
 		outfit.set_setting(setting)
 		c.send("Updated setting of outfit '%s' to %d.", (c.translate(outfit.type.name), setting))
+
+def handle_supply(c: Client, args: List[str]):
+	if len(args) != 2:
+		c.send("Usage: supply <structure ID> <energy>")
+		return
+	s = c.structure
+	try:
+		sid = int(args[0])
+		count = int(args[1])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	report = production.update(s)
+	if count > 0:
+		if count > s.energy:
+			c.send("Insufficient energy.")
+			return
+	elif -count > report.max_energy - s.energy:
+		count = s.energy - report.max_energy
+	
+	# Find docked target
+	if s.dock_parent != None:
+		if s.dock_parent.id != sid:
+			c.send("Unable to locate docked structure.")
+			return
+		target = s.dock_parent
+	else:
+		target = None
+		for ship in s.dock_children:
+			if ship.id == sid:
+				target = ship
+				break
+		if target == None:
+			c.send("Unable to locate docked structure.")
+			return
+	report = production.update(target)
+	if count < 0:
+		if -count > target.energy:
+			c.send("Insufficient energy.")
+			return
+	elif count > report.max_energy - target.energy:
+		count = report.max_energy - target.energy
+	
+	# Transfer the energy
+	s.energy-= count
+	target.energy+= count
+	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (s.energy, s.id))
+	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (target.energy, sid))
+	conn.commit()
+	if count > 0:
+		c.send("Supplied %d energy to '%d %s'.", (count, sid, target.name))
+	else:
+		c.send("Drew %d energy from '%d %s'.", (count, sid, target.name))
 
 def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:

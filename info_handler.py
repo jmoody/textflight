@@ -91,7 +91,7 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	for uname in conn.execute("SELECT username FROM users WHERE structure_id = ?;", (s.id,)):
 		if not wrote_pilots:
 			wrote_pilots = True
-			c.send("Pilots:")
+			c.send("Operators:")
 		c.send("	%s", (uname["username"],))
 	if s.planet_id != None:
 		c.send("Landed on planet %d.", (s.planet_id,))
