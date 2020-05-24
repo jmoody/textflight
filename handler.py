@@ -69,14 +69,14 @@ COMMANDS = {
 	"faction_claim": ("Claim a system or planet for your faction.", faction_handler.handle_claim),
 	"faction_info": ("Display faction info.", faction_handler.handle_info),
 	"faction_join": ("Join a faction.", faction_handler.handle_join),
-	"faction_kick": ("Kick a user from your faction.", faction_handler.handle_kick),
+	"faction_kick": ("Kick an operator from your faction.", faction_handler.handle_kick),
 	"faction_leave": ("Leave a faction.", faction_handler.handle_leave),
 	"faction_list": ("List all factions.", faction_handler.handle_list),
 	"faction_name": ("Name a claimed system or planet.", faction_handler.handle_name),
 	"faction_passwd": ("Change your faction password.", faction_handler.handle_passwd),
 	"faction_release": ("Releas your faction's claim on a system or planet.", faction_handler.handle_release),
 	"faction_rename": ("Rename your faction.", faction_handler.handle_rename),
-	"faction_rep": ("View or set user reputations.", faction_handler.handle_frep),
+	"faction_rep": ("View or set operator reputations.", faction_handler.handle_frep),
 	"faction_repf": ("View or set faction reputations.", faction_handler.handle_frepf),
 	"hail": ("Hail a structure.", social_handler.handle_hail),
 	"help": ("Show list of commands, or usage of a given command.", handle_help),
@@ -92,7 +92,7 @@ COMMANDS = {
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
 	"rename": ("Rename your structure.", info_handler.handle_rename),
-	"rep": ("View or set personal reputations.", faction_handler.handle_rep),
+	"rep": ("View or set personal operator reputations.", faction_handler.handle_rep),
 	"repf": ("View or set personal faction reputations.", faction_handler.handle_repf),
 	"scan": ("Scan nearby structures.", info_handler.handle_scan),
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
@@ -142,7 +142,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	c.prompt()
 
 def handle_death(c: Client) -> None:
-	c.send("Your structure was destroyed, and your pilot died.")
+	c.send("Your structure was destroyed.")
 	c.send("Log in again to respawn.")
 	c.quitting = True
 
