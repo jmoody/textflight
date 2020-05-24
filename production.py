@@ -66,31 +66,31 @@ def update(s: Structure) -> None:
 		report.mass+= outfit.mark
 		report.outfit_space-= outfit.mark
 		
-		report.antigravity+= outfit.prop("antigravity")
-		report.assembly_rate+= outfit.prop("assembler")
-		report.electron_damage+= outfit.prop("electron")
-		report.emp_damage+= outfit.prop("emp")
+		report.antigravity+= outfit.prop("antigravity", True)
+		report.assembly_rate+= outfit.prop("assembler", True)
+		report.electron_damage+= outfit.prop("electron", True)
+		report.emp_damage+= outfit.prop("emp", True)
 		report.energy_rate+= outfit.prop("energy")
 		report.heat_rate+= outfit.heat_rate()
-		report.max_energy+= outfit.prop_nocharge("max_energy")
-		report.max_heat+= outfit.prop_nocharge("max_heat")
+		report.max_energy+= outfit.prop_nocharge("max_energy", True)
+		report.max_heat+= outfit.prop_nocharge("max_heat", True)
 		report.max_shield+= outfit.prop_nocharge("max_shield")
-		report.mining_power+= outfit.prop("mining")
-		report.plasma_damage+= outfit.prop("plasma")
-		report.shield_rate+= outfit.prop("shield")
-		report.shipyard+= outfit.prop("shipyard")
-		report.energy_rate-= outfit.prop("solar") * (s.system.brightness / pow(2, system.BRIGHTNESS_BITS))
-		report.warp_rate+= outfit.prop("warp")
-		report.normal_warp+= outfit.prop_nocharge("warp")
-		if outfit.type.properties["shield"] > 0:
+		report.mining_power+= outfit.prop("mining", True)
+		report.plasma_damage+= outfit.prop("plasma", True)
+		report.shield_rate+= outfit.prop("shield", True)
+		report.shipyard+= outfit.prop("shipyard", True)
+		report.energy_rate-= outfit.prop("solar", True) * (s.system.brightness / pow(2, system.BRIGHTNESS_BITS))
+		report.warp_rate+= outfit.prop("warp", True)
+		report.normal_warp+= outfit.prop_nocharge("warp", True)
+		if outfit.prop_nocharge("shield") > 0:
 			report.has_shields = True
-		if outfit.type.properties["fission"] > 0:
+		if outfit.prop_nocharge("fission") > 0:
 			if outfit.setting > 0:
-				fuel = outfit.counter + report._fission_cells * outfit.type.properties["fission"]
+				fuel = outfit.counter + report._fission_cells * outfit.prop_nocharge("fission", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
-		elif outfit.type.properties["fusion"] > 0:
+		elif outfit.prop_nocharge("fusion") > 0:
 			if outfit.setting > 0:
-				fuel = outfit.counter + report._fusion_cells * outfit.type.properties["fusion"]
+				fuel = outfit.counter + report._fusion_cells * outfit.prop_nocharge("fusion", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
 	
 	# Determine stime for heat
@@ -129,7 +129,7 @@ def update(s: Structure) -> None:
 		if used < outfit.counter:
 			left = outfit.counter - used
 		elif outfit.prop("fission") > 0:
-			fission = outfit.prop("fission")
+			fission = outfit.prop_nocharge("fission", True)
 			fuel_used = int(used / fission) + 1
 			if used == fuelout - s.interrupt:
 				left = 0
@@ -137,7 +137,7 @@ def update(s: Structure) -> None:
 				left = fission - used % fission
 			Cargo("Uranium Fuel Cell", fuel_used).remove(s)
 		elif outfit.prop("fusion") > 0:
-			fusion = outfit.prop("fusion")
+			fusion = outfit.prop_nocharge("fusion", True)
 			fuel_used = int(used / fusion) + 1
 			if used == fuelout - s.interrupt:
 				left = 0
