@@ -22,7 +22,7 @@ def client_read(client):
 		command = client.read_buffer[:index].strip().split(' ')
 		if client.id == None:
 			handler.handle_login(client, command[0], command[1:])
-		elif client.structure._destroyed:
+		elif client.structure == None or client.structure._destroyed:
 			handler.handle_death(client)
 		else:
 			handler.handle_command(client, command[0], command[1:])

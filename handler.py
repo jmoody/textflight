@@ -52,6 +52,7 @@ def handle_help(c: Client, args: List[str]) -> None:
 			c.send("%s: %s", (cmd, c.translate(COMMANDS[cmd][0])))
 
 COMMANDS = {
+	"airlock": ("Remove someone from your structure.", struct_handler.handle_airlock),
 	"base": ("Construct a planetary base.", craft_handler.handle_base),
 	"board": ("Board another structure.", struct_handler.handle_board),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
@@ -98,7 +99,7 @@ COMMANDS = {
 	"set": ("Change the power setting of installed outfits.", struct_handler.handle_set),
 	"status": ("Show status of your structure.", info_handler.handle_status),
 	"subs": ("Send subspace message to another user.", social_handler.handle_subs),
-	"supply": ("Supply energy to a docked structure. Negative values draw energy.", struct_handler.handle_supply),
+	"supply": ("Supply energy to a docked structure.", struct_handler.handle_supply),
 	"target": ("View or add combat targets.", combat_handler.handle_target),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
 	"username": ("Change your username.", handle_username),

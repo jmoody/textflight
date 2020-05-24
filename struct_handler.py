@@ -5,11 +5,31 @@ import outfittype
 import production
 import database
 import faction
+import network
 from client import Client
 from cargo import Cargo
 from outfit import Outfit
 
 conn = database.conn
+
+def handle_airlock(c: Client, args: List[str]):
+	if len(args) != 1:
+		c.send("Usage: airlock <username>")
+		return
+	elif c.structure.owner_id != c.id:
+		c.send("Permission denied.")
+		return
+	rc = conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ? AND username = ?;",
+		(c.structure.id, args[0],)).rowcount
+	if rc > 0:
+		conn.commit()
+		for client in network.clients:
+			if client.username == args[0]:
+				client.structure = None
+				break
+		c.send("Jettisoned operator '%s' out the airlock.", (args[0],))
+	else:
+		c.send("Unable to locate operator.")
 
 def handle_board(c: Client, args: List[str]):
 	if len(args) != 1:
@@ -190,13 +210,13 @@ def handle_supply(c: Client, args: List[str]):
 	except ValueError:
 		c.send("Not a number.")
 		return
-	report = production.update(s)
-	if count > 0:
-		if count > s.energy:
-			c.send("Insufficient energy.")
-			return
-	elif -count > report.max_energy - s.energy:
-		count = s.energy - report.max_energy
+	production.update(s)
+	if count < 1:
+		c.send("Energy must be greater than zero.")
+		return
+	elif count > s.energy:
+		c.send("Insufficient energy.")
+		return
 	
 	# Find docked target
 	if s.dock_parent != None:
@@ -214,11 +234,7 @@ def handle_supply(c: Client, args: List[str]):
 			c.send("Unable to locate docked structure.")
 			return
 	report = production.update(target)
-	if count < 0:
-		if -count > target.energy:
-			c.send("Insufficient energy.")
-			return
-	elif count > report.max_energy - target.energy:
+	if count > report.max_energy - target.energy:
 		count = report.max_energy - target.energy
 	
 	# Transfer the energy

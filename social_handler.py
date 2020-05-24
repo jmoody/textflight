@@ -24,7 +24,7 @@ def handle_subs(c: Client, args: List[str]) -> None:
 			client.chat(MessageType.SUBSPACE, c.username, " ".join(args))
 			c.send("Sent message via subspace link.")
 			return
-	c.send("Unable to locate user.")
+	c.send("Unable to locate operator.")
 
 def handle_locl(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
