@@ -67,7 +67,7 @@ Shield Matrix
 Shipyard
 	heat 1
 	energy 1
-	shipyard 1
+	shipyard 2
 	overcharge 0
 
 Solar Array
