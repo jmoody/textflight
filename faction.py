@@ -100,7 +100,7 @@ def apply_penalty(uid: int, fid: int, uid2: int, penalty: int) -> None:
 		own.set_user_reputation(uid2, False, rep - penalty)
 
 def get_net_reputation(uid: int, fid: int, uid2: int, fid2: int) -> None:
-	rep = get_personal_reputation(uid, uid2)
+	rep = get_personal_reputation(uid2, uid)
 	if rep != 0:
 		return rep
 	fact = None

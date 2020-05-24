@@ -103,8 +103,8 @@ def handle_launch(c: Client, args: List[str]) -> None:
 
 def handle_jump(c: Client, args: List[str]) -> None:
 	s = c.structure
-	if len(args) != 1:
-		c.send("Usage: jump <link ID>")
+	if len(args) < 1:
+		c.send("Usage: jump <link ID> [structure IDs]")
 		return
 	elif s.planet_id != None:
 		c.send("Cannot engage warp engines in atmosphere.")
@@ -112,8 +112,11 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	elif s.dock_parent != None or len(s.dock_children) > 0:
 		c.send("Cannot engage warp engines while docked.")
 		return
+	sids = []
 	try:
-		lindex = int(args[0])
+		lindex = int(args.pop(0))
+		for arg in args:
+			sids.append(int(arg))
 	except ValueError:
 		c.send("Not a number.")
 		return
@@ -125,14 +128,35 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	if s.warp_charge < report.mass:
 		c.send("Warp engines are not fully charged.")
 		return
-	
+	ships = {s: report.mass}
+	for sid in sids:
+		fship = structure.load_structure(sid)
+		if fship == None or fship.system.id != s.system.id:
+			c.send("Unable to locate structure '%d'.", (sid,))
+			return
+		elif conn.execute("SELECT id FROM users WHERE structure_id = ?;", (sid,)).fetchone() != None:
+			c.send("Permission denied (%d %s).", (sid, fship.name))
+			return
+		elif fship.owner_id != c.id:
+			fact = faction.get_faction_by_user(fship.owner_id)
+			if fact.id == 0 or fact.id != c.faction_id:
+				rep = faction.get_net_reputation(c.id, c.faction_id, fship.owner_id, fact.id)
+				if rep < 1:
+					c.send("Permission denied (%d %s).", (sid, fship.name))
+					return
+		freport = production.update(fship)
+		if fship.warp_charge < freport.mass:
+			c.send("Warp engines on '%d %s' are not fully charged.", (sid, fship.name))
+			return
+		ships[fship] = report.mass
 	xo, yo, drag = links[lindex]
-	cost = report.mass / pow(2, system.DRAG_BITS) * drag
 	sys = system.System(system.to_system_id(s.system.x + xo, s.system.y + yo))
+	for ship, mass in ships.items():
+		cost = report.mass / pow(2, system.DRAG_BITS) * drag
+		ship.system = sys
+		ship.warp_charge-= cost
+		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id, ship.warp_charge, ship.id))
 	c.send("Warp engines engaging.")
-	s.system = sys
-	s.warp_charge-= cost
-	conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id, s.warp_charge, s.id))
 	conn.commit()
 	c.send("Jump complete! Remaining charge: %d%%.", (s.warp_charge / report.mass * 100))
 

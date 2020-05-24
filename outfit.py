@@ -46,7 +46,7 @@ class Outfit:
 		else:
 			return mod * pow(2, self.setting / 16 - 1) * self.mark
 	
-	def prop(self, key: str, boost: False) -> int:
+	def prop(self, key: str, boost=False) -> int:
 		b = 1
 		if boost:
 			b+= (self.mark - 1) / 10
@@ -55,7 +55,7 @@ class Outfit:
 			charge = min(charge, self.mark * b)
 		return self.type.properties[key] * charge
 	
-	def prop_nocharge(self, key: str, boost: False) -> int:
+	def prop_nocharge(self, key: str, boost=False) -> int:
 		b = 1
 		if boost:
 			b+= (self.mark - 1) / 10
