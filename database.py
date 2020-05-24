@@ -15,6 +15,8 @@ create_table("""users (
 	email TEXT,
 	structure_id INTEGER,
 	faction_id INTEGER DEFAULT 0 NOT NULL,
+	last_login INTEGER DEFAULT 0 NOT NULL,
+	last_spawn INTEGER DEFAULT 0 NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id),
 	FOREIGN KEY(faction_id) REFERENCES factions(id)
 );""")

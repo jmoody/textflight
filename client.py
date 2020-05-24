@@ -1,5 +1,6 @@
 import gettext
 import bcrypt
+import time
 from enum import Enum
 from threading import Lock
 from typing import Tuple
@@ -11,6 +12,7 @@ from cargo import Cargo
 
 WELCOME_MESSAGE = "Welcome to textflight!"
 MOTD = "We're full of bugs!"
+SPAWN_TIME = 600
 
 conn = database.conn
 
@@ -102,9 +104,16 @@ class Client:
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:
+			respawn = ctup["last_spawn"] + SPAWN_TIME - time.time()
+			if respawn > 0:
+				self.send("Please wait %d seconds before respawning.", (respawn,))
+				self.quitting = True
+				return False
 			self.structure = create_starter_ship(self.id, ctup["username"])
-			conn.execute("UPDATE users SET structure_id = ? WHERE id = ?", (self.structure.id, self.id))
-			conn.commit()
+			conn.execute("UPDATE users SET structure_id = ?, last_spawn = strftime('%s', 'now') WHERE id = ?;",
+				(self.structure.id, self.id))
+		conn.execute("UPDATE users SET last_login = strftime('%s', 'now') WHERE id = ?", (self.id,))
+		conn.commit()
 		return True
 
 def create_starter_ship(uid, username) -> structure.Structure:
