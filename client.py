@@ -38,6 +38,9 @@ class Client:
 	def fileno(self) -> int:
 		return self.sock.fileno()
 	
+	def get_ip(self) -> int:
+		return self.sock.getpeername()[0]
+	
 	def translate(self, message: str) -> str:
 		return gettext.gettext(message)
 	

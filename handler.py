@@ -10,6 +10,7 @@ import info_handler
 import ship_handler
 import social_handler
 import struct_handler
+import network
 from client import Client
 
 HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
@@ -121,6 +122,11 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			return
 		username = args.pop(0)
 		if c.login(username, " ".join(args)):
+			for client in network.clients:
+				if client != c and client.username == username:
+					client.send("You have been disconnected by another session.")
+					client.quit()
+					c.send("Disconnected an existing session from %s.", (client.get_ip(),))
 			c.send("Logged in as %s.", (username,))
 			if c.email == None:
 				c.send("WARNING: Please set an email address with the `email` command. This is used only for resetting your password.")
