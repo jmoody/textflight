@@ -13,7 +13,7 @@ Assembler
 		Heavy Plating 1
 
 Capacitor
-	max_energy 64
+	max_energy 7200
 	recipe
 		Silicon 4
 		Copper 8
@@ -21,7 +21,7 @@ Capacitor
 Coolant Pump
 	heat -4
 	energy 1
-	max_heat 64
+	max_heat 60
 	overcharge 0
 
 Electron Beam
@@ -38,11 +38,13 @@ Fission Reactor
 	heat 1
 	energy -16
 	fission 3600
+	max_energy 120
 
 Fusion Reactor
 	heat 1
 	energy -4
 	fusion 3600
+	max_energy 60
 
 Mining Beam
 	heat 1
@@ -58,7 +60,7 @@ Shield Matrix
 	heat 1
 	energy 1
 	shield 1
-	max_shield 64
+	max_shield 60
 	recipe
 		Controller 8
 
@@ -71,6 +73,7 @@ Shipyard
 Solar Array
 	heat 0.25
 	solar 6
+	max_energy 60
 
 Warp Engine
 	heat 1
