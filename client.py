@@ -7,6 +7,7 @@ from typing import Tuple
 import database
 import structure
 from outfit import Outfit
+from cargo import Cargo
 
 WELCOME_MESSAGE = "Welcome to textflight!"
 MOTD = "We're full of bugs!"
@@ -105,14 +106,15 @@ class Client:
 
 def create_starter_ship(uid, username) -> structure.Structure:
 	ship = structure.create_structure(username + "'s Ship", uid, "ship", 8, 0)
-	Outfit("Reactor", 1).install(ship)
+	Outfit("Fusion Reactor", 1).install(ship)
+	Outfit("Solar Array", 1).install(ship)
 	Outfit("Coolant Pump", 1).install(ship)
 	Outfit("Shield Matrix", 1).install(ship)
 	Outfit("Warp Engine", 1).install(ship)
 	Outfit("Antigravity Engine", 1).install(ship)
 	Outfit("Mining Beam", 1).install(ship)
 	Outfit("Assembler", 1).install(ship)
-	Outfit("Capacitor", 1).install(ship)
+	Cargo("Hydrogen Fuel Cell", 8).add(ship)
 	return ship
 
 def register_user(username, password) -> None:

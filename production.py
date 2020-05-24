@@ -23,6 +23,9 @@ class StatusReport:
 	overheat_time = None
 	powerloss_time = None
 	
+	_fission_cells = 0
+	_fusion_cells = 0
+	
 	shield_rate = 0
 	max_shield = 0
 	has_shields = False
@@ -42,6 +45,7 @@ class StatusReport:
 	
 	def __init__(self):
 		self.now = time.time()
+		self.generators = {}
 
 def update(s: Structure) -> None:
 	report = StatusReport()
@@ -54,6 +58,10 @@ def update(s: Structure) -> None:
 			report.mass+= int(cargo.extra) * cargo.count
 		except:
 			report.mass+= cargo.count
+		if cargo.type == "Uranium Fuel Cell":
+			report._fission_cells+= cargo.count
+		elif cargo.type == "Hydrogen Fuel Cell":
+			report._fusion_cells+= cargo.count
 	for outfit in s.outfits:
 		report.mass+= outfit.mark
 		report.outfit_space-= outfit.mark
@@ -71,12 +79,21 @@ def update(s: Structure) -> None:
 		report.plasma_damage+= outfit.prop("plasma")
 		report.shield_rate+= outfit.prop("shield")
 		report.shipyard+= outfit.prop("shipyard")
+		report.energy_rate-= outfit.prop("solar") * (s.system.brightness / pow(2, system.BRIGHTNESS_BITS))
 		report.warp_rate+= outfit.prop("warp")
 		report.normal_warp+= outfit.prop_nocharge("warp")
 		if outfit.type.properties["shield"] > 0:
 			report.has_shields = True
+		if outfit.type.properties["fission"] > 0:
+			if outfit.setting > 0:
+				fuel = outfit.counter + report._fission_cells * outfit.type.properties["fission"]
+				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
+		elif outfit.type.properties["fusion"] > 0:
+			if outfit.setting > 0:
+				fuel = outfit.counter + report._fusion_cells * outfit.type.properties["fusion"]
+				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
 	
-	# Determine stime
+	# Determine stime for heat
 	stime = report.now
 	if report.heat_rate >= 0:
 		if s.heat == report.max_heat:
@@ -85,6 +102,51 @@ def update(s: Structure) -> None:
 			report.overheat_time = s.interrupt + (report.max_heat - s.heat) / report.heat_rate
 		if report.overheat_time != None and report.overheat_time < stime:
 			stime = report.overheat_time
+	
+	# Determine stime for generators
+	gtime = s.interrupt
+	ctime = None
+	for outfit, fuelout in sorted(report.generators.items(), key=lambda item: item[1]):
+		if fuelout < stime:
+			
+			# Update ctime
+			if report.energy_rate > 0:
+				ctime = s.interrupt + s.energy / report.energy_rate
+				if ctime < fuelout and ctime < stime:
+					stime = ctime
+			
+			# Skip if capacitors are out
+			if ctime == None or ctime >= fuelout:
+				s.energy-= (fuelout - gtime) * report.energy_rate
+				s.energy = max(min(report.max_energy, s.energy), 0)
+				gtime = fuelout
+				report.energy_rate-= outfit.prop("energy")
+		
+		# Update counters and fuel
+		used = min(fuelout, stime) - s.interrupt
+		used*= outfit.performance()
+		left = 0
+		if used < outfit.counter:
+			left = outfit.counter - used
+		elif outfit.prop("fission") > 0:
+			fission = outfit.prop("fission")
+			fuel_used = int(used / fission) + 1
+			if used == fuelout - s.interrupt:
+				left = 0
+			else:
+				left = fission - used % fission
+			Cargo("Uranium Fuel Cell", fuel_used).remove(s)
+		elif outfit.prop("fusion") > 0:
+			fusion = outfit.prop("fusion")
+			fuel_used = int(used / fusion) + 1
+			if used == fuelout - s.interrupt:
+				left = 0
+			else:
+				left = fusion - used % fusion
+			Cargo("Hydrogen Fuel Cell", fuel_used).remove(s)
+		outfit.set_counter(left)
+	
+	# Determine stime for energy
 	if report.energy_rate >= 0:
 		if s.energy == 0:
 			report.powerloss_time = s.interrupt
@@ -100,7 +162,7 @@ def update(s: Structure) -> None:
 		if report.assembly_rate > 0:
 			update_assembly(s, stime, report.assembly_rate)
 		s.heat+= active * report.heat_rate
-		s.energy-= active * report.energy_rate
+		s.energy-= (stime - gtime) * report.energy_rate
 		s.shield+= active * report.shield_rate
 		s.warp_charge+= active * report.warp_rate
 	

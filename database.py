@@ -97,6 +97,7 @@ create_table("""outfits (
 	type TEXT NOT NULL,
 	mark INTEGER NOT NULL,
 	setting INTEGER DEFAULT 0 NOT NULL,
+	counter REAL DEFAULT 0 NOT NULL,
 	structure_id INTEGER NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")

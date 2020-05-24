@@ -34,6 +34,16 @@ EMP Beam
 	energy 1
 	emp 8
 
+Fission Reactor
+	heat 1
+	energy -16
+	fission 3600
+
+Fusion Reactor
+	heat 1
+	energy -4
+	fusion 3600
+
 Mining Beam
 	heat 1
 	energy 1
@@ -43,13 +53,6 @@ Plasma Beam
 	heat 1
 	energy 1
 	plasma 8
-
-Reactor
-	heat 1
-	energy -4
-	recipe
-		Controller 2
-		Heavy Plating 8
 
 Shield Matrix
 	heat 1
@@ -64,6 +67,10 @@ Shipyard
 	energy 1
 	shipyard 1
 	overcharge 0
+
+Solar Array
+	heat 0.25
+	solar 6
 
 Warp Engine
 	heat 1

@@ -134,14 +134,23 @@ def handle_status(c: Client, args: List[str]) -> None:
 		c.send("	Cooling status: Overheat in %d seconds!" % (report.overheat_time - report.now,))
 	else:
 		c.send("	Cooling status: OVERHEATED")
-	c.send("	Net heat generation: %.1f/s.", (report.heat_rate,))
+	c.send("	Net heat generation: %.1f/s", (report.heat_rate,))
 	if report.powerloss_time == None:
 		c.send("	Power status: Stable")
 	elif report.powerloss_time > report.now:
 		c.send("	Power status: System failure in %d seconds!" % (report.powerloss_time - report.now,))
 	else:
 		c.send("	Power status: BROWNOUT")
-	c.send("	Net power consumption: %.1f/s.", (report.energy_rate,))
+	c.send("	Net energy consumption: %.1f/s", (report.energy_rate,))
+	
+	# Generators
+	if len(report.generators) > 0:
+		c.send("Reactors:")
+	for outfit, fuelout in report.generators.items():
+		if fuelout > report.now:
+			c.send("	[%d] %s mark %d: %d seconds of fuel remaining.", (s.outfits.index(outfit), c.translate(outfit.type.name), outfit.mark, fuelout - report.now))
+		else:
+			c.send("	[%d] %s mark %d: OUT OF FUEL", (s.outfits.index(outfit), c.translate(outfit.type.name), outfit.mark))
 	
 	# Extra systems
 	if report.has_shields:

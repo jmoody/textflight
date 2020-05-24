@@ -11,6 +11,8 @@ class OutfitType:
 		"electron": 0,
 		"emp": 0,
 		"energy": 0,
+		"fission": 0,
+		"fusion": 0,
 		"heat": 0,
 		"max_energy": 0,
 		"max_heat": 0,
@@ -19,6 +21,7 @@ class OutfitType:
 		"plasma": 0,
 		"shield": 0,
 		"shipyard": 0,
+		"solar": 0,
 		"warp": 0,
 		
 		"overcharge": 1,
@@ -76,7 +79,7 @@ def handle_line(line: str, tabs: int, state: State) -> None:
 			args = line.split(" ")
 			if args[0] in OutfitType.properties:
 				try:
-					value = int(args[1])
+					value = float(args[1])
 				except (ValueError, IndexError):
 					fatal_err("Invalid number", state.linenum)
 				state.outfit.properties[args[0]] = value
