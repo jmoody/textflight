@@ -14,6 +14,8 @@ MINING_INTERVAL_BASE = 60
 
 class StatusReport:
 	
+	_stime = 0
+	
 	mass = 0
 	outfit_space = 0
 	heat_rate = 0
@@ -44,12 +46,40 @@ class StatusReport:
 	shipyard = 0
 	
 	def __init__(self):
-		self.now = time.time()
 		self.generators = {}
+		self._gtimes = {}
 
-def update(s: Structure) -> None:
+def update(s: Structure) -> StatusReport:
+	structs = s.targets.copy()
+	structs.append(s)
+	now = time.time()
+	report = None
+	while len(structs) > 0:
+		min_stime = now
+		reports = {}
+		for struct in structs.copy():
+			if struct._destroyed:
+				structs.remove(struct)
+				s.targets.remove(struct)
+				continue
+			r = determine_stime(s, now)
+			reports[struct] = r
+			min_stime = min(min_stime, r._stime)
+		for struct in structs.copy():
+			r = reports[struct]
+			if r._stime == min_stime:
+				if struct == s:
+					report = r
+				structs.remove(struct)
+			else:
+				r._stime = min_stime
+			update_step(s, r)
+	return report
+
+def determine_stime(s: Structure, now: float) -> StatusReport:
 	report = StatusReport()
 	report.outfit_space = s.outfit_space
+	report.now = now
 	
 	# Parse outfits and cargo
 	report.mass+= len(s.craft_queue)
@@ -107,22 +137,41 @@ def update(s: Structure) -> None:
 	gtime = s.interrupt
 	ctime = None
 	for outfit, fuelout in sorted(report.generators.items(), key=lambda item: item[1]):
-		if fuelout < stime:
-			
-			# Update ctime
-			if report.energy_rate > 0:
-				ctime = s.interrupt + s.energy / report.energy_rate
-				if ctime < fuelout and ctime < stime:
-					stime = ctime
-			
-			# Skip if capacitors are out
-			if ctime == None or ctime >= fuelout:
-				s.energy-= (fuelout - gtime) * report.energy_rate
-				s.energy = max(min(report.max_energy, s.energy), 0)
-				gtime = fuelout
-				report.energy_rate-= outfit.prop("energy")
-		
-		# Update counters and fuel
+		if fuelout >= stime:
+			continue
+		if report.energy_rate > 0:
+			ctime = s.interrupt + s.energy / report.energy_rate
+			if ctime < fuelout and ctime < stime:
+				stime = ctime
+		if ctime == None or ctime >= fuelout:
+			s.energy-= (fuelout - gtime) * report.energy_rate
+			s.energy = max(min(report.max_energy, s.energy), 0)
+			gtime = fuelout
+			report._gtimes[fuelout] = s.energy
+			report.energy_rate-= outfit.prop("energy")
+	
+	# Determine stime for energy
+	if report.energy_rate >= 0:
+		if s.energy == 0:
+			report.powerloss_time = s.interrupt
+		elif report.energy_rate > 0:
+			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
+		if report.powerloss_time != None and report.powerloss_time < stime:
+			stime = report.powerloss_time
+	
+	report._stime = stime
+	return report
+
+def update_step(s: Structure, report: StatusReport):
+	stime = report._stime
+	if len(report._gtimes) > 0:
+		gtime = sorted(report._gtimes)[-1]
+		s.energy = report._gtimes[gtime]
+	else:
+		gtime = s.interrupt
+	
+	# Update counters and fuel
+	for outfit, fuelout in report.generators.items():
 		used = min(fuelout, stime) - s.interrupt
 		used*= outfit.performance()
 		left = 0
@@ -145,15 +194,6 @@ def update(s: Structure) -> None:
 				left = fusion - used % fusion
 			Cargo("Hydrogen Fuel Cell", fuel_used).remove(s)
 		outfit.set_counter(left)
-	
-	# Determine stime for energy
-	if report.energy_rate >= 0:
-		if s.energy == 0:
-			report.powerloss_time = s.interrupt
-		elif report.energy_rate > 0:
-			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
-		if report.powerloss_time != None and report.powerloss_time < stime:
-			stime = report.powerloss_time
 	
 	# Update if systems have not failed
 	if s.interrupt != stime:

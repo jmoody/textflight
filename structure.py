@@ -52,6 +52,9 @@ class Structure:
 		self.craft_queue = []
 		for q in conn.execute("SELECT * FROM craft_queue WHERE structure_id = ?;", (self.id,)):
 			self.craft_queue.append(queue.load_craft_queue(q))
+		
+		# Combat
+		self.targets = []
 	
 	def land(self, planet_id: int) -> None:
 		conn.execute("UPDATE structures SET planet_id = ? WHERE id = ?;", (planet_id, self.id))
