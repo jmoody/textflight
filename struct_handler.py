@@ -54,6 +54,9 @@ def handle_board(c: Client, args: List[str]):
 			c.send("Unable to locate docked structure.")
 			return
 		s = c.structure.dock_parent
+	if not faction.has_permission(c, s, faction.BOARD_MIN):
+		c.send("Permission denied.")
+		return
 	c.structure = s
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
 	conn.commit()

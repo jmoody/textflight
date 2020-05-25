@@ -35,13 +35,9 @@ def handle_dock(c: Client, args: List[str]) -> None:
 	elif target.dock_parent != None:
 		c.send("Target has no available docking ports.")
 		return
-	elif target.owner_id != c.id:
-		fact = faction.get_faction_by_user(target.owner_id)
-		if fact.id != c.faction_id:
-			rep = faction.get_net_reputation(c.id, c.faction_id, target.owner_id, fact.id)
-			if rep < 1:
-				c.send("Permission denied.")
-				return
+	elif not faction.has_permission(c, target, faction.DOCK_MIN):
+		c.send("Permission denied.")
+		return
 	target.dock_children.append(s)
 	s.dock_parent = target
 	conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
@@ -102,6 +98,8 @@ def handle_launch(c: Client, args: List[str]) -> None:
 	c.send("Launched from planet.")
 
 def handle_jump(c: Client, args: List[str]) -> None:
+	
+	# Validate input
 	s = c.structure
 	if len(args) < 1:
 		c.send("Usage: jump <link ID> [structure IDs]")
@@ -128,6 +126,8 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	if s.warp_charge < report.mass:
 		c.send("Warp engines are not fully charged.")
 		return
+	
+	# Make sure all ships are ready to jump
 	ships = {s: report.mass}
 	for sid in sids:
 		fship = structure.load_structure(sid)
@@ -137,18 +137,16 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		elif conn.execute("SELECT id FROM users WHERE structure_id = ?;", (sid,)).fetchone() != None:
 			c.send("Permission denied (%d %s).", (sid, fship.name))
 			return
-		elif fship.owner_id != c.id:
-			fact = faction.get_faction_by_user(fship.owner_id)
-			if fact.id == 0 or fact.id != c.faction_id:
-				rep = faction.get_net_reputation(c.id, c.faction_id, fship.owner_id, fact.id)
-				if rep < 1:
-					c.send("Permission denied (%d %s).", (sid, fship.name))
-					return
+		elif not faction.has_permission(c, fship, faction.JUMP_MIN):
+			c.send("Permission denied (%d %s).", (sid, fship.name))
+			return
 		freport = production.update(fship)
 		if fship.warp_charge < freport.mass:
 			c.send("Warp engines on '%d %s' are not fully charged.", (sid, fship.name))
 			return
 		ships[fship] = report.mass
+	
+	# Perform jump
 	xo, yo, drag = links[lindex]
 	sys = system.System(system.to_system_id(s.system.x + xo, s.system.y + yo))
 	for ship, mass in ships.items():

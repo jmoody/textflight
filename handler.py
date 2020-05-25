@@ -140,7 +140,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			c.send("Usage: register <username> <password>. Username and password cannot contain spaces.")
 			c.prompt()
 			return
-		if c.checkvalid(args[0]):
+		if not c.checkvalid(args[0]):
 			c.send("Username can only contain letters and numbers.")
 		elif database.get_user_by_username(args[0]) != None:
 			c.send("Username '%s' is already taken.", (args[0],))

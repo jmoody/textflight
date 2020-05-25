@@ -4,9 +4,12 @@ from typing import List
 import crafting
 import production
 import structure
+import database
 from cargo import Cargo
 from client import Client
 from system import PlanetType
+
+conn = database.conn
 
 def handle_base(c: Client, args: List[str]) -> None:
 	handle_construct(c, args, True)
@@ -46,12 +49,21 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	if outfit_space < 1:
 		c.send("Outfit space must be greater than zero.")
 		return
+	elif outfit_space > 1024:
+		c.send("Outfit space must be less than 1024.")
+		return
 	s = c.structure
 	report = production.update(s)
 	name = " ".join(args)
 	if base:
 		if s.planet_id == None:
 			c.send("Must be landed on a planet to construct a base.")
+			return
+		total = outfit_space
+		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id, s.planet_id)):
+			total+= pbase["outfit_space"]
+		if total > 1024:
+			c.send("Total outfit space of all bases must be less than 1024.")
 			return
 	elif outfit_space > report.shipyard:
 		if report.shipyard == 0:

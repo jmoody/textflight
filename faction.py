@@ -4,6 +4,10 @@ import database
 
 conn = database.conn
 
+DOCK_MIN = 1
+JUMP_MIN = 2
+BOARD_MIN = 3
+
 ATTACK_PENALTY = 10
 DESTROY_PENALTY = 100
 CAPTURE_PENALTY = 100
@@ -118,4 +122,13 @@ def get_net_reputation(uid: int, fid: int, uid2: int, fid2: int) -> None:
 	if fid != 0 and fid2 != 0:
 		return fact2.get_reputation(fact.id)
 	return 0
+
+def has_permission(client, struct, rep_min) -> bool:
+	if struct.owner_id != client.id:
+		fact = get_faction_by_user(struct.owner_id)
+		if fact.id == 0 or fact.id != client.faction_id:
+			rep = get_net_reputation(client.id, client.faction_id, struct.owner_id, fact.id)
+			if rep < rep_min:
+				return False
+	return True
 
