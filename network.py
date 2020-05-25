@@ -1,5 +1,6 @@
 import select
 import socket
+import re
 
 import handler
 from client import Client

@@ -1,6 +1,7 @@
 import gettext
 import bcrypt
 import time
+import re
 from enum import Enum
 from threading import Lock
 from typing import Tuple
@@ -10,11 +11,18 @@ import structure
 from outfit import Outfit
 from cargo import Cargo
 
-WELCOME_MESSAGE = "Welcome to textflight!"
+WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
+| |_  ___ __ __| |_  / _|| |(_)/ _` || |_  | |_
+|  _|/ -_)\ \ /|  _||  _|| || |\__. ||   \ |  _|
+ \__|\___|/_\_\ \__||_|  |_||_||___/ |_||_| \__|
+
+TEXTFLIGHT remote access protocol v0.1a.
+Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 MOTD = "We're full of bugs!"
 SPAWN_TIME = 600
 
 conn = database.conn
+validchars = re.compile(r"[^a-zA-Z0-9 ]+")
 
 class MessageType(Enum):
 	SUBSPACE = "SUBS"
@@ -39,6 +47,9 @@ class Client:
 	
 	def fileno(self) -> int:
 		return self.sock.fileno()
+	
+	def checkvalid(self, text: str) -> str:
+		return len(text) == len(validchars.sub("", text))
 	
 	def get_ip(self) -> int:
 		return self.sock.getpeername()[0]

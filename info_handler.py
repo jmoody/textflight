@@ -58,8 +58,11 @@ def handle_rename(c: Client, args: List[str]) -> None:
 		c.send("Usage: rename <name>")
 		return
 	name = " ".join(args)
-	c.send("Renamed '%s' to '%s'.", (c.structure.name, name))
-	c.structure.rename(name)
+	if c.checkvalid(name):
+		c.send("Renamed '%s' to '%s'.", (c.structure.name, name))
+		c.structure.rename(name)
+	else:
+		c.send("Name can only contain letters and numbers.")
 
 def handle_scan(c: Client, args: List[str]) -> None:
 	s = c.structure

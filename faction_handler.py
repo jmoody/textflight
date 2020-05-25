@@ -89,6 +89,9 @@ def handle_join(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
 		c.send("Usage: faction_join <faction name> <password>")
 		return
+	elif not c.checkvalid(args[0]):
+		c.send("Name can only contain letters and numbers.")
+		return
 	elif c.faction_id != 0:
 		c.send("You are already in a faction.")
 		return
@@ -148,6 +151,8 @@ def handle_list(c: Client, args: List[str]) -> None:
 def handle_name(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
 		c.send("Usage: faction_name <name>")
+	elif not c.checkvalid(" ".join(args)):
+		c.send("Name can only contain letters and numbers.")
 	elif c.faction_id == 0:
 		c.send("You are not in a faction.")
 	elif c.structure.planet_id == None:
@@ -203,6 +208,9 @@ def handle_release(c: Client, args: List[str]) -> None:
 def handle_rename(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send("Usage: faction_rename <new name>")
+		return
+	elif not c.checkvalid(args[0]):
+		c.send("Name can only contain letters and numbers.")
 		return
 	elif c.faction_id == 0:
 		c.send("You are not in a faction")
