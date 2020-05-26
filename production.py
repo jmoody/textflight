@@ -59,7 +59,7 @@ def update(s: Structure, now=None) -> StatusReport:
 		min_stime = now
 		reports = {}
 		for struct in structs.copy():
-			if struct._destroyed:
+			if struct._destroyed or struct.system.id != s.system.id:
 				structs.remove(struct)
 				s.targets.remove(struct)
 				continue
