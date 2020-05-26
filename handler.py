@@ -59,7 +59,6 @@ COMMANDS = {
 	"board": ("Board another structure.", struct_handler.handle_board),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
 	"capture": ("Capture a nearby structure.", combat_handler.handle_capture),
-	"ceasefire": ("Stop targetting a nearby structure.", combat_handler.handle_ceasefire),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
 	"destroy": ("Destroy a nearby structure.", combat_handler.handle_destroy),

@@ -49,10 +49,11 @@ class StatusReport:
 		self.generators = {}
 		self._gtimes = {}
 
-def update(s: Structure) -> StatusReport:
+def update(s: Structure, now=None) -> StatusReport:
 	structs = s.targets.copy()
 	structs.append(s)
-	now = time.time()
+	if now == None:
+		now = time.time()
 	report = None
 	while len(structs) > 0:
 		min_stime = now
@@ -62,18 +63,20 @@ def update(s: Structure) -> StatusReport:
 				structs.remove(struct)
 				s.targets.remove(struct)
 				continue
-			r = determine_stime(s, now)
+			r = determine_stime(struct, now)
 			reports[struct] = r
-			min_stime = min(min_stime, r._stime)
+			if r._stime != s.interrupt:
+				reports[struct] = r
+				min_stime = min(min_stime, r._stime)
 		for struct in structs.copy():
 			r = reports[struct]
-			if r._stime == min_stime:
+			if r._stime <= min_stime:
 				if struct == s:
 					report = r
 				structs.remove(struct)
 			else:
 				r._stime = min_stime
-			update_step(s, r)
+			update_step(struct, r)
 	return report
 
 def determine_stime(s: Structure, now: float) -> StatusReport:

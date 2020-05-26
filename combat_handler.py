@@ -11,9 +11,6 @@ conn = database.conn
 def handle_capture(c: Client, args: List[str]) -> None:
 	pass
 
-def handle_ceasefire(c: Client, args: List[str]) -> None:
-	pass
-
 def handle_destroy(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send("Usage: destroy <structure ID>")
@@ -40,5 +37,37 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 		c.send("Destroyed structure '%d %s'.", (s.id, s.name))
 
 def handle_target(c: Client, args: List[str]) -> None:
-	pass
+	if len(args) == 0:
+		if len(c.structure.targets) < 1:
+			c.send("Weapons not targeting any structures.")
+			return
+		for target in c.structure.targets:
+			c.send("%d %s", (target.id, target.name))
+	elif len(args) == 1:
+		try:
+			sid = int(args[0])
+		except ValueError:
+			c.send("Not a number.")
+		if sid == c.structure.id:
+			c.send("You cannot target yourself.")
+			return
+		for struct in c.structure.targets:
+			if struct.id == sid:
+				c.send("Already targeting '%d %s'.", (struct.id, struct.name))
+				return
+		s = structure.load_structure(sid)
+		if s == None or s.system.id != c.structure.system.id:
+			c.send("Unable to locate structure.")
+			return
+		report = production.update(c.structure)
+		production.update(s, report.now)
+		if report.electron_damage == 0 and report.plasma_damage == 0 and report.emp_damage == 0:
+			c.send("Weapons are not online.")
+			return
+		s.targets.append(c.structure)
+		c.structure.targets.append(s)
+		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.ATTACK_PENALTY)
+		c.send("Targeting structure '%d %s'.", (s.id, s.name))
+	else:
+		c.send("Usage: target <structure ID>")
 
