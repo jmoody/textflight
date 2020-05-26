@@ -14,6 +14,7 @@ class OutfitType:
 		"fission": 0,
 		"fusion": 0,
 		"heat": 0,
+		"hull": 0,
 		"max_energy": 0,
 		"max_heat": 0,
 		"max_shield": 0,

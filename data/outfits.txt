@@ -27,12 +27,13 @@ Coolant Pump
 Electron Beam
 	heat 1
 	energy 1
-	electron 8
+	electron 1
+	hull 8
 
 EMP Beam
 	heat 1
 	energy 1
-	emp 8
+	emp 1
 
 Fission Reactor
 	heat 1
@@ -54,7 +55,7 @@ Mining Beam
 Plasma Beam
 	heat 1
 	energy 1
-	plasma 8
+	plasma 1
 
 Shield Matrix
 	heat 1

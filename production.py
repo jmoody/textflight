@@ -37,8 +37,9 @@ class StatusReport:
 	antigravity = 0
 	
 	electron_damage = 0
-	plasma_damage = 0
 	emp_damage = 0
+	hull_damage = 0
+	plasma_damage = 0
 	
 	mining_power = 0
 	mining_interval = 0
@@ -105,6 +106,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.emp_damage+= outfit.prop("emp", True)
 		report.energy_rate+= outfit.prop("energy")
 		report.heat_rate+= outfit.heat_rate()
+		report.hull_damage+= outfit.prop("hull", True)
 		report.max_energy+= outfit.prop_nocharge("max_energy", True)
 		report.max_heat+= outfit.prop_nocharge("max_heat", True)
 		report.max_shield+= outfit.prop_nocharge("max_shield")
@@ -125,6 +127,11 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			if outfit.setting > 0:
 				fuel = outfit.counter + report._fusion_cells * outfit.prop_nocharge("fusion", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
+	for struct in s.targets:
+		for outfit in struct.outfits:
+			report.heat_rate+= outfit.prop("plasma", True)
+			report.energy_rate+= outfit.prop("emp", True)
+			report.shield_rate-= outfit.prop("electron", True)
 	
 	# Determine stime for heat
 	stime = report.now

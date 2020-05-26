@@ -27,8 +27,8 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 	report = production.update(c.structure)
 	if s.shield > 0:
 		c.send("Cannot destroy structure while its shields are up.")
-	elif report.electron_damage < s.outfit_space:
-		c.send("Electron beams not powerful enough to destroy target.")
+	elif report.hull_damage < s.outfit_space:
+		c.send("Weapons not powerful enough to destroy target.")
 	else:
 		s._destroyed = True
 		conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ?;", (s.id,))
@@ -38,6 +38,7 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 
 def handle_target(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
+		production.update(c.structure)
 		if len(c.structure.targets) < 1:
 			c.send("Weapons not targeting any structures.")
 			return
