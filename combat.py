@@ -4,21 +4,30 @@ import structure
 import production
 import faction
 import database
+import network
 
 conn = database.conn
 
 def add_target(s: structure.Structure, s2: structure.Structure) -> None:
-	s.targets.append(s2)
-	s2.targets.append(s)
+	s.targets.add(s2)
+	s2.targets.add(s)
 	if not s2 in s.tree:
 		s.tree = s.tree | s2.tree
 		s2.tree = s.tree
+	for client in network.clients:
+		if client.structure == s or client.structure == s2:
+			client.tree = set(s.tree)
 
 def clear_targets(s: structure.Structure) -> None:
 	for s2 in s.targets:
 		s2.targets.remove(s)
 		s2.tree.remove(s)
-	s.targets = []
+	for client in network.clients:
+		if client.structure == s:
+			client.tree = set()
+		elif client.structure in s.targets:
+			client.tree.remove(s)
+	s.targets = weakref.WeakSet()
 	s.tree = weakref.WeakSet()
 	s.tree.add(s)
 

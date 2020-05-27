@@ -42,6 +42,7 @@ class Client:
 	
 	def __init__(self, sock) -> None:
 		self.sock = sock
+		self.tree = set()
 		self.send(WELCOME_MESSAGE)
 		self.send(MOTD)
 		self.prompt()

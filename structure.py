@@ -54,7 +54,7 @@ class Structure:
 			self.craft_queue.append(queue.load_craft_queue(q))
 		
 		# Combat
-		self.targets = []
+		self.targets = weakref.WeakSet()
 		self.tree = weakref.WeakSet()
 		self.tree.add(self)
 	
