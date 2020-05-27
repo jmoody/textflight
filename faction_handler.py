@@ -229,6 +229,9 @@ def handle_frepf(c: Client, args: List[str]) -> None:
 		c.send("You are not in a faction.")
 		return
 	own = faction.get_faction(c.faction_id)
+	if len(args) > 0 and args[0] == own.name:
+		c.send("Cannot view or set reputation with yourself.")
+		return
 	if len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
@@ -260,6 +263,8 @@ def handle_repf(c: Client, args: List[str]) -> None:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
 			c.send("Faction does not exist.")
+		elif fact.id == c.faction_id:
+			c.send("Cannot view or set reputation with yourself.")
 		else:
 			c.send("Personal reputation of '%s': %d", (fact.name, fact.get_user_reputation(c.id, False)))
 			c.send("Personal reputation with '%s': %d", (fact.name, fact.get_user_reputation(c.id, True)))
@@ -272,6 +277,8 @@ def handle_repf(c: Client, args: List[str]) -> None:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None or fact.name == "":
 			c.send("Faction does not exist.")
+		elif fact.id == c.faction_id:
+			c.send("Cannot view or set reputation with yourself.")
 		else:
 			fact.set_user_reputation(c.id, False, value)
 			combat.update_targets(c.structure.system.id)
@@ -280,6 +287,9 @@ def handle_repf(c: Client, args: List[str]) -> None:
 		c.send("Usage: repf <faction name> [value]")
 
 def handle_rep(c: Client, args: List[str]) -> None:
+	if len(args) > 0 and args[0] == c.username:
+		c.send("Cannot view or set reputation with yourself.")
+		return
 	if len(args) == 1:
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:
@@ -308,6 +318,9 @@ def handle_rep(c: Client, args: List[str]) -> None:
 def handle_frep(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
+		return
+	elif len(args) > 0 and args[0] == c.username:
+		c.send("Cannot view or set reputation with yourself.")
 		return
 	own = faction.get_faction(c.faction_id)
 	if len(args) == 1:
