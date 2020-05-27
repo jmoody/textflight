@@ -19,7 +19,6 @@ WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
 
 TEXTFLIGHT remote access protocol v0.1a.
 Protocol manual available for transfer: https://leagueh.xyz/tf/"""
-MOTD = "We're full of bugs!"
 SPAWN_TIME = 600
 
 conn = database.conn
@@ -44,7 +43,6 @@ class Client:
 		self.sock = sock
 		self.tree = set()
 		self.send(WELCOME_MESSAGE)
-		self.send(MOTD)
 		self.prompt()
 	
 	def fileno(self) -> int:
@@ -104,6 +102,11 @@ class Client:
 		self.username = username
 		return True
 	
+	def set_chat(self, chat: bool) -> None:
+		self.chat_on = chat
+		conn.execute("UPDATE users SET chat_on = ? WHERE id = ?;", (int(chat), self.id))
+		conn.commit()
+	
 	def login(self, username: str, password: str) -> bool:
 		c = conn.cursor()
 		c.execute("SELECT * FROM users WHERE username = ?;", (username,))
@@ -114,6 +117,8 @@ class Client:
 		self.username = ctup["username"]
 		self.email = ctup["email"]
 		self.faction_id = ctup["faction_id"]
+		self.chat_on = bool(ctup["chat_on"])
+		self.premium = bool(ctup["premium"])
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:

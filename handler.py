@@ -42,6 +42,13 @@ def handle_username(c: Client, args: List[str]) -> None:
 	else:
 		c.send("Username '%s' is already taken.", (args[0],))
 
+def handle_chat(c: Client, args: List[str]) -> None:
+	c.set_chat(not c.chat_on)
+	if c.chat_on:
+		c.send("Enabled chat.")
+	else:
+		c.send("Disabled chat.")
+
 def handle_help(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		for k, v in COMMANDS.items():
@@ -59,6 +66,7 @@ COMMANDS = {
 	"board": ("Board another structure.", struct_handler.handle_board),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
 	"capture": ("Capture a nearby structure.", combat_handler.handle_capture),
+	"chat": ("Toggles chat on or off.", handle_chat),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
 	"destroy": ("Destroy a nearby structure.", combat_handler.handle_destroy),
@@ -123,10 +131,11 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 		username = args.pop(0)
 		if c.login(username, " ".join(args)):
 			for c2 in network.clients:
-				if c2 != c and c3.username == username:
+				if c2 != c and c2.username == username:
 					c2.send("You have been disconnected by another session.")
 					c2.quitting = True
 					c.send("Disconnected an existing session from %s.", (c2.get_ip(),))
+			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
 			c.send("Logged in as %s.", (username,))
 			if c.email == None:
 				c.send("WARNING: Please set an email address with the `email` command. This is used only for resetting your password.")
