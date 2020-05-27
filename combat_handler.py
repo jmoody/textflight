@@ -67,7 +67,7 @@ def handle_target(c: Client, args: List[str]) -> None:
 			return
 		report = production.update(c.structure)
 		production.update(s, report.now)
-		if report.electron_damage == 0 and report.plasma_damage == 0 and report.emp_damage == 0:
+		if not report.has_weapons:
 			c.send("Weapons are not online.")
 			return
 		combat.add_target(c.structure, s)

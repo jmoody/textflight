@@ -40,9 +40,9 @@ def update_target(s: structure.Structure) -> None:
 	fact = faction.get_faction_by_user(s.owner_id)
 	report = production.update(s)
 	for stup in conn.execute("SELECT id, owner_id FROM structures WHERE sys_id = ? AND id != ?;", (s.system.id, s.id)):
-		update_target_duo(fact, s, stup, report.now)
+		update_target_duo(fact, s, stup, report)
 
-def update_target_duo(fact: faction.Faction, s: structure.Structure, stup, now) -> None:
+def update_target_duo(fact: faction.Faction, s: structure.Structure, stup, report) -> None:
 	fact2 = faction.get_faction_by_user(stup["owner_id"])
 	rep = faction.get_net_reputation(s.owner_id, fact.id, stup["owner_id"], fact2.id)
 	rep = min(faction.get_net_reputation(stup["owner_id"], fact2.id, s.owner_id, fact.id), rep)
@@ -54,6 +54,7 @@ def update_target_duo(fact: faction.Faction, s: structure.Structure, stup, now) 
 				break
 		if not found:
 			s2 = structure.load_structure(stup["id"])
-			production.update(s2, now)
-			add_target(s, s2)
+			report2 = production.update(s2, report.now)
+			if report.has_weapons or report2.has_weapons:
+				add_target(s, s2)
 

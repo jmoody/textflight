@@ -40,6 +40,7 @@ class StatusReport:
 	emp_damage = 0
 	hull_damage = 0
 	plasma_damage = 0
+	has_weapons = False
 	
 	mining_power = 0
 	mining_interval = 0
@@ -128,6 +129,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.heat_rate+= outfit.prop("plasma", True)
 			report.energy_rate+= outfit.prop("emp", True)
 			report.shield_rate-= outfit.prop("electron", True)
+	if report.electron_damage > 0 or report.emp_damage > 0 or report.plasma_damage > 0 or report.hull_damage > 0:
+		report.has_weapons = True
 	
 	# Determine stime for heat
 	stime = report.now
