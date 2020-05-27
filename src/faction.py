@@ -3,17 +3,19 @@ from typing import List
 import database
 import structure
 import production
+import config
 
 conn = database.conn
 
-ATTACK_MIN = -1
-DOCK_MIN = 1
-JUMP_MIN = 2
-BOARD_MIN = 3
+facf = config.get_section("faction")
+ATTACK_MIN = facf.getint("AttackMin")
+DOCK_MIN = facf.getint("DockMin")
+JUMP_MIN = facf.getint("JumpMin")
+BOARD_MIN = facf.getint("BoardMin")
 
-ATTACK_PENALTY = 10
-DESTROY_PENALTY = 100
-CAPTURE_PENALTY = 100
+ATTACK_PENALTY = facf.getint("AttackPenalty")
+DESTROY_PENALTY = facf.getint("DestroyPenalty")
+CAPTURE_PENALTY = facf.getint("CapturePenalty")
 
 class Faction:
 	

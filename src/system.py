@@ -2,12 +2,15 @@ from typing import List, Tuple
 import enum
 import random
 
-BRIGHTNESS_BITS = 8
-ASTEROID_RICHNESS_BITS = 3
-PLANET_COUNT_BITS = 2
-LINK_BITS = 1
-DRAG_BITS = 8
-SEED = 0
+import config
+
+syst = config.get_section("terrain")
+SEED = syst.getint("Seed")
+BRIGHTNESS_BITS = syst.getint("BrightnessBits")
+ASTEROID_RICHNESS_BITS = syst.getint("AsteroidRichnessBits")
+PLANET_COUNT_BITS = syst.getint("PlanetCountBits")
+LINK_BITS = syst.getint("LinkBits")
+DRAG_BITS = syst.getint("DragBits")
 
 class PlanetType(enum.Enum):
 	GAS = 0

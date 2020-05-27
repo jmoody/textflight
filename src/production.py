@@ -1,16 +1,17 @@
 import time
 from typing import Tuple
 
-import system
 import database
 import crafting
+import config
+import system
 from structure import Structure
 from cargo import Cargo
 
 conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
-MINING_INTERVAL_BASE = 60
+MINING_INTERVAL_BASE = config.get_section("data").getint("MiningInterval")
 
 class StatusReport:
 	

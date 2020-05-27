@@ -1,6 +1,8 @@
 import sqlite3
 
-conn = sqlite3.connect("database.db")
+import config
+
+conn = sqlite3.connect(config.get_section("data").get("DatabasePath"))
 conn.row_factory = sqlite3.Row
 conn.cursor().execute("PRAGMA foreign_keys = ON;")
 

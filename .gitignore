@@ -1,6 +1,8 @@
 *
-!*.py
-!*.md
-!.gitignore
+!src/
+!src/*.py
 !data/
 !data/*.txt
+!*.md
+!textflight.conf.example
+!.gitignore

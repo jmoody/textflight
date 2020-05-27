@@ -9,6 +9,7 @@ from typing import Tuple
 
 import database
 import structure
+import config
 from outfit import Outfit
 from cargo import Cargo
 
@@ -19,10 +20,11 @@ WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
 
 TEXTFLIGHT remote access protocol v0.1a.
 Protocol manual available for transfer: https://leagueh.xyz/tf/"""
-SPAWN_TIME = 600
+ccf = config.get_section("client")
+SPAWN_TIME = ccf.getint("SpawnTime")
 
 conn = database.conn
-validchars = re.compile(r"[^a-zA-Z0-9 ]+")
+VALIDREGEX = re.compile(ccf.get("ValidateRegex"))
 
 class MessageType(Enum):
 	SUBSPACE = "SUBS"
@@ -49,7 +51,7 @@ class Client:
 		return self.sock.fileno()
 	
 	def checkvalid(self, text: str) -> str:
-		return len(text) == len(validchars.sub("", text))
+		return len(text) == len(VALIDREGEX.sub("", text))
 	
 	def get_ip(self) -> int:
 		return self.sock.getpeername()[0]

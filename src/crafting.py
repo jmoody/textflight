@@ -5,13 +5,14 @@ from math import inf
 from typing import List, Dict
 
 import system
+import config
 from queue import Recipe, CraftQueue
 from structure import Structure
 
-CRAFT_TIME = 10
+CRAFT_TIME = config.get_section("data").getint("CraftTime")
 
 def load_recipes(name: str) -> Dict[str, Recipe]:
-	f = open("data/%s.txt" % (name,), "r")
+	f = config.opendata(name + ".txt")
 	out = {}
 	current = None
 	for line in f:

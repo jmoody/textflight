@@ -3,11 +3,13 @@ import socket
 import re
 
 import handler
+import config
 from client import Client
 
-ADDRESS = "::"
-PORT = 10000
-BUFFER_SIZE = 4096
+netw = config.get_section("network")
+ADDRESS = netw.get("Address")
+PORT = netw.getint("Port")
+BUFFER_SIZE = netw.getint("BufferSize")
 
 clients = []
 

@@ -1,0 +1,31 @@
+[network]
+Address = ::
+Port = 10000
+BufferSize = 4096
+
+[client]
+SpawnTime = 600
+ValidateRegex = "[^a-zA-Z0-9 ]+"
+
+[data]
+DataPath = data/
+DatabasePath = database.db
+MiningInterval = 60
+CraftTime = 10
+
+[faction]
+AttackMin = -1
+DockMin = 1
+JumpMin = 2
+BoardMin = 3
+AttackPenalty = 10
+DestroyPenalty = 100
+CapturePenalty = 100
+
+[terrain]
+Seed = 0
+BrightnessBits = 8
+AsteroidRichnessBits = 3
+PlanetCountBits = 2
+LinkBits = 1
+DragBits = 8

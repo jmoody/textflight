@@ -1,6 +1,7 @@
 import sys
 import copy
 
+import config
 from queue import Recipe
 
 class OutfitType:
@@ -98,7 +99,7 @@ def handle_line(line: str, tabs: int, state: State) -> None:
 		else:
 			fatal_err("Scope error", state.linenum)
 
-with open("data/outfits.txt", "r") as f:
+with config.opendata("outfits.txt") as f:
 	state = State()
 	for line in f:
 		state.linenum+= 1

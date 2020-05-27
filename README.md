@@ -6,7 +6,7 @@ A command line space exploration MMO.
 
 Note: Although you can run your own server, remember that this is an MMO; the more people are playing on a server, the more fun it is, so running a public server is strongly discouraged so as not to fragment the community. Thanks for your understanding!
 
-To start the server, simply execute `main.py`, ensuring all the dependencies listed below have been installed:
+To start the server, simply execute `./src/main.py`, ensuring all the dependencies listed below have been installed:
 
 - Python 3
 - sqlite3
