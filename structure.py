@@ -55,6 +55,8 @@ class Structure:
 		
 		# Combat
 		self.targets = []
+		self.tree = weakref.WeakSet()
+		self.tree.add(self)
 	
 	def land(self, planet_id: int) -> None:
 		conn.execute("UPDATE structures SET planet_id = ? WHERE id = ?;", (planet_id, self.id))

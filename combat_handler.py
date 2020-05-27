@@ -4,6 +4,7 @@ import faction
 import production
 import structure
 import database
+import combat
 from client import Client
 
 conn = database.conn
@@ -33,8 +34,12 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 		s._destroyed = True
 		conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ?;", (s.id,))
 		conn.execute("DELETE FROM structures WHERE id = ?;", (s.id,))
+		conn.commit()
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.DESTROY_PENALTY)
+		combat.clear_targets(s)
 		c.send("Destroyed structure '%d %s'.", (s.id, s.name))
+		del s
+		combat.update_targets(c.structure.system.id)
 
 def handle_target(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
@@ -65,9 +70,9 @@ def handle_target(c: Client, args: List[str]) -> None:
 		if report.electron_damage == 0 and report.plasma_damage == 0 and report.emp_damage == 0:
 			c.send("Weapons are not online.")
 			return
-		s.targets.append(c.structure)
-		c.structure.targets.append(s)
+		combat.add_target(c.structure, s)
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.ATTACK_PENALTY)
+		combat.update_targets(s.system.id)
 		c.send("Targeting structure '%d %s'.", (s.id, s.name))
 	else:
 		c.send("Usage: target <structure ID>")

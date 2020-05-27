@@ -2,6 +2,7 @@ import gettext
 import bcrypt
 import time
 import re
+import combat
 from enum import Enum
 from threading import Lock
 from typing import Tuple
@@ -125,6 +126,7 @@ class Client:
 				(self.structure.id, self.id))
 		conn.execute("UPDATE users SET last_login = strftime('%s', 'now') WHERE id = ?", (self.id,))
 		conn.commit()
+		combat.update_targets(self.structure.system.id)
 		return True
 
 def create_starter_ship(uid, username) -> structure.Structure:

@@ -5,6 +5,7 @@ import system
 import database
 import structure
 import faction
+import combat
 from client import Client
 
 conn = database.conn
@@ -156,5 +157,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id, ship.warp_charge, ship.id))
 	c.send("Warp engines engaging.")
 	conn.commit()
+	combat.clear_targets(s)
+	combat.update_targets(sys.id)
 	c.send("Jump complete! Remaining charge: %d%%.", (s.warp_charge / report.mass * 100))
 

@@ -51,8 +51,7 @@ class StatusReport:
 		self._gtimes = {}
 
 def update(s: Structure, now=None) -> StatusReport:
-	structs = s.targets.copy()
-	structs.append(s)
+	structs = list(s.tree)
 	if now == None:
 		now = time.time()
 	report = None
@@ -60,10 +59,6 @@ def update(s: Structure, now=None) -> StatusReport:
 		min_stime = now
 		reports = {}
 		for struct in structs.copy():
-			if struct._destroyed or struct.system.id != s.system.id:
-				structs.remove(struct)
-				s.targets.remove(struct)
-				continue
 			r = determine_stime(struct, now)
 			reports[struct] = r
 			if r._stime != s.interrupt:
@@ -77,6 +72,7 @@ def update(s: Structure, now=None) -> StatusReport:
 				structs.remove(struct)
 			else:
 				r._stime = min_stime
+				r.now = min_stime
 			update_step(struct, r)
 	return report
 

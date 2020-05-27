@@ -141,7 +141,7 @@ def handle_status(c: Client, args: List[str]) -> None:
 	if report.powerloss_time == None:
 		c.send("	Power status: Stable")
 	elif report.powerloss_time > report.now:
-		c.send("	Power status: System failure in %d seconds!" % (report.powerloss_time - report.now,))
+		c.send("	Power status: Brownout in %d seconds!" % (report.powerloss_time - report.now,))
 	else:
 		c.send("	Power status: BROWNOUT")
 	c.send("	Net energy consumption: %.1f/s", (report.energy_rate,))

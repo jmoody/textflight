@@ -3,6 +3,7 @@ from typing import List
 import database
 import faction
 import territory
+import combat
 from client import Client
 
 conn = database.conn
@@ -249,6 +250,7 @@ def handle_frepf(c: Client, args: List[str]) -> None:
 			c.send("Faction does not exist.")
 		else:
 			own.set_reputation(fact.id, value)
+			combat.update_targets(c.structure.system.id)
 			c.send("Set reputation of '%s' to %d.", (fact.name, value))
 	else:
 		c.send("Usage: faction_repf <faction name> [value]")
@@ -272,6 +274,7 @@ def handle_repf(c: Client, args: List[str]) -> None:
 			c.send("Faction does not exist.")
 		else:
 			fact.set_user_reputation(c.id, False, value)
+			combat.update_targets(c.structure.system.id)
 			c.send("Set personal reputation of '%s' to %d.", (fact.name, value))
 	else:
 		c.send("Usage: repf <faction name> [value]")
@@ -296,6 +299,7 @@ def handle_rep(c: Client, args: List[str]) -> None:
 			c.send("User does not exist.")
 		else:
 			faction.set_personal_reputation(c.id, utup["id"], value)
+			combat.update_targets(c.structure.system.id)
 			c.send("Set personal reputation of '%s' to %d.", (args[0], value))
 	else:
 		c.send("Usage: rep <username> [value]")
@@ -328,6 +332,7 @@ def handle_frep(c: Client, args: List[str]) -> None:
 			c.send("User does not exist.")
 		else:
 			own.set_user_reputation(utup["id"], True, value)
+			combat.update_targets(c.structure.system.id)
 			c.send("Set reputation of '%s' to %d.", (args[0], value))
 	else:
 		c.send("Usage: faction_rep <username> [value]")

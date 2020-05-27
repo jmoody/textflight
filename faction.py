@@ -1,9 +1,12 @@
 from typing import List
 
 import database
+import structure
+import production
 
 conn = database.conn
 
+ATTACK_MIN = -1
 DOCK_MIN = 1
 JUMP_MIN = 2
 BOARD_MIN = 3
@@ -89,9 +92,13 @@ def set_personal_reputation(uid: int, uid2: int, value: int) -> int:
 	conn.commit()
 
 def apply_penalty(uid: int, fid: int, uid2: int, penalty: int) -> None:
+	if uid == uid2:
+		return
+	fact = get_faction_by_user(uid2)
+	if fid != 0 and fact.id == fid:
+		return
 	prep = get_personal_reputation(uid2, uid)
 	set_personal_reputation(uid2, uid, prep - penalty)
-	fact = get_faction_by_user(uid2)
 	if fact.id != 0:
 		urep = fact.get_user_reputation(uid, True)
 		fact.set_user_reputation(uid, True, urep - penalty)
