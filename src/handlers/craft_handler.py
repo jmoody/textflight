@@ -1,4 +1,5 @@
 import time
+import logging
 from typing import List
 
 import crafting
@@ -107,6 +108,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		struct = structure.create_structure(name, c.id, "base", outfit_space, s.system.id, s.planet_id)
 	else:
 		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system.id, s.planet_id, s.id)
+	logging.info("Structure '%d %s' created by %d.", struct.id, name, c.id)
 	c.send("Successfully created structure '%s' with size %d.", (name, outfit_space))
 
 def handle_craft(c: Client, args: List[str]) -> None:

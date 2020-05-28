@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import faction
@@ -37,6 +38,7 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 		conn.commit()
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.DESTROY_PENALTY)
 		combat.clear_targets(s)
+		logging.info("Structure '%d %s' destroyed by %d.", s.id, s.name, c.id)
 		c.send("Destroyed structure '%d %s'.", (s.id, s.name))
 		del s
 		combat.update_targets(c.structure.system.id)

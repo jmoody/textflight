@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import List
 
@@ -39,6 +40,7 @@ def handle_fact(c: Client, args: List[str]) -> None:
 	for client in network.clients:
 		if client.chat_on and client.faction_id == c.faction_id:
 			client.chat(MessageType.FACTION, c.username, message)
+	logging.info("Faction message '%s' sent by %d.", message, c.id)
 	c.send("Broadcast message to faction.")
 
 def handle_subs(c: Client, args: List[str]) -> None:
@@ -55,6 +57,7 @@ def handle_subs(c: Client, args: List[str]) -> None:
 			if c.premium:
 				message = apply_format_codes(message)
 			client.chat(MessageType.SUBSPACE, c.username, message)
+			logging.info("Subspace message '%s' sent by %d, to %d.", message, c.id, client.id)
 			c.send("Sent message via subspace link.")
 			return
 	c.send("Unable to locate operator.")
@@ -70,6 +73,7 @@ def handle_locl(c: Client, args: List[str]) -> None:
 	for client in network.clients:
 		if client.chat_on and client.structure.system.id == c.structure.system.id:
 			client.chat(MessageType.LOCAL, name, message)
+	logging.info("Local message '%s' sent by %d.", message, c.id)
 	c.send("Broadcast message to local system.")
 
 def handle_hail(c: Client, args: List[str]) -> None:
@@ -91,6 +95,7 @@ def handle_hail(c: Client, args: List[str]) -> None:
 			if c.premium:
 				message = apply_format_codes(message)
 			client.chat(MessageType.HAIL, "%d %s" % (c.structure.id, c.structure.name), message)
+			logging.info("Hail message '%s' sent by %d, to %d.", message, c.id, client.id)
 			c.send("Sent hail to '%d %s'.", (sid, client.structure.name))
 			return
 	c.send("Unable to hail structure.")

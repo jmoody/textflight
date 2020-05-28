@@ -57,7 +57,7 @@ def init():
 				sock.setblocking(0)
 				c = Client(sock)
 				clients.append(c)
-				logging.info("Client from '%s' connected.", c.get_ip())
+				logging.info("Client '%s' connected.", c.get_ip())
 			else:
 				client_read(s)
 		
@@ -68,7 +68,10 @@ def init():
 		# Disconnect quitting clients
 		for s in clients:
 			if s.quitting:
-				logging.info("Client from '%s' disconnected.", s.get_ip())
+				if s.id != None:
+					logging.info("Client '%s', logged in as %d, disconnected.", s.get_ip(), s.id)
+				else:
+					logging.info("Client '%s' disconnected.", s.get_ip())
 				s.sock.close()
 				clients.remove(s)
 

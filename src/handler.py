@@ -138,7 +138,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					c.send("Disconnected an existing session from %s.", (c2.get_ip(),))
 			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
 			c.send("Logged in as %s.", (username,))
-			logging.info("Client '%s' logged in as '%s'.", c.get_ip(), username)
+			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
 			if c.email == None:
 				c.send("WARNING: Please set an email address with the `email` command. This is used only for resetting your password.")
 		elif c.quitting:
