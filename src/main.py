@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 
-from configparser import ConfigParser
+import logging
+
+import config
+
+logc = config.get_section("logging")
+log_level = 50 - logc.getint("LogLevel") * 10
+log_file = logc.get("LogFile")
+if log_file == "":
+	log_file = None
+logging.basicConfig(filename=log_file, level=log_level, format=logc.get("LogFormat"))
 
 import database
 import network

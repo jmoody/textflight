@@ -1,3 +1,24 @@
+### DEFAULT CONFIG - DO NOT MODIFY ###
+## If you wish to edit config options,	##
+## copy this file to one of the			##
+## following locations and edit there	##
+## instead:								##
+
+# /etc/textflight.conf
+# $HOME/.config/textflight.conf
+# $HOME/textflight.conf
+# ./textflight.conf
+
+# 0 Critical
+# 1 Error
+# 2 Warning
+# 3 Info
+# 4 Debug
+[logging]
+LogLevel = 3
+LogFormat = %%(asctime)s %%(levelname)s:%%(message)s
+LogFile =
+
 [network]
 Address = ::
 Port = 10000
@@ -22,6 +43,9 @@ AttackPenalty = 10
 DestroyPenalty = 100
 CapturePenalty = 100
 
+# WARNING: Modifying this section will
+# cause a completely new universe to
+# be generated!
 [terrain]
 Seed = 0
 BrightnessBits = 8
@@ -29,3 +53,4 @@ AsteroidRichnessBits = 3
 PlanetCountBits = 2
 LinkBits = 1
 DragBits = 8
+

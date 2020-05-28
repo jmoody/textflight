@@ -1,16 +1,17 @@
+import logging
 from typing import List
 
 import database
 import client
 import system
-import combat_handler
-import craft_handler
-import faction_handler
-import info_handler
-import ship_handler
-import social_handler
-import struct_handler
 import network
+import handlers.combat_handler as combat_handler
+import handlers.craft_handler as craft_handler
+import handlers.faction_handler as faction_handler
+import handlers.info_handler as info_handler
+import handlers.ship_handler as ship_handler
+import handlers.social_handler as social_handler
+import handlers.struct_handler as struct_handler
 from client import Client
 
 HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
@@ -137,11 +138,13 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					c.send("Disconnected an existing session from %s.", (c2.get_ip(),))
 			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
 			c.send("Logged in as %s.", (username,))
+			logging.info("Client '%s' logged in as '%s'.", c.get_ip(), username)
 			if c.email == None:
 				c.send("WARNING: Please set an email address with the `email` command. This is used only for resetting your password.")
 		elif c.quitting:
 			return
 		else:
+			logging.info("Failed login attempt from '%s', username '%s'.", c.get_ip(), username)
 			c.send("Incorrect username or password.")
 	elif cmd == "register":
 		if len(args) < 2:
@@ -154,6 +157,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			c.send("Username '%s' is already taken.", (args[0],))
 		else:
 			client.register_user(args.pop(0), " ".join(args))
+			logging.info("Client '%s' registered account '%s'.", c.get_ip(), username)
 			c.send("Registration successful! Try logging in with 'login [username] [password]'.")
 	elif cmd == "exit":
 		c.quit()

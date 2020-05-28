@@ -1,5 +1,5 @@
-import sys
 import copy
+import logging
 
 import config
 from queue import Recipe
@@ -45,9 +45,8 @@ outfit_base = {
 	"Controller": 1,
 }
 
-# TODO: Proper logging
 def fatal_err(message: str, linenum: int) -> None:
-	print("%s on line %d of outfits.txt" % (message, linenum), file=sys.stderr)
+	logging.critical("%s on line %d of outfits.txt.", message, linenum)
 	exit(1)
 
 def add_outfit_base(recipe: Recipe) -> None:
@@ -62,6 +61,7 @@ def handle_line(line: str, tabs: int, state: State) -> None:
 		fatal_err("Scope error", state.linenum)
 	elif tabs == 0:
 		if state.outfit != None:
+			logging.info("Loaded outfit '%s'.", state.outfit.name)
 			outfits[state.outfit.name] = state.outfit
 			state.outfit = None
 		if line != "":

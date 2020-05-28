@@ -1,6 +1,8 @@
 *
 !src/
 !src/*.py
+!src/handlers/
+!src/handlers/*.py
 !data/
 !data/*.txt
 !*.md
