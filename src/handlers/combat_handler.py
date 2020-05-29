@@ -75,7 +75,8 @@ def handle_target(c: Client, args: List[str]) -> None:
 		combat.add_target(c.structure, s)
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.ATTACK_PENALTY)
 		combat.update_targets(s.system.id)
-		c.send("Targeting structure '%d %s'.", (s.id, s.name))
+		logging.info("User %d targeting structures '%d %s'.", (c.id, s.id, s.name))
+		c.send("Targeting structure '%d %s'.", s.id, s.name)
 	else:
 		c.send("Usage: target <structure ID>")
 

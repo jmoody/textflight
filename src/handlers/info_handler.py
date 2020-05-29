@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import database
@@ -59,6 +60,7 @@ def handle_rename(c: Client, args: List[str]) -> None:
 		return
 	name = " ".join(args)
 	if c.checkvalid(name):
+		logging.info("User %d renamed structures '%d %s' to '%s'.", c.id, c.structure.name, name)
 		c.send("Renamed '%s' to '%s'.", (c.structure.name, name))
 		c.structure.rename(name)
 	else:

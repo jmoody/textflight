@@ -26,6 +26,7 @@ def handle_chown(c: Client, args: List[str]) -> None:
 		return
 	conn.execute("UPDATE factions SET owner_id = ? WHERE id = ?;", (utup["id"], fact.id))
 	conn.commit()
+	logging.info("User %d transferred ownership of faction '%s' to %d.", c.id, fact.name, utup["id"])
 	c.send("Transferred ownership of faction to '%s'.", (args[0],))
 
 def handle_claim(c: Client, args: List[str]) -> None:
@@ -103,6 +104,7 @@ def handle_join(c: Client, args: List[str]) -> None:
 		c.send("Creating new faction...")
 		conn.execute("INSERT INTO factions (name, password, owner_id) VALUES (?, ?, ?);", (name, password, c.id))
 		fact = faction.get_faction_by_name(name)
+		logging.info("User %d created faction '%s'.", (name,))
 	elif fact.password != password:
 		c.send("Permission denied.")
 		return
@@ -161,6 +163,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 		if fid == c.faction_id:
 			name = " ".join(args)
 			territory.set_system(c.structure.system.id, fid, name)
+			logging.info("User %d renamed system to %s.", c.id, name)
 			c.send("Renamed this system '%s'.", (name,))
 		else:
 			c.send("Your faction has not claimed this system.")
@@ -169,6 +172,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 		if fid == c.faction_id:
 			name = " ".join(args)
 			territory.set_planet(c.structure.system.id, c.structure.planet_id, fid, name)
+			logging.info("User %d renamed planet to %s.", c.id, name)
 			c.send("Renamed this planet '%s'.", (name,))
 		else:
 			c.send("Your faction has not claimed this planet.")
@@ -222,6 +226,7 @@ def handle_rename(c: Client, args: List[str]) -> None:
 	else:
 		conn.execute("UPDATE factions SET name = ? WHERE id = ?;", (args[0], fact.id))
 		conn.commit()
+		logging.info("User %d renamed faction '%s' to '%s'", fact.name, args[0])
 		c.send("Renamed '%s' to '%s'.", (fact.name, args[0]))
 
 def handle_frepf(c: Client, args: List[str]) -> None:

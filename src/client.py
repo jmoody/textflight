@@ -102,6 +102,7 @@ class Client:
 		c.execute("UPDATE users SET username = ? WHERE id = ?;", (username, self.id))
 		conn.commit()
 		self.username = username
+		logging.info("User %d changed their username to '%d'.", self.id, username)
 		return True
 	
 	def set_chat(self, chat: bool) -> None:
@@ -126,12 +127,14 @@ class Client:
 		if self.structure == None:
 			respawn = ctup["last_spawn"] + SPAWN_TIME - time.time()
 			if respawn > 0:
+				logging.info("User %d attempted to respawn with %d seconds remaining.", self.id, respawn)
 				self.send("Please wait %d seconds before respawning.", (respawn,))
 				self.quitting = True
 				return False
 			self.structure = create_starter_ship(self.id, ctup["username"])
 			conn.execute("UPDATE users SET structure_id = ?, last_spawn = strftime('%s', 'now') WHERE id = ?;",
 				(self.structure.id, self.id))
+			logging.info("User %d spawned.", self.id)
 		conn.execute("UPDATE users SET last_login = strftime('%s', 'now') WHERE id = ?", (self.id,))
 		conn.commit()
 		combat.update_targets(self.structure.system.id)
