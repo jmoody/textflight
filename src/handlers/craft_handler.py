@@ -75,11 +75,11 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	
 	# Determine the cost
 	if not base:
-		cost_factor = 4
+		cost_factor = crafting.COST_FACTOR_SHIP
 	elif s.system.planets[s.planet_id] == PlanetType.HABITABLE:
-		cost_factor = 1
+		cost_factor = crafting.COST_FACTOR_HABITABLE
 	else:
-		cost_factor = 2
+		cost_factor = crafting.COST_FACTOR_PLANET
 	cost = pow(outfit_space, cost_factor)
 	
 	# Remove the materials

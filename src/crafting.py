@@ -9,7 +9,11 @@ import config
 from queue import Recipe, CraftQueue
 from structure import Structure
 
-CRAFT_TIME = config.get_section("data").getint("CraftTime")
+crfc = config.get_section("crafting")
+CRAFT_TIME = crfc.getint("CraftTime")
+COST_FACTOR_SHIP = crfc.getfloat("CostFactorShip")
+COST_FACTOR_HABITABLE = crfc.getfloat("CostFactorHabitable")
+COST_FACTOR_PLANET = crfc.getfloat("CostFactorPlanet")
 
 def load_recipes(name: str) -> Dict[str, Recipe]:
 	f = config.opendata(name + ".txt")

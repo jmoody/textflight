@@ -31,8 +31,13 @@ ValidateRegex = "[^a-zA-Z0-9 ]+"
 [data]
 DataPath = data/
 DatabasePath = database.db
+
+[crafting]
 MiningInterval = 60
 CraftTime = 10
+CostFactorShip = 2
+CostFactorHabitable = 1
+CostFacotrPlanet = 1.5
 
 [faction]
 AttackMin = -1

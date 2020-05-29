@@ -68,7 +68,7 @@ class Client:
 		for m in self.msg_buffer:
 			msg+= m + "\n"
 		self.msg_buffer = []
-		msg+= self.translate(message) + "\n"	# TODO: Allow setting the language
+		msg+= self.translate(message) + "\n"
 		if args != None:
 			msg = msg % args
 		self.send_bytes(msg.encode("utf-8"))

@@ -11,7 +11,7 @@ from cargo import Cargo
 conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
-MINING_INTERVAL_BASE = config.get_section("data").getint("MiningInterval")
+MINING_INTERVAL_BASE = config.get_section("crafting").getint("MiningInterval")
 
 class StatusReport:
 	

@@ -88,6 +88,6 @@ def to_system_id(x: int, y: int) -> int:
 
 def get_random(seed: int) -> random.Random:
 	r = random.Random()
-	r.seed(seed + SEED)	# TODO: Use SHA256 to obfuscate a seed
+	r.seed(seed + SEED)
 	return r
 
