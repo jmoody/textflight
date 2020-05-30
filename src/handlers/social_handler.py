@@ -9,6 +9,7 @@ from client import Client, MessageType
 validchars = re.compile(r"[^ -~]+")	# Only allow printable ASCII
 
 format_codes = {
+	"^0": "\033[0m",
 	"^1": "\033[31m",
 	"^2": "\033[32m",
 	"^3": "\033[33m",
@@ -23,8 +24,6 @@ def apply_format_codes(message: str) -> None:
 	for code, value in format_codes.items():
 		message = message.replace(code, value)
 	message+= "\033[0m"
-	message = message.replace("^0", "\033[0m")
-	message = message.replace("^1", "\033[0;31m")
 	return message
 
 def handle_fact(c: Client, args: List[str]) -> None:
