@@ -102,6 +102,7 @@ COMMANDS = {
 	"nav": ("Get navigation information.", info_handler.handle_nav),
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
+	"rdock": ("Remotely dock a structure.", ship_handler.handle_rdock),
 	"rename": ("Rename your structure.", info_handler.handle_rename),
 	"rep": ("View or set personal operator reputations.", faction_handler.handle_rep),
 	"repf": ("View or set personal faction reputations.", faction_handler.handle_repf),
@@ -156,7 +157,8 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 		elif database.get_user_by_username(args[0]) != None:
 			c.send("Username '%s' is already taken.", (args[0],))
 		else:
-			client.register_user(args.pop(0), " ".join(args))
+			username = args.pop(0)
+			client.register_user(username, " ".join(args))
 			logging.info("Client '%s' registered account '%s'.", c.get_ip(), username)
 			c.send("Registration successful! Try logging in with 'login [username] [password]'.")
 	elif cmd == "exit":

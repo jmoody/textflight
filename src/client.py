@@ -2,11 +2,11 @@ import gettext
 import bcrypt
 import time
 import re
-import combat
+import logging
 from enum import Enum
 from threading import Lock
-from typing import Tuple
 
+import combat
 import database
 import structure
 import config

@@ -32,18 +32,48 @@ def handle_dock(c: Client, args: List[str]) -> None:
 	target = structure.load_structure(sid)
 	if target == None or target.system.id != s.system.id:
 		c.send("Unable to locate structure.")
-		return
 	elif target.dock_parent != None:
-		c.send("Target has no available docking ports.")
-		return
+		c.send("Target is already docked to a structure.")
 	elif not faction.has_permission(c, target, faction.DOCK_MIN):
 		c.send("Permission denied.")
+	else:
+		target.dock_children.append(s)
+		s.dock_parent = target
+		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
+		conn.commit()
+		c.send("Docked to structure '%d %s'.", (sid, target.name))
+
+def handle_rdock(c: Client, args: List[str]) -> None:
+	s = c.structure
+	if len(args) != 1:
+		c.send("Usage: rdock <structure ID>")
 		return
-	target.dock_children.append(s)
-	s.dock_parent = target
-	conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
-	conn.commit()
-	c.send("Docked to structure '%d %s'.", (sid, target.name))
+	try:
+		sid = int(args[0])
+	except ValueError:
+		c.send("Not a number.")
+		return
+	if sid == s.id:
+		c.send("Cannot dock to yourself.")
+		return
+	elif s.dock_parent != None:
+		c.send("Already docked to a structure.")
+		return
+	target = structure.load_structure(sid)
+	if target == None or target.system.id != s.system.id:
+		c.send("Unable to locate structure.")
+	elif target.type != "ship":
+		c.send("Only ships can be docked to a structure.")
+	elif target.dock_parent != None or len(target.dock_children) > 0:
+		c.send("Target is already docked to a structure.")
+	elif not faction.has_permission(c, target, faction.DOCK_MIN):
+		c.send("Permission denied.")
+	else:
+		s.dock_children.append(target)
+		target.dock_parent = s
+		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (s.id, sid))
+		conn.commit()
+		c.send("Docked structure '%d %s'.", (sid, target.name))
 
 def handle_land(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
