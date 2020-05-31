@@ -34,31 +34,31 @@ def handle_claim(c: Client, args: List[str]) -> None:
 		c.send("You are not in a faction.")
 		return
 	if c.structure.planet_id == None:
-		fid, name = territory.get_system(c.structure.system.id)
+		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
 			c.send("Your faction has already claimed this system.")
 			return
 		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ?;",
-			(c.structure.system.id, c.faction_id,)).fetchall())
+			(c.structure.system.id_db, c.faction_id,)).fetchall())
 		if rowcount > 0:
 			c.send("Cannot claim system while there are ships from other factions present.")
 		else:
-			territory.set_system(c.structure.system.id, c.faction_id, name)
+			territory.set_system(c.structure.system, c.faction_id, name)
 			if name != None:
 				c.send("Claimed '%s' for faction.", (name,))
 			else:
 				c.send("Claimed system for faction.")
 	else:
-		fid, name = territory.get_planet(c.structure.system.id, c.structure.planet_id)
+		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
 			c.send("Your faction has already claimed this planet.")
 			return
 		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ? AND planet_id = ?;",
-			(c.structure.system.id, c.faction_id, c.structure.planet_id)).fetchall())
+			(c.structure.system.id_db, c.faction_id, c.structure.planet_id)).fetchall())
 		if rowcount > 0:
 			c.send("Cannot claim planet while there are ships from other factions present.")
 		else:
-			territory.set_planet(c.structure.system.id, c.structure.planet_id, c.faction_id, name)
+			territory.set_planet(c.structure.system, c.structure.planet_id, c.faction_id, name)
 			if name != None:
 				c.send("Claimed '%s' for faction.", (name,))
 			else:
@@ -159,19 +159,19 @@ def handle_name(c: Client, args: List[str]) -> None:
 	elif c.faction_id == 0:
 		c.send("You are not in a faction.")
 	elif c.structure.planet_id == None:
-		fid, name = territory.get_system(c.structure.system.id)
+		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
 			name = " ".join(args)
-			territory.set_system(c.structure.system.id, fid, name)
+			territory.set_system(c.structure.system, fid, name)
 			logging.info("User %d renamed system to %s.", c.id, name)
 			c.send("Renamed this system '%s'.", (name,))
 		else:
 			c.send("Your faction has not claimed this system.")
 	else:
-		fid, name = territory.get_planet(c.structure.system.id, c.structure.planet_id)
+		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
 			name = " ".join(args)
-			territory.set_planet(c.structure.system.id, c.structure.planet_id, fid, name)
+			territory.set_planet(c.structure.system, c.structure.planet_id, fid, name)
 			logging.info("User %d renamed planet to %s.", c.id, name)
 			c.send("Renamed this planet '%s'.", (name,))
 		else:
@@ -196,16 +196,16 @@ def handle_release(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
 		c.send("You are not in a faction.")
 	elif c.structure.planet_id == None:
-		fid, name = territory.get_system(c.structure.system.id)
+		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
-			territory.del_system(c.structure.system.id)
+			territory.del_system(c.structure.system)
 			c.send("Released claim on this system.")
 		else:
 			c.send("Your faction has not claimed this system.")
 	else:
-		fid, name = territory.get_planet(c.structure.system.id, c.structure.planet_id)
+		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
-			territory.del_planet(c.structure.system.id, c.structure.planet_id)
+			territory.del_planet(c.structure.system, c.structure.planet_id)
 			c.send("Released your claim on this planet.")
 		else:
 			c.send("Your faction has not claimed this planet.")

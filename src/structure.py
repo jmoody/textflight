@@ -32,7 +32,10 @@ class Structure:
 		self.mining_progress = stup["mining_progress"]
 		
 		# Load position info
-		self.system = System(stup["sys_id"])
+		sys_id = stup["sys_id"]
+		if sys_id < 0:
+			sys_id+= 1 << 64
+		self.system = System(sys_id)
 		self.planet_id = stup["planet_id"]
 		self._dock_id = stup["dock_id"]
 		self.dock_parent = None
@@ -90,9 +93,9 @@ def load_structure(sid: int) -> Structure:
 			s.dock_children.append(load_structure(did["id"]))
 	return s
 
-def create_structure(name, owner, stype, outfit_space, sys_id, planet_id = None, dock_id = None) -> Structure:
+def create_structure(name, owner, stype, outfit_space, sys, planet_id = None, dock_id = None) -> Structure:
 	c = conn.execute("INSERT INTO structures (name, owner_id, type, outfit_space, sys_id, planet_id, dock_id) VALUES (?, ?, ?, ?, ?, ?, ?);",
-		(name, owner, stype, outfit_space, sys_id, planet_id, dock_id))
+		(name, owner, stype, outfit_space, sys.id_db, planet_id, dock_id))
 	conn.commit()
 	return load_structure(c.lastrowid)
 

@@ -10,6 +10,7 @@ import combat
 import database
 import structure
 import config
+import system
 from outfit import Outfit
 from cargo import Cargo
 
@@ -141,7 +142,7 @@ class Client:
 		return True
 
 def create_starter_ship(uid, username) -> structure.Structure:
-	ship = structure.create_structure(username + "'s Ship", uid, "ship", 8, 0)
+	ship = structure.create_structure(username + "'s Ship", uid, "ship", 8, system.System(0))
 	Outfit("Fusion Reactor", 1).install(ship)
 	Outfit("Solar Array", 1).install(ship)
 	Outfit("Coolant Pump", 1).install(ship)

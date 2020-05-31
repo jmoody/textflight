@@ -39,7 +39,7 @@ def update_targets(sys_id: int) -> None:
 def update_target(s: structure.Structure) -> None:
 	fact = faction.get_faction_by_user(s.owner_id)
 	report = production.update(s)
-	for stup in conn.execute("SELECT id, owner_id FROM structures WHERE sys_id = ? AND id != ?;", (s.system.id, s.id)):
+	for stup in conn.execute("SELECT id, owner_id FROM structures WHERE sys_id = ? AND id != ?;", (s.system.id_db, s.id)):
 		update_target_duo(fact, s, stup, report)
 
 def update_target_duo(fact: faction.Faction, s: structure.Structure, stup, report) -> None:

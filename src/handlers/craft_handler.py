@@ -61,7 +61,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			c.send("Must be landed on a planet to construct a base.")
 			return
 		total = outfit_space
-		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id, s.planet_id)):
+		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 			total+= pbase["outfit_space"]
 		if total > 1024:
 			c.send("Total outfit space of all bases must be less than 1024.")
@@ -105,9 +105,9 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	
 	# Create the structure
 	if base:
-		struct = structure.create_structure(name, c.id, "base", outfit_space, s.system.id, s.planet_id)
+		struct = structure.create_structure(name, c.id, "base", outfit_space, s.system, s.planet_id)
 	else:
-		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system.id, s.planet_id, s.id)
+		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system, s.planet_id, s.id)
 	logging.info("Structure '%d %s' created by %d.", struct.id, name, c.id)
 	c.send("Successfully created structure '%s' with size %d.", (name, outfit_space))
 

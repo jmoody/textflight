@@ -1,6 +1,7 @@
-from typing import List, Tuple
+import hashlib
 import enum
 import random
+from typing import List, Tuple
 
 import config
 
@@ -30,6 +31,9 @@ class System:
 	
 	def __init__(self, sys_id: int) -> None:
 		self.id = sys_id
+		self.id_db = sys_id
+		if self.id_db > pow(2, 63):
+			self.id_db-= 1 << 64
 		self.x, self.y = to_system_coords(self.id)
 		r = get_random(self.id)
 		self.brightness = r.getrandbits(BRIGHTNESS_BITS)
@@ -45,9 +49,20 @@ class System:
 			for yo in range(-1, 2):
 				if xo == 0 and yo == 0:
 					continue
-				drag = get_link_drag(self.id, to_system_id(self.x + xo, self.y + yo))
+				lx = self.x + xo
+				ly = self.y + yo
+				if lx < 0:
+					lx+= 1 << 32
+				elif lx + 1 > pow(2, 32):
+					lx-= 1 << 32
+				if ly < 0:
+					ly+= 1 << 32
+				elif ly + 1 > pow(2, 32):
+					ly-= 1 << 32
+				lid = to_system_id(lx, ly)
+				drag = get_link_drag(self.id, lid)
 				if drag != 0:
-					links.append((xo, yo, drag))
+					links.append((lid, drag))
 		return links
 
 class Planet:
@@ -88,6 +103,9 @@ def to_system_id(x: int, y: int) -> int:
 
 def get_random(seed: int) -> random.Random:
 	r = random.Random()
-	r.seed(seed + SEED)
+	digest = hashlib.sha256()
+	seeddat = (seed + SEED).to_bytes(16, byteorder='big')
+	digest.update(seeddat)
+	r.seed(digest.digest())
 	return r
 

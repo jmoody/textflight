@@ -178,13 +178,13 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		ships[fship] = report.mass
 	
 	# Perform jump
-	xo, yo, drag = links[lindex]
-	sys = system.System(system.to_system_id(s.system.x + xo, s.system.y + yo))
+	lid, drag = links[lindex]
+	sys = system.System(lid)
 	for ship, mass in ships.items():
 		cost = report.mass / pow(2, system.DRAG_BITS) * drag
 		ship.system = sys
 		ship.warp_charge-= cost
-		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id, ship.warp_charge, ship.id))
+		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id_db, ship.warp_charge, ship.id))
 	c.send("Warp engines engaging.")
 	conn.commit()
 	combat.clear_targets(s)

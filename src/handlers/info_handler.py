@@ -13,7 +13,7 @@ conn = database.conn
 
 def handle_nav(c: Client, args: List[str]) -> None:
 	sys = c.structure.system
-	fid, name = territory.get_system(sys.id)
+	fid, name = territory.get_system(sys)
 	if name != None:
 		c.send("System: %s", (name,))
 	if fid != None:
@@ -24,9 +24,9 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	c.send("Links:")
 	index = 0
 	for link in sys.get_links():
-		xo, yo, drag = link
-		target_sys = system.System(system.to_system_id(sys.x + xo, sys.y + yo))
-		tfid, tname = territory.get_system(target_sys.id)
+		lid, drag = link
+		target_sys = system.System(lid)
+		tfid, tname = territory.get_system(target_sys)
 		if tname != None:
 			tfact = faction.get_faction(tfid)
 			c.send("	[%d] %s (faction: %s) (drag: %d)", (index, tname, tfact.name, drag))
@@ -39,7 +39,7 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	c.send("Planets:")
 	index = 0
 	for planet in sys.planets:
-		pfid, pname = territory.get_planet(sys.id, index)
+		pfid, pname = territory.get_planet(sys, index)
 		if pname != None:
 			pfact = faction.get_faction(pfid)
 			c.send("	[%d] %s (faction: %s) (%s)", (index, pname, pfact.name, c.translate(planet.ptype.name.lower())))
@@ -50,7 +50,7 @@ def handle_nav(c: Client, args: List[str]) -> None:
 			c.send("	[%d] (%s)", (index, c.translate(planet.ptype.name.lower())))
 		index+= 1
 	c.send("Structures:")
-	for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id,)):
+	for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id_db,)):
 		sid, name = stup
 		c.send("	%d %s.", (sid, name))
 
