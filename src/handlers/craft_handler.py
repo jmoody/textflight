@@ -6,6 +6,7 @@ import crafting
 import production
 import structure
 import database
+import system
 from cargo import Cargo
 from client import Client
 from system import PlanetType
@@ -57,8 +58,8 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	report = production.update(s)
 	name = " ".join(args)
 	if base:
-		if s.planet_id == None:
-			c.send("Must be landed on a planet to construct a base.")
+		if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
+			c.send("Must be landed on a rocky planet to construct a base.")
 			return
 		total = outfit_space
 		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
