@@ -119,9 +119,9 @@ def handle_launch(c: Client, args: List[str]) -> None:
 	report = production.update(s)
 	if report.mass > report.antigravity:
 		if report.antigravity == 0:
-			c.send("Antigravity engines are needed to land on planets.")
+			c.send("Antigravity engines are needed to launch off planets.")
 		else:
-			c.send("Antigravity engines are not powerful enough to land.")
+			c.send("Antigravity engines are not powerful enough to launch.")
 		return
 	s.planet_id = None
 	conn.execute("UPDATE structures SET planet_id = NULL WHERE id = ?;", (s.id,))

@@ -32,12 +32,15 @@ ValidateRegex = "[^a-zA-Z0-9 ]+"
 DataPath = data/
 DatabasePath = database.db
 
-[crafting]
+[mining]
 MiningInterval = 60
 GasIntervalMultiplier = 32
 HydrogenCount = 32
 OxygenCount = 16
 XenonCount = 1
+PlanetHeat = 0.25
+
+[crafting]
 CraftTime = 10
 CostFactorShip = 2
 CostFactorHabitable = 1

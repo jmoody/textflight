@@ -175,6 +175,7 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 	elif cindex >= len(c.structure.cargo):
 		c.send("Cargo does not exist.")
 	else:
+		count = min(c.structure.cargo[cindex].count, count)
 		c.structure.cargo[cindex].less(count, c.structure)
 		c.send("Jettisoned %d items from cargo.", (count,))
 

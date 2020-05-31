@@ -11,12 +11,13 @@ from cargo import Cargo
 conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
-crtc = config.get_section("crafting")
-MINING_INTERVAL_BASE = crtc.getint("MiningInterval")
-GAS_INTERVAL_MULTIPLIER = crtc.getint("GasIntervalMultiplier")
-HYDROGEN_COUNT = crtc.getint("HydrogenCount")
-OXYGEN_COUNT = crtc.getint("OxygenCount")
-XENON_COUNT = crtc.getint("XenonCount")
+minc = config.get_section("mining")
+MINING_INTERVAL_BASE = minc.getint("MiningInterval")
+GAS_INTERVAL_MULTIPLIER = minc.getint("GasIntervalMultiplier")
+HYDROGEN_COUNT = minc.getint("HydrogenCount")
+OXYGEN_COUNT = minc.getint("OxygenCount")
+XENON_COUNT = minc.getint("XenonCount")
+PLANET_HEAT_RATE = minc.getfloat("PlanetHeat")
 
 class StatusReport:
 	
@@ -87,6 +88,12 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 	report = StatusReport()
 	report.outfit_space = s.outfit_space
 	report.now = now
+	
+	# Apply planetary effects
+	if s.planet_id != None:
+		ptype = s.system.planets[s.planet_id]
+		if ptype == system.PlanetType.BARREN or system.PlanetType.GREENHOUSE:
+			report.heat_rate+= PLANET_HEAT_RATE * s.outfit_space
 	
 	# Parse outfits and cargo
 	report.mass+= len(s.craft_queue)
@@ -252,12 +259,14 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 		return 0
 	elapsed = s.mining_progress + active
 	interval = MINING_INTERVAL_BASE / beam_power
+	if s.planet_id != None:
+		ptype = s.system.planets[s.planet_id].ptype
 	if s.planet_id == None:
 		interval*= MAX_ASTEROID_RICHNESS / s.system.asteroid_richness
 		count = int(elapsed / interval)
 		if count > 0:
 			Cargo(s.system.asteroid_type.value, count).add(s)
-	elif s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
+	elif ptype == system.PlanetType.GAS or ptype == system.PlanetType.GREENHOUSE:
 		interval*= GAS_INTERVAL_MULTIPLIER
 		count = int(elapsed / interval)
 		if count > 0:
