@@ -66,7 +66,6 @@ class System:
 		return links
 
 class Planet:
-	name = None
 	ptype = None
 	
 	def __init__(self, r: random.Random) -> None:

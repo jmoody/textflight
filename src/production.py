@@ -11,7 +11,12 @@ from cargo import Cargo
 conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
-MINING_INTERVAL_BASE = config.get_section("crafting").getint("MiningInterval")
+crtc = config.get_section("crafting")
+MINING_INTERVAL_BASE = crtc.getint("MiningInterval")
+GAS_INTERVAL_MULTIPLIER = crtc.getint("GasIntervalMultiplier")
+HYDROGEN_COUNT = crtc.getint("HydrogenCount")
+OXYGEN_COUNT = crtc.getint("OxygenCount")
+XENON_COUNT = crtc.getint("XenonCount")
 
 class StatusReport:
 	
@@ -246,11 +251,23 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	if beam_power == 0:
 		return 0
 	elapsed = s.mining_progress + active
-	interval = (MAX_ASTEROID_RICHNESS - s.system.asteroid_richness) * MINING_INTERVAL_BASE / beam_power
-	count = int(elapsed / interval)
+	interval = MINING_INTERVAL_BASE / beam_power
+	if s.planet_id == None:
+		interval*= MAX_ASTEROID_RICHNESS / s.system.asteroid_richness
+		count = int(elapsed / interval)
+		if count > 0:
+			Cargo(s.system.asteroid_type.value, count).add(s)
+	elif s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
+		interval*= GAS_INTERVAL_MULTIPLIER
+		count = int(elapsed / interval)
+		if count > 0:
+			Cargo("Hydrogen", count * HYDROGEN_COUNT).add(s)
+			Cargo("Oxygen", count * OXYGEN_COUNT).add(s)
+			Cargo("Xenon", count * XENON_COUNT).add(s)
+	else:
+		s.mining_progress = 0
+		return interval
 	s.mining_progress = elapsed - interval * count
-	if count > 0:
-		Cargo(s.system.asteroid_type.value, count).add(s)
 	return interval
 
 def update_assembly(s: Structure, stime: float, assembly_rate: float) -> float:

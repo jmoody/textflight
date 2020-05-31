@@ -41,8 +41,7 @@ class State:
 
 outfits = {}
 outfit_base = {
-	"Light Material": 4,
-	"Controller": 1,
+	"Outfit Frame": 1,
 }
 
 def fatal_err(message: str, linenum: int) -> None:

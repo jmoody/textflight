@@ -1,3 +1,9 @@
+Beam Guide
+	Xenon 1
+	Steel 16
+	Silicon 8
+	Heavy Plating 2
+
 Carbon Alloy
 	Iron 4
 	Carbon 4
@@ -13,19 +19,27 @@ Empty Cell
 Enriched Uranium
 	Uranium 128
 
-Fuel Cell
-	Empty Cell 1
-	Enriched Uranium 1
-
 Heavy Plating
 	Carbon Alloy 16
 	Thermal Pipe 2
 
+Hydrogen Fuel Cell
+	Empty Cell 1
+	Hydrogen 1
+
 Light Material
 	Carbon Alloy 4
+
+Outfit Frame
+	Light Material 4
+	Controller 1
 
 Steel
 	Iron 4
 
 Thermal Pipe
 	Copper 4
+
+Uranium Fuel Cell
+	Empty Cell 1
+	Enriched Uranium 1
