@@ -10,9 +10,6 @@ from client import Client
 
 conn = database.conn
 
-def handle_capture(c: Client, args: List[str]) -> None:
-	pass
-
 def handle_destroy(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send("Usage: destroy <structure ID>")

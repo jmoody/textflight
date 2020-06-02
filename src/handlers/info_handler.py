@@ -63,18 +63,6 @@ def handle_nav(c: Client, args: List[str]) -> None:
 		sid, name = stup
 		c.send("	%d %s.", (sid, name))
 
-def handle_rename(c: Client, args: List[str]) -> None:
-	if len(args) < 1:
-		c.send("Usage: rename <name>")
-		return
-	name = " ".join(args)
-	if c.checkvalid(name):
-		logging.info("User %d renamed structures '%d %s' to '%s'.", c.id, c.structure.name, name)
-		c.send("Renamed '%s' to '%s'.", (c.structure.name, name))
-		c.structure.rename(name)
-	else:
-		c.send("Name can only contain letters and numbers.")
-
 def handle_scan(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if len(args) == 1:
