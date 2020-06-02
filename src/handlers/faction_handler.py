@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import database
@@ -104,7 +105,7 @@ def handle_join(c: Client, args: List[str]) -> None:
 		c.send("Creating new faction...")
 		conn.execute("INSERT INTO factions (name, password, owner_id) VALUES (?, ?, ?);", (name, password, c.id))
 		fact = faction.get_faction_by_name(name)
-		logging.info("User %d created faction '%s'.", (name,))
+		logging.info("User %d created faction '%s'.", c.id, name)
 	elif fact.password != password:
 		c.send("Permission denied.")
 		return
@@ -141,7 +142,10 @@ def handle_leave(c: Client, args: List[str]) -> None:
 	c.faction_id = 0;
 	conn.execute("UPDATE users SET faction_id = 0 WHERE id = ?;", (c.id,))
 	c.send("Left '%s'.", (fact.name,))
-	if len(members) == 0:
+	if len(members) == 1:
+		conn.execute("DELETE FROM faction_claims WHERE faction_id = ?;", (fact.id,))
+		conn.execute("DELETE FROM faction_reputation WHERE faction_id = ?;", (fact.id,))
+		conn.execute("DELETE FROM user_reputation WHERE faction_id = ?;", (fact.id,))
 		conn.execute("DELETE FROM factions WHERE id = ?;", (fact.id,))
 	conn.commit()
 
@@ -163,7 +167,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 		if fid == c.faction_id:
 			name = " ".join(args)
 			territory.set_system(c.structure.system, fid, name)
-			logging.info("User %d renamed system to %s.", c.id, name)
+			logging.info("User %d renamed system to '%s'.", c.id, name)
 			c.send("Renamed this system '%s'.", (name,))
 		else:
 			c.send("Your faction has not claimed this system.")
@@ -172,7 +176,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 		if fid == c.faction_id:
 			name = " ".join(args)
 			territory.set_planet(c.structure.system, c.structure.planet_id, fid, name)
-			logging.info("User %d renamed planet to %s.", c.id, name)
+			logging.info("User %d renamed planet to '%s'.", c.id, name)
 			c.send("Renamed this planet '%s'.", (name,))
 		else:
 			c.send("Your faction has not claimed this planet.")
