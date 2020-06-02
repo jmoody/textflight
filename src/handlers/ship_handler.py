@@ -101,7 +101,8 @@ def handle_land(c: Client, args: List[str]) -> None:
 			c.send("Antigravity engines are not powerful enough to land.")
 		return
 	c.structure.planet_id = pid
-	conn.execute("UPDATE structures SET planet_id = ? WHERE id = ?;", (pid, c.structure.id))
+	c.structure.mining_progress = 0
+	conn.execute("UPDATE structures SET planet_id = ?, mining_progress = 0 WHERE id = ?;", (pid, c.structure.id))
 	conn.commit()
 	c.send("Landed on planet %d.", (pid,))
 
@@ -124,7 +125,8 @@ def handle_launch(c: Client, args: List[str]) -> None:
 			c.send("Antigravity engines are not powerful enough to launch.")
 		return
 	s.planet_id = None
-	conn.execute("UPDATE structures SET planet_id = NULL WHERE id = ?;", (s.id,))
+	s.mining_progress = 0
+	conn.execute("UPDATE structures SET planet_id = NULL, mining_progress = 0 WHERE id = ?;", (s.id,))
 	conn.commit()
 	c.send("Launched from planet.")
 
@@ -184,7 +186,9 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		cost = report.mass / pow(2, system.DRAG_BITS) * drag
 		ship.system = sys
 		ship.warp_charge-= cost
-		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ? WHERE id = ?", (sys.id_db, ship.warp_charge, ship.id))
+		ship.mining_progress = 0
+		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ?, mining_progress = 0 WHERE id = ?",
+			(sys.id_db, ship.warp_charge, ship.id))
 	c.send("Warp engines engaging.")
 	conn.commit()
 	combat.clear_targets(s)
