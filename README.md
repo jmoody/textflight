@@ -2,6 +2,14 @@
 
 A command line space exploration MMO.
 
+## Playing
+
+You can use any SSL-secured socket client to connect to the server. Here is an example using the program `socat`:
+
+```
+socat - openssl:leagueh.xyz:10000
+```
+
 ## Running
 
 Note: Although you can run your own server, remember that this is an MMO; the more people are playing on a server, the more fun it is, so running a public server is strongly discouraged so as not to fragment the community. Thanks for your understanding!
