@@ -23,6 +23,9 @@ LogFile =
 Address = ::
 Port = 10000
 BufferSize = 4096
+SSL = false
+SSLCert =
+SSLKey =
 
 [client]
 SpawnTime = 600

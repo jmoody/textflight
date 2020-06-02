@@ -36,11 +36,11 @@ class MessageType(Enum):
 class Client:
 	read_buffer = ""
 	write_buffer = bytes()
-	write_lock = Lock()
 	msg_buffer = []
 	quitting = False
 	
 	id = None
+	username = None
 	
 	def __init__(self, sock) -> None:
 		self.sock = sock
@@ -55,7 +55,10 @@ class Client:
 		return len(text) == len(VALIDREGEX.sub("", text))
 	
 	def get_ip(self) -> int:
-		return self.sock.getpeername()[0]
+		try:
+			return self.sock.getpeername()[0]
+		except:
+			return "[socket closed]"
 	
 	def translate(self, message: str) -> str:
 		return gettext.gettext(message)
@@ -78,9 +81,7 @@ class Client:
 		self.send_bytes("> ".encode("utf-8"))
 	
 	def send_bytes(self, message) -> None:
-		self.write_lock.acquire()
 		self.write_buffer+= message
-		self.write_lock.release()
 	
 	def quit(self) -> None:
 		self.send("Goodbye.")
