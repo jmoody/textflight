@@ -178,7 +178,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		ships[fship] = report.mass
 	
 	# Perform jump
-	lid, drag = links[lindex]
+	lid, drag, xo, yo = links[lindex]
 	sys = system.System(lid)
 	for ship, mass in ships.items():
 		cost = report.mass / pow(2, system.DRAG_BITS) * drag

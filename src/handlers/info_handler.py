@@ -24,17 +24,26 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	c.send("Links:")
 	index = 0
 	for link in sys.get_links():
-		lid, drag = link
+		lid, drag, xo, yo = link
+		direction = ""
+		if yo < 0:
+			direction = "north"
+		elif yo > 0:
+			direction = "south"
+		if xo < 0:
+			direction+= "west"
+		elif xo > 0:
+			direction+= "east"
 		target_sys = system.System(lid)
 		tfid, tname = territory.get_system(target_sys)
 		if tname != None:
 			tfact = faction.get_faction(tfid)
-			c.send("	[%d] %s (faction: %s) (drag: %d)", (index, tname, tfact.name, drag))
+			c.send("	[%d] %s (faction: %s) (%s) (drag: %d)", (index, tname, tfact.name, c.translate(direction), drag))
 		elif tfid != None:
 			tfact = faction.get_faction(tfid)
-			c.send("	[%d] (faction: %s) (drag: %d)", (index, tfact.name, drag))
+			c.send("	[%d] (faction: %s) (%s) (drag: %d)", (index, tfact.name, c.translate(direction), drag))
 		else:
-			c.send("	[%d] (drag: %d)", (index, drag))
+			c.send("	[%d] (%s) (drag: %d)", (index, c.translate(direction), drag))
 		index+= 1
 	c.send("Planets:")
 	index = 0

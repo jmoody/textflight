@@ -45,8 +45,8 @@ class System:
 	
 	def get_links(self) -> List[int]:
 		links = []
-		for xo in range(-1, 2):
-			for yo in range(-1, 2):
+		for yo in range(-1, 2):
+			for xo in range(-1, 2):
 				if xo == 0 and yo == 0:
 					continue
 				lx = self.x + xo
@@ -62,7 +62,7 @@ class System:
 				lid = to_system_id(lx, ly)
 				drag = get_link_drag(self.id, lid)
 				if drag != 0:
-					links.append((lid, drag))
+					links.append((lid, drag, xo, yo))
 		return links
 
 class Planet:
