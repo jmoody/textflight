@@ -45,6 +45,8 @@ class Client:
 	def __init__(self, sock) -> None:
 		self.sock = sock
 		self.tree = set()
+		self.session_start = time.time()
+		self.last_command = time.time()
 		self.send(WELCOME_MESSAGE)
 		self.prompt()
 	

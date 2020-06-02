@@ -2,6 +2,7 @@ import select
 import socket
 import logging
 import ssl
+import time
 
 import handler
 import config
@@ -10,6 +11,10 @@ from client import Client
 netw = config.get_section("network")
 ADDRESS = netw.get("Address")
 PORT = netw.getint("Port")
+TIMEOUT = netw.getfloat("Timeout")
+RATELIMIT = netw.getfloat("Ratelimit")
+MIN_SESSION = netw.getfloat("MinSession")
+MAX_SESSION = netw.getfloat("MaxSession")
 BUFFER_SIZE = netw.getint("BufferSize")
 SSL = netw.getboolean("SSL")
 SSL_CERT_PATH = netw.get("SSLCert")
@@ -41,6 +46,7 @@ def client_read(client):
 
 def client_write(client):
 	if len(client.write_buffer) > 0:
+		client.last_command = time.time()
 		client.write_buffer = client.write_buffer[client.sock.send(client.write_buffer):]
 
 def init():
@@ -66,6 +72,7 @@ def init():
 		readable, writeable, exceptional = select.select(inputs, [], clients)
 		
 		# Read from clients
+		now = time.time()
 		for s in (readable + exceptional):
 			if s is ss:
 				sock, addr = ss.accept()
@@ -80,11 +87,18 @@ def init():
 				clients.append(c)
 				logging.info("Client '%s' connected.", c.get_ip())
 			else:
+				if now - s.last_command < RATELIMIT:
+					s.quitting = True
+					logging.warn("Client '%s' exceeded ratelimit.", c.get_ip())
 				client_read(s)
 		
 		# Write to clients
 		for s in clients:
-			client_write(s)
+			if now - s.last_command > TIMEOUT:
+				s.quitting = True
+				logging.warn("Client '%s' timed out.", c.get_ip())
+			else:
+				client_write(s)
 		
 		# Disconnect quitting clients
 		for s in clients:
@@ -93,6 +107,9 @@ def init():
 					logging.info("Client '%s', logged in as %d, disconnected.", s.get_ip(), s.id)
 				else:
 					logging.info("Client '%s' disconnected.", s.get_ip())
+				session_length = now - s.session_start
+				if session_length < MIN_SESSION or session_length > MAX_SESSION:
+					logging.warn("Client '%s' exceeded allowed session bounds.", c.get_ip())
 				s.sock.close()
 				clients.remove(s)
 

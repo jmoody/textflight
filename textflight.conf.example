@@ -22,6 +22,10 @@ LogFile =
 [network]
 Address = ::
 Port = 10000
+Timeout = 600
+Ratelimit = 0.5
+MinSession = 1
+MaxSession = 21600
 BufferSize = 4096
 SSL = false
 SSLCert =
