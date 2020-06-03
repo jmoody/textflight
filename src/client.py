@@ -11,6 +11,7 @@ import database
 import structure
 import config
 import system
+import strings
 from outfit import Outfit
 from cargo import Cargo
 
@@ -69,14 +70,13 @@ class Client:
 		msg = "[%s][%s] %s" % (mtype.value, author, message)
 		self.msg_buffer.append(msg)
 	
-	def send(self, message: str, args = None) -> None:
+	def send(self, message: str, args = None, **kwargs) -> None:
 		msg = ""
 		for m in self.msg_buffer:
 			msg+= m + "\n"
 		self.msg_buffer = []
 		msg+= self.translate(message) + "\n"
-		if args != None:
-			msg = msg % args
+		msg = msg.format(**kwargs)
 		self.send_bytes(msg.encode("utf-8"))
 	
 	def prompt(self) -> None:
@@ -86,7 +86,7 @@ class Client:
 		self.write_buffer+= message
 	
 	def quit(self) -> None:
-		self.send("Goodbye.")
+		self.send(strings.MISC.GOODBYE)
 		self.quitting = True
 	
 	def set_email(self, email: str) -> None:
@@ -132,7 +132,7 @@ class Client:
 			respawn = ctup["last_spawn"] + SPAWN_TIME - time.time()
 			if respawn > 0:
 				logging.info("User %d attempted to respawn with %d seconds remaining.", self.id, respawn)
-				self.send("Please wait %d seconds before respawning.", (respawn,))
+				self.send(strings.MISC.RESPAWN, remaining=respawn)
 				self.quitting = True
 				return False
 			self.structure = create_starter_ship(self.id, ctup["username"])

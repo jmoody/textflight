@@ -7,6 +7,7 @@ import production
 import structure
 import database
 import system
+import strings
 from cargo import Cargo
 from client import Client
 from system import PlanetType
@@ -18,60 +19,60 @@ def handle_base(c: Client, args: List[str]) -> None:
 
 def handle_cancel(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send("Usage: cancel <queue ID> <count>")
+		c.send(strings.USAGE.CANCEL)
 		return
 	try:
 		qindex = int(args[0])
 		count = int(args[1])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if count < 1:
-		c.send("Count must be greater than zero.")
+		c.send(strings.MISC.COUNT_GTZ)
 	elif qindex >= len(c.structure.craft_queue):
-		c.send("Queue does not exist.")
+		c.send(strings.CRAFT.NO_QUEUE)
 	else:
 		c.structure.craft_queue[qindex].less(count, c.structure)
-		c.send("Cancelled %d items queued for assembly.", (count,))
+		c.send(strings.CRAFT.CANCELLED, count=count)
 
 def handle_construct(c: Client, args: List[str], base = False) -> None:
 	
 	# Validate input
 	if len(args) < 2:
 		if base:
-			c.send("Usage: base <outfit space> <name>")
+			c.send(strings.USAGE.BASE)
 		else:
-			c.send("Usage: construct <outfit space> <name>")
+			c.send(strings.USAGE.CONSTRUCT)
 		return
 	try:
 		outfit_space = int(args.pop(0))
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if outfit_space < 1:
-		c.send("Outfit space must be greater than zero.")
+		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
 		return
 	elif outfit_space > 1024:
-		c.send("Outfit space must be less than 1024.")
+		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=1024)	# TODO: Configurable max
 		return
 	s = c.structure
 	report = production.update(s)
 	name = " ".join(args)
 	if base:
 		if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
-			c.send("Must be landed on a rocky planet to construct a base.")
+			c.send(strings.CRAFT.NEED_ROCKY)
 			return
 		total = outfit_space
 		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 			total+= pbase["outfit_space"]
 		if total > 1024:
-			c.send("Total outfit space of all bases must be less than 1024.")
+			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=1024)
 			return
 	elif outfit_space > report.shipyard:
 		if report.shipyard == 0:
-			c.send("Shipyard required to construct new structures.")
+			c.send(strings.CRAFT.NEED_SHIPYARD)
 		else:
-			c.send("Shipyard not large enough to construct this structure.")
+			c.send(strings.CRAFT.SMALL_SHIPYARD)
 		return
 	
 	# Determine the cost
@@ -96,10 +97,10 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			if not has_plating:
 				break
 	if not has_struct:
-		c.send("Insufficient 'Light Material' (needs %d).", (cost,))
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
 		return
 	if not has_plating:
-		c.send("Insufficient 'Heavy Plating' (needs %d).", (outfit_space,))
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
 		return
 	Cargo("Light Material", cost).remove(s)
 	Cargo("Heavy Plating", outfit_space).remove(s)
@@ -110,7 +111,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	else:
 		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system, s.planet_id, s.id)
 	logging.info("Structure '%d %s' created by %d.", struct.id, name, c.id)
-	c.send("Successfully created structure '%s' with size %d.", (name, outfit_space))
+	c.send(strings.CRAFT.CREATED_STRUCT, name=name, size=outfit_space)
 
 def handle_craft(c: Client, args: List[str]) -> None:
 	production.update(c.structure)
@@ -118,7 +119,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
 		i = 0
 		for q in available:
-			c.send("[%d] %s (x%d)", (i, c.translate(q.type), q.count))
+			c.send(strings.CRAFT.RECIPE, index=i, name=c.translate(q.type), count=q.count)
 			i+= 1
 	elif 1 < len(args) < 4:
 		
@@ -130,23 +131,23 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			if len(args) > 2:
 				extra = int(args[2])
 		except ValueError:
-			c.send("Not a number.")
+			c.send(strings.MISC.NAN)
 			return
 		if count < 1:
-			c.send("Count must be greater than zero.")
+			c.send(strings.MISC.COUNT_GTZ)
 			return
 		elif index >= len(available):
-			c.send("Recipe does not exist.")
+			c.send(strings.CRAFT.NO_RECIPE)
 			return
 		q = available[index]
 		if q.count < count * max(1, extra):
-			c.send("Insufficient resources.")
+			c.send(strings.CRAFT.INSUFFICIENTS)
 			return
 		elif extra < 1 and q._rec.has_extra:
-			c.send("Mark not specified.")
+			c.send(strings.CRAFT.MISSING_MARK)
 			return
 		elif extra != 0 and not q._rec.has_extra:
-			c.send("Recipe has no mark options.")
+			c.send(strings.CRAFT.NO_MARK)
 			return
 		
 		# Remove cargo and add to queue
@@ -156,29 +157,29 @@ def handle_craft(c: Client, args: List[str]) -> None:
 		if extra > 0:
 			q.extra = extra
 		q.add(c.structure)
-		c.send("Queued %d items for assembly.", (count,))
+		c.send(strings.CRAFT.QUEUED, count=count)
 		
 	else:
-		c.send("Usage: craft [recipe ID] [count] [mark]")
+		c.send(strings.USAGE.CRAFT)
 
 def handle_jettison(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send("Usage: jettison <cargo ID> <count>")
+		c.send(strings.USAGE.JETTISON)
 		return
 	try:
 		cindex = int(args[0])
 		count = int(args[1])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if count < 1:
-		c.send("Count must be greater than zero.")
+		c.send(strings.MISC.COUNT_GTZ)
 	elif cindex >= len(c.structure.cargo):
-		c.send("Cargo does not exist.")
+		c.send(strings.MISC.NO_CARGO)
 	else:
 		count = min(c.structure.cargo[cindex].count, count)
 		c.structure.cargo[cindex].less(count, c.structure)
-		c.send("Jettisoned %d items from cargo.", (count,))
+		c.send(strings.CRAFT.JETTISONED, count=count)
 
 def handle_queue(c: Client, args: List[str]) -> None:
 	i = 0
@@ -193,8 +194,8 @@ def handle_queue(c: Client, args: List[str]) -> None:
 		else:
 			time_str = "never"
 		if q.extra == None:
-			c.send("[%d] %s x%d - %s", (i, c.translate(q.type), q.count, time_str))
+			c.send(strings.CRAFT.QUEUE, index=i, name=c.translate(q.type), count=q.count, time=time_str)
 		else:
-			c.send("[%d] %s (%s) x%d - %s", (i, c.translate(q.type), q.extra, q.count, time_str))
+			c.send(strings.CRAFT.QUEUE_EXTRA, index=i, name=c.translate(q.type), extra=q.extra, count=q.count, time=time_str)
 		i+= 1
 

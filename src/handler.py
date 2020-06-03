@@ -5,6 +5,7 @@ import database
 import client
 import system
 import network
+import strings
 import handlers.combat_handler as combat_handler
 import handlers.craft_handler as craft_handler
 import handlers.faction_handler as faction_handler
@@ -18,48 +19,48 @@ HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
 
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send("Usage: email <new email>")
+		c.send(strings.USAGE.EMAIL)
 		return
 	c.set_email(args[0])
-	c.send("Updated email address.")
+	c.send(strings.MISC.UPDATED_EMAIL)
 
 def handle_exit(c: Client, args: List[str]) -> None:
 	c.quit()
 
 def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send("Usage: passwd <new password>")
+		c.send(strings.USAGE.PASSWD)
 		return
 	c.set_password(" ".join(args))
-	c.send("Updated password.")
+	c.send(strings.MISC.UPDATED_PASSWORD)
 
 def handle_username(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send("Usage: username <new username>")
+		c.send(strings.USAGE.USERNAME)
 	elif not c.checkvalid(args[0]):
-		c.send("Username can only contain letters and numbers.")
+		c.send(strings.MISC.ALPHANUM_USERNAME)
 	elif c.set_username(args[0]):
-		c.send("Updated username.")
+		c.send(strings.MISC.UPDATED_USERNAME)
 	else:
-		c.send("Username '%s' is already taken.", (args[0],))
+		c.send(strings.MISC.USERNAME_TAKEN, username=args[0])
 
 def handle_chat(c: Client, args: List[str]) -> None:
 	c.set_chat(not c.chat_on)
 	if c.chat_on:
-		c.send("Enabled chat.")
+		c.send(strings.MISC.ENABLED_CHAT)
 	else:
-		c.send("Disabled chat.")
+		c.send(strings.MISC.DISABLED_CHAT)
 
 def handle_help(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		for k, v in COMMANDS.items():
-			c.send("%s: %s", (k, c.translate(v[0])))
+			c.send("{command}: {description}", command=k, description=c.translate(v[0]))
 	else:
 		cmd = args[0]
 		if not cmd in COMMANDS:
-			c.send("No such command '%s'", (cmd,))
+			c.send(strings.MISC.NO_COMMAND, command=cmd)
 		else:
-			c.send("%s: %s", (cmd, c.translate(COMMANDS[cmd][0])))
+			c.send("{command}: {description}", command=cmd, description=c.translate(COMMANDS[cmd][0]))
 
 COMMANDS = {
 	"airlock": ("Remove someone from your structure.", struct_handler.handle_airlock),
@@ -125,49 +126,48 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	if cmd == "login":
 		if len(args) < 2:
-			c.send("Usage: login <username> <password>.")
+			c.send(strings.USAGE.LOGIN)
 			c.prompt()
 			return
 		username = args.pop(0)
 		if c.login(username, " ".join(args)):
 			for c2 in network.clients:
 				if c2 != c and c2.username == username:
-					c2.send("You have been disconnected by another session.")
+					c2.send(strings.MISC.DISCONNECTED_BY)
 					c2.quitting = True
-					c.send("Disconnected an existing session from %s.", (c2.get_ip(),))
+					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip())
 			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
-			c.send("Logged in as %s.", (username,))
+			c.send(strings.MISC.LOGGED_IN, username=username)
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
 			if c.email == None:
-				c.send("WARNING: Please set an email address with the `email` command. This is used only for resetting your password.")
+				c.send(strings.MISC.EMAIL_WARNING)
 		elif c.quitting:
 			return
 		else:
 			logging.info("Failed login attempt from '%s', username '%s'.", c.get_ip(), username)
-			c.send("Incorrect username or password.")
+			c.send(strings.MISC.INCORRECT_LOGIN)
 	elif cmd == "register":
 		if len(args) < 2:
-			c.send("Usage: register <username> <password>. Username and password cannot contain spaces.")
+			c.send(strings.USAGE.REGISTER)
 			c.prompt()
 			return
 		if not c.checkvalid(args[0]):
-			c.send("Username can only contain letters and numbers.")
+			c.send(strings.MISC.ALPHANUM_USERNAME)
 		elif database.get_user_by_username(args[0]) != None:
-			c.send("Username '%s' is already taken.", (args[0],))
+			c.send(strings.MISC.USERNAME_TAKEN, username=args[0])
 		else:
 			username = args.pop(0)
 			client.register_user(username, " ".join(args))
 			logging.info("Client '%s' registered account '%s'.", c.get_ip(), username)
-			c.send("Registration successful! Try logging in with 'login [username] [password]'.")
+			c.send(strings.MISC.REGISTERED)
 	elif cmd == "exit":
 		c.quit()
 		return
 	else:
-		c.send("You are not logged in; use 'login [username] [password]' to log in, or 'register [username] [password]' to create a new account.")
+		c.send(strings.MISC.NOT_LOGGED_IN)
 	c.prompt()
 
 def handle_death(c: Client) -> None:
-	c.send("Your structure was destroyed.")
-	c.send("Log in again to respawn.")
+	c.send(strings.MISC.STRUCT_DESTROYED)
 	c.quitting = True
 

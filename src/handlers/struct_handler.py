@@ -6,6 +6,7 @@ import production
 import database
 import faction
 import network
+import strings
 from client import Client
 from cargo import Cargo
 from outfit import Outfit
@@ -14,10 +15,10 @@ conn = database.conn
 
 def handle_airlock(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send("Usage: airlock <username>")
+		c.send(strings.USAGE.AIRLOCK)
 		return
 	elif c.structure.owner_id != c.id:
-		c.send("Permission denied.")
+		c.send(strings.MISC.PERMISSION_DENIED)
 		return
 	rc = conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ? AND username = ?;",
 		(c.structure.id, args[0],)).rowcount
@@ -27,18 +28,18 @@ def handle_airlock(c: Client, args: List[str]):
 			if client.username == args[0]:
 				client.structure = None
 				break
-		c.send("Jettisoned operator '%s' out the airlock.", (args[0],))
+		c.send(strings.STRUCT.AIRLOCK, username=args[0])
 	else:
-		c.send("Unable to locate operator.")
+		c.send(strings.MISC.NO_OP)
 
 def handle_board(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send("Usage: board <structure ID>")
+		c.send(strings.USAGE.BOARD)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if c.structure.dock_parent == None:
 		s = None
@@ -47,20 +48,20 @@ def handle_board(c: Client, args: List[str]):
 				s = struct
 				break
 		if s == None:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 	else:
 		if c.structure.dock_parent.id != sid:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 		s = c.structure.dock_parent
 	if not faction.has_permission(c, s, faction.BOARD_MIN):
-		c.send("Permission denied.")
+		c.send(strings.MISC.PERMISSION_DENIED)
 		return
 	c.structure = s
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
 	conn.commit()
-	c.send("Boarded '%d %s'.", (sid, s.name))
+	c.send(strings.STRUCT.BOARDED, id=sid, name=s.name)
 
 def handle_eject(c: Client, args: List[str]):
 	s = c.structure
@@ -71,18 +72,18 @@ def handle_eject(c: Client, args: List[str]):
 			s.dock_children = []
 			conn.execute("UPDATE structures SET dock_id = NULL where dock_id = ?;", (s.id,))
 			conn.commit()
-			c.send("Ejected all docked structures.")
+			c.send(strings.STRUCT.EJECT_ALL)
 		else:
 			s.dock_parent.dock_children.remove(s)
 			s.dock_parent = None
 			conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
 			conn.commit()
-			c.send("Ejected from docked structure.")
+			c.send(strings.STRUCT.EJECT)
 	elif len(args) == 1:
 		try:
 			sid = int(args[0])
 		except ValueError:
-			c.send("Not a number.")
+			c.send(strings.MISC.NAN)
 			return
 		if s.dock_parent != None:
 			if s.dock_parent.id == sid:
@@ -90,76 +91,76 @@ def handle_eject(c: Client, args: List[str]):
 				s.dock_parent = None
 				conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
 				conn.commit()
-				c.send("Ejected from docked structure.")
+				c.send(strings.STRUCT.EJECT)
 			else:
-				c.send("Unable to locate docked structure.")
+				c.send(strings.STRUCT.NO_DOCK)
 		else:
 			for ship in s.dock_children:
 				if ship.id == sid:
 					s.dock_children.remove(ship)
 					ship.dock_parent = None
 					conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (ship.id,))
-					c.send("Ejected '%d %s'.", (ship.id, ship.name))
+					c.send(strings.STRUCT.EJECTED, id=ship.id, name=ship.name)
 					return
-			c.send("Unable to locate docked structure.")
+			c.send(strings.STRUCT.NO_DOCK)
 	else:
-		c.send("Usage: eject [structure ID]")
+		c.send(strings.USAGE.EJECT)
 
 def handle_install(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send("Usage: install <cargo ID>")
+		c.send(strings.USAGE.INSTALL)
 		return
 	try:
 		cindex = int(args[0])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if cindex >= len(c.structure.cargo):
-		c.send("Cargo does not exist.")
+		c.send(strings.MISC.NO_CARGO)
 	else:
 		for o in c.structure.outfits:
 			if o.setting != 0:
-				c.send("Structure must be powered down to install outfits.")
+				c.send(strings.STRUCT.POWERED_DOWN)
 				return
 		cargo = c.structure.cargo[cindex]
 		if not cargo.type in outfittype.outfits:
-			c.send("This is not an outfit.")
+			c.send(strings.STRUCT.NOT_OUTFIT)
 			return
 		mark = int(cargo.extra)
 		report = production.update(c.structure)
 		if report.outfit_space < mark:
-			c.send("Insufficient outfit space.")
+			c.send(strings.NO_OUTFIT_SPACE)
 			return
 		Outfit(cargo.type, mark).install(c.structure)
 		cargo.less(1, c.structure)
-		c.send("Installed a mark %d '%s' from cargo.", (mark, c.translate(cargo.type)))
+		c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
 
 def handle_load(c: Client, args: List[str]):
 	
 	# Validate input
 	s = c.structure
 	if len(args) != 3:
-		c.send("Usage: load <structure ID> <cargo ID> <count>")
+		c.send(strings.USAGE.LOAD)
 		return
 	try:
 		sid = int(args[0])
 		cindex = int(args[1])
 		count = int(args[2])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	production.update(s)
 	if count < 1:
-		c.send("Count must be greater than zero.")
+		c.send(strings.MISC.COUNT_GTZ)
 		return
 	elif cindex >= len(s.cargo):
-		c.send("Cargo does not exist.")
+		c.send(strings.MISC.NO_CARGO)
 		return
 	
 	# Find docked target
 	if s.dock_parent != None:
 		if s.dock_parent.id != sid:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.struct.NO_DOCK)
 			return
 		target = s.dock_parent
 	else:
@@ -169,62 +170,62 @@ def handle_load(c: Client, args: List[str]):
 				target = ship
 				break
 		if target == None:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.struct.NO_DOCK)
 			return
 	
 	# Move the cargo
 	car = copy.copy(s.cargo[cindex])
 	if car.count < count:
-		c.send("Insufficient resources.")
+		c.send(strings.CRAFT.INSUFFICIENTS)
 		return
 	s.cargo[cindex].less(count, s)
 	car.count = count
 	car.add(target)
-	c.send("Loaded %d '%s' into '%d %s'", (count, car.type, sid, target.name))
+	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=sid, name=target.name)
 
 def handle_set(c: Client, args: List[str]):
 	if len(args) != 2:
-		c.send("Usage: set <outfit ID> <setting>")
+		c.send(strings.USAGE.SET)
 		return
 	try:
 		oindex = int(args[0])
 		setting = int(args[1])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if oindex >= len(c.structure.outfits):
-		c.send("Outfit does not exist.")
+		c.send(strings.STRUCT.NO_OUTFIT)
 	elif setting < 0:
-		c.send("Setting must be greater than zero.")
+		c.send(strings.STRUCT.SET_GTZ)
 	else:
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.set_setting(setting)
-		c.send("Updated setting of outfit '%s' to %d.", (c.translate(outfit.type.name), setting))
+		c.send(strings.STRUCT.SET, name=c.translate(outfit.type.name), setting=setting)
 
 def handle_supply(c: Client, args: List[str]):
 	if len(args) != 2:
-		c.send("Usage: supply <structure ID> <energy>")
+		c.send(strings.USAGE.SUPPLY)
 		return
 	s = c.structure
 	try:
 		sid = int(args[0])
 		count = int(args[1])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	production.update(s)
 	if count < 1:
-		c.send("Energy must be greater than zero.")
+		c.send(strings.STRUCT.ENERGY_GTZ)
 		return
 	elif count > s.energy:
-		c.send("Insufficient energy.")
+		c.send(strings.STRUCT.NO_ENERGY)
 		return
 	
 	# Find docked target
 	if s.dock_parent != None:
 		if s.dock_parent.id != sid:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 		target = s.dock_parent
 	else:
@@ -234,11 +235,11 @@ def handle_supply(c: Client, args: List[str]):
 				target = ship
 				break
 		if target == None:
-			c.send("Unable to locate docked structure.")
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 	report = production.update(target)
 	if count > report.max_energy - target.energy:
-		count = report.max_energy - target.energy
+		count = int(report.max_energy - target.energy)
 	
 	# Transfer the energy
 	s.energy-= count
@@ -246,30 +247,27 @@ def handle_supply(c: Client, args: List[str]):
 	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (s.energy, s.id))
 	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (target.energy, sid))
 	conn.commit()
-	if count > 0:
-		c.send("Supplied %d energy to '%d %s'.", (count, sid, target.name))
-	else:
-		c.send("Drew %d energy from '%d %s'.", (count, sid, target.name))
+	c.send(strings.STRUCT.SUPPLIED, count=count, id=sid, name=target.name)
 
 def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send("Usage: uninstall <outfit ID>")
+		c.send(strings.USAGE.UNINSTALL)
 		return
 	try:
 		oindex = int(args[0])
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	if oindex >= len(c.structure.outfits):
-		c.send("Outfit does not exist.")
+		c.send(strings.STRUCT.NO_OUTFIT)
 	else:
 		for o in c.structure.outfits:
 			if o.setting != 0:
-				c.send("Structure must be powered down to uninstall outfits.")
+				c.send(strings.STRUCT.POWERED_DOWN)
 				return
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.uninstall(c.structure)
 		Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
-		c.send("Uninstalled outfit '%s' into cargo.", (c.translate(outfit.type.name),))
+		c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
 

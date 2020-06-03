@@ -4,6 +4,7 @@ from typing import List
 
 import network
 import structure
+import strings
 from client import Client, MessageType
 
 validchars = re.compile(r"[^ -~]+")	# Only allow printable ASCII
@@ -28,10 +29,10 @@ def apply_format_codes(message: str) -> None:
 
 def handle_fact(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send("Usage: fact <message>")
+		c.send(strings.USAGE.FACT)
 		return
 	elif c.faction_id == 0:
-		c.send("You are not in a faction.")
+		c.send(strings.MISC.NOT_IN_FACTION)
 		return
 	message = validchars.sub("", " ".join(args))
 	if c.premium:
@@ -40,30 +41,30 @@ def handle_fact(c: Client, args: List[str]) -> None:
 		if client.chat_on and client.faction_id == c.faction_id:
 			client.chat(MessageType.FACTION, c.username, message)
 	logging.info("Faction message '%s' sent by %d.", message, c.id)
-	c.send("Broadcast message to faction.")
+	c.send(strings.SOCIAL.FACTION)
 
 def handle_subs(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
-		c.send("Usage: subs <username> <message>")
+		c.send(strings.USAGE.SUBS)
 		return
 	username = args.pop(0)
 	for client in network.clients:
 		if client.username == username:
 			if not client.chat_on:
-				c.send("Operator has chat disabled.")
+				c.send(strings.SOCIAL.NO_CHAT)
 				return
 			message = validchars.sub("", " ".join(args))
 			if c.premium:
 				message = apply_format_codes(message)
 			client.chat(MessageType.SUBSPACE, c.username, message)
 			logging.info("Subspace message '%s' sent by %d, to %d.", message, c.id, client.id)
-			c.send("Sent message via subspace link.")
+			c.send(strings.SOCIAL.SUBSPACE)
 			return
-	c.send("Unable to locate operator.")
+	c.send(strings.MISC.NO_OP)
 
 def handle_locl(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send("Usage: locl <message>")
+		c.send(strings.USAGE.LOCL)
 		return
 	name = "%d %s" % (c.structure.id, c.structure.name)
 	message = validchars.sub("", " ".join(args))
@@ -73,29 +74,30 @@ def handle_locl(c: Client, args: List[str]) -> None:
 		if client.chat_on and client.structure.system.id == c.structure.system.id:
 			client.chat(MessageType.LOCAL, name, message)
 	logging.info("Local message '%s' sent by %d.", message, c.id)
-	c.send("Broadcast message to local system.")
+	c.send(strings.SOCIAL.LOCAL)
 
 def handle_hail(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
-		c.send("Usage: hail <structure ID> <message>")
+		c.send(strings.USAGE.HAIL)
 		return
 	try:
 		sid = int(args.pop(0))
 	except ValueError:
-		c.send("Not a number.")
+		c.send(strings.MISC.NAN)
 		return
 	for client in network.clients:
 		if client.structure.id == sid:
 			if client.structure.system.id != c.structure.system.id:
-				break
+				c.send(strings.MISC.NO_STRUCT)
+				return
 			elif not client.chat_on:
-				c.send("Operator has chat disabled.")
+				c.send(strings.SOCIAL.NO_CHAT)
 			message = validchars.sub("", " ".join(args))
 			if c.premium:
 				message = apply_format_codes(message)
 			client.chat(MessageType.HAIL, "%d %s" % (c.structure.id, c.structure.name), message)
 			logging.info("Hail message '%s' sent by %d, to %d.", message, c.id, client.id)
-			c.send("Sent hail to '%d %s'.", (sid, client.structure.name))
+			c.send(strings.SOCIAL.HAIL, id=sid, name=client.structure.name)
 			return
-	c.send("Unable to hail structure.")
+	c.send(strings.SOCIAL.NO_HAIL)
 
