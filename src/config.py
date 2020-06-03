@@ -1,6 +1,8 @@
 from pathlib import Path
 from configparser import ConfigParser
 
+VERSION = "0.1a"
+
 config = ConfigParser()
 config.read("./textflight.conf.example")
 config.read("/etc/textflight.conf")

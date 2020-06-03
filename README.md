@@ -10,6 +10,10 @@ You can use any SSL-secured socket client to connect to the server. Here is an e
 socat - openssl:leagueh.xyz:10000
 ```
 
+## Translation
+
+Textflight supports localization via GNU gettext. Programs like `xgettext` will not work on the source code; instead, run `./src/generate_pot.py` to automatically generate a POT file.
+
 ## Running
 
 Note: Although you can run your own server, remember that this is an MMO; the more people are playing on a server, the more fun it is, so running a public server is strongly discouraged so as not to fragment the community. Thanks for your understanding!

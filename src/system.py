@@ -4,6 +4,7 @@ import random
 from typing import List, Tuple
 
 import config
+import strings
 
 syst = config.get_section("terrain")
 SEED = syst.getint("Seed")
@@ -21,7 +22,7 @@ class PlanetType(enum.Enum):
 	HABITABLE = 4
 
 class AsteroidType(enum.Enum):
-	IRON = "Iron ore"
+	IRON = "Iron Ore"
 	CARBON = "Carbon Ore"
 	COPPER = "Copper Ore"
 	SILICON = "Silicon Ore"
