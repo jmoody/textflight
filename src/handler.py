@@ -16,8 +16,6 @@ import handlers.social_handler as social_handler
 import handlers.struct_handler as struct_handler
 from client import Client
 
-HELP_MESSAGE = "No such command '%s'. Use 'help' for a list of commands."
-
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send(strings.USAGE.EMAIL)
@@ -133,7 +131,7 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 	if cmd in COMMANDS:
 		COMMANDS[cmd][1](c, args)
 	else:
-		c.send(HELP_MESSAGE, (cmd,))
+		c.send(strings.MISC.HELP_MESSAGE, command=cmd)
 	if cmd != "exit":
 		c.prompt()
 

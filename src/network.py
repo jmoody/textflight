@@ -23,12 +23,29 @@ SSL_KEY_PATH = netw.get("SSLKey")
 clients = []
 
 def client_read(client):
-	buf = client.sock.recv(BUFFER_SIZE)
+	try:
+		buf = client.sock.recv(BUFFER_SIZE)
+	except ssl.SSLError as e:
+		if e.errno != ssl.SSL_ERROR_WANT_READ:
+			raise
+		return
 	if len(buf) == 0:
 		client.quitting = True
 		return
 	try:
 		client.read_buffer+= buf.decode("utf-8")
+		if type(client.sock) == ssl.SSLSocket:
+			left = client.sock.pending()
+			while client.sock.pending() > 0:
+				buf = client.sock.recv(client.sock.pending())
+				client.read_buffer+= buf.decode("utf-8")
+		else:
+			try:
+				while len(buf) == BUFFER_SIZE:
+					buf = client.sock.recv(BUFFER_SIZE)
+					client.read_buffer+= buf.decode("utf-8")
+			except BlockingIOError:
+				pass
 	except UnicodeDecodeError:
 		client.quitting = True
 		return
