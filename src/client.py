@@ -40,6 +40,7 @@ class Client:
 	msg_buffer = []
 	quitting = False
 	translator = translations.get_default()
+	client_mode = False
 	
 	id = None
 	username = None
@@ -76,8 +77,14 @@ class Client:
 		for m in self.msg_buffer:
 			msg+= m + "\n"
 		self.msg_buffer = []
-		msg+= self.translate(message) + "\n"
-		msg = msg.format(**kwargs)
+		if self.client_mode:
+			msg+= "[]" + message + "|" + self.translate(message)
+			for k, v in kwargs.items():
+				msg+= "|%s=%s" % (k, v)
+			msg+= "\n"
+		else:
+			msg+= self.translate(message) + "\n"
+			msg = msg.format(**kwargs)
 		self.send_bytes(msg.encode("utf-8"))
 	
 	def prompt(self) -> None:
@@ -96,6 +103,10 @@ class Client:
 		self.email = email
 	
 	def set_language(self, lang: str) -> None:
+		if lang == "client":
+			self.client_mode = True
+			self.language = translations.languages["en"]
+			return
 		conn.execute("UPDATE users SET language = ? WHERE id = ?;", (lang, self.id))
 		conn.commit()
 		self.language = translations.languages[lang]

@@ -18,6 +18,10 @@ Once you've created a PO file with your translation, add it to `locale/LANGUAGE/
 
 If you don't know how to add the PO file and create a pull request, email the file to `root@leagueh.xyz` to have it added for you.
 
+## Client development
+
+The `language client` command can be used to set the session into client mode. In this mode, normal output will be sent in the format `format string|translated format string|param 1| param 2| param 3`. This allows the development of clients which parse the output from the server. Note that you still need to handle the prompt (`>`) and chat messages, keeping in mind that chat messages can contain vertical bars.
+
 ## Running
 
 Note: Although you can run your own server, remember that this is an MMO; the more people are playing on a server, the more fun it is, so running a public server is strongly discouraged so as not to fragment the community. Thanks for your understanding!
