@@ -147,7 +147,7 @@ class FACTION:
 class INFO:
 	SYSTEM = "System: {name}"
 	CLAIMED_BY = "Claimed by '{faction}'."
-	BRIGHTNESS = "Brightness: {brightness}."
+	BRIGHTNESS = "Brightness: {brightness}"
 	ASTEROIDS = "Asteroids: {asteroid_type} (density: {asteroid_density})"
 	NORTH = "north"
 	SOUTH = "south"

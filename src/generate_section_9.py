@@ -15,7 +15,6 @@ for recipe in crafting.recipes.values():
 		for name, count in recipe.inputs.items():
 			mats+= "%s x%d, " % (name, count)
 		print(mats[:-2])
-		# TODO: Print description
 
 print("\nOutfits (all outfits require one Outfit Frame):\n")
 for outfit in outfittype.outfits.values():

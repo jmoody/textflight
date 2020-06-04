@@ -34,7 +34,7 @@ def handle_chown(c: Client, args: List[str]) -> None:
 
 def handle_claim(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 		return
 	if c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
@@ -70,7 +70,7 @@ def handle_claim(c: Client, args: List[str]) -> None:
 def handle_info(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		if c.faction_id == 0:
-			c.send(strings.MISC.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION)
 			return
 		fact = faction.get_faction(c.faction_id)
 	elif len(args) == 1:
@@ -121,7 +121,7 @@ def handle_kick(c: Client, args: List[str]) -> None:
 		c.send(strings.USAGE.FACTION_KICK)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
@@ -166,7 +166,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 	elif not c.checkvalid(" ".join(args)):
 		c.send(strings.FACTION.ALPHANUM_ONLY)
 	elif c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 	elif c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
@@ -191,7 +191,7 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 		c.send(strings.USAGE.FACTION_PASSWD)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
@@ -203,7 +203,7 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 
 def handle_release(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 	elif c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
@@ -240,7 +240,7 @@ def handle_rename(c: Client, args: List[str]) -> None:
 
 def handle_frepf(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 		return
 	own = faction.get_faction(c.faction_id)
 	if len(args) > 0 and args[0] == own.name:
@@ -331,7 +331,7 @@ def handle_rep(c: Client, args: List[str]) -> None:
 
 def handle_frep(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.MISC.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION)
 		return
 	elif len(args) > 0 and args[0] == c.username:
 		c.send(strings.FACTION.SELF_REPUTATION)
