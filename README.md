@@ -22,6 +22,10 @@ If you don't know how to add the PO file and create a pull request, email the fi
 
 The `language client` command can be used to set the session into client mode. In this mode, normal output will be sent in the format `format string|translated format string|param 1| param 2| param 3`. This allows the development of clients which parse the output from the server. Note that you still need to handle the prompt (`>`) and chat messages, keeping in mind that chat messages can contain vertical bars.
 
+## Building the manual
+
+To compile the manual into HTML and PDF formats, run `./build_manual.sh` with pandoc installed.
+
 ## Running
 
 Note: Although you can run your own server, remember that this is an MMO; the more people are playing on a server, the more fun it is, so running a public server is strongly discouraged so as not to fragment the community. Thanks for your understanding!
@@ -32,6 +36,7 @@ To start the server, simply execute `./src/main.py`, ensuring all the dependenci
 - sqlite3
 - bcrypt
 - msgfmt (optional)
+- pandoc (optional)
 
 The message catalogs can be compiled using `./genlocales.sh`, if `msgfmt` is installed. Without them, translations will not be available.
 
