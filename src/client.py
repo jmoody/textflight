@@ -95,6 +95,11 @@ class Client:
 		conn.commit()
 		self.email = email
 	
+	def set_language(self, lang: str) -> None:
+		conn.execute("UPDATE users SET language = ? WHERE id = ?;", (lang,))
+		conn.commit()
+		self.language = translations.languages[lang]
+	
 	def set_password(self, password: str) -> None:
 		passwd = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 		conn.execute("UPDATE users SET passwd = ? WHERE id = ?;", (passwd, self.id))
@@ -126,6 +131,7 @@ class Client:
 		self.email = ctup["email"]
 		self.faction_id = ctup["faction_id"]
 		self.chat_on = bool(ctup["chat_on"])
+		self.language = translations.languages[ctup["language"]]
 		self.premium = bool(ctup["premium"])
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])

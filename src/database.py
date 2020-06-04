@@ -18,12 +18,13 @@ create_table("""users (
 	structure_id INTEGER,
 	faction_id INTEGER DEFAULT 0 NOT NULL,
 	chat_on INTEGER DEFAULT 1 NOT NULL,
+	language TEXT DEFAULT "%s" NOT NULL,
 	premium INTEGER DEFAULT 0 NOT NULL,
 	last_login INTEGER DEFAULT 0 NOT NULL,
 	last_spawn INTEGER DEFAULT 0 NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id),
 	FOREIGN KEY(faction_id) REFERENCES factions(id)
-);""")
+);""" % (config.get_section("data").get("Language"),))
 
 create_table("""factions (
 	id INTEGER PRIMARY KEY,

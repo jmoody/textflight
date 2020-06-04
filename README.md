@@ -28,7 +28,6 @@ To start the server, simply execute `./src/main.py`, ensuring all the dependenci
 - sqlite3
 - bcrypt
 - msgfmt (optional)
-- sh (optional)
 
 The message catalogs can be compiled using `./genlocales.sh`, if `msgfmt` is installed. Without them, translations will not be available.
 

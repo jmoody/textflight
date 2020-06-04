@@ -6,6 +6,7 @@ import client
 import system
 import network
 import strings
+import translations
 import handlers.combat_handler as combat_handler
 import handlers.craft_handler as craft_handler
 import handlers.faction_handler as faction_handler
@@ -26,6 +27,19 @@ def handle_email(c: Client, args: List[str]) -> None:
 
 def handle_exit(c: Client, args: List[str]) -> None:
 	c.quit()
+
+def handle_language(c: Client, args: List[str]) -> None:
+	if len(args) == 0:
+		for lang in translations.languages.keys():
+			c.send(lang)
+	elif len(args) == 1:
+		if not args[0] in translations.languages:
+			c.send(strings.MISC.NO_LANGUAGE)
+		else:
+			c.set_language(args[0])
+			c.send(strings.MISC.UPDATED_LANGUAGE)
+	else:
+		c.send(strings.USAGE.LANGUAGE)
 
 def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
@@ -95,7 +109,7 @@ COMMANDS = {
 	"jettison": ("Discard cargo into space.", craft_handler.handle_jettison),
 	"jump": ("Jump to another system.", ship_handler.handle_jump),
 	"land": ("Land on a planet.", ship_handler.handle_land),
-	"language": ("Set your language.", None),
+	"language": ("Set your language.", handle_language),
 	"launch": ("Launch off a planet.", ship_handler.handle_launch),
 	"load": ("Load cargo onto another structure.", struct_handler.handle_load),
 	"locl": ("Broadcast a message to the local system.", social_handler.handle_locl),

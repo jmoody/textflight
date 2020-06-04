@@ -11,6 +11,8 @@ class MISC:
 	GOODBYE = "Goodbye."
 	RESPAWN = "Please wait {remaining} seconds before respawning."
 	UPDATED_EMAIL = "Updated email address."
+	UPDATED_LANGUAGE = "Updated language."
+	NO_LANGUAGE = "Language '{lang}' is not available."
 	UPDATED_PASSWORD = "Updated password."
 	ALPHANUM_USERNAME = "Username can only contain letters and numbers."
 	UPDATED_USERNAME = "Updated username."
@@ -68,6 +70,7 @@ class USAGE:
 	USRENAME = "Usage: username <new username>"
 	LOGIN = "Usage: login <username> <password>"
 	REGISTER = "Usage: register <username> <password>"
+	LANGUAGE = "Usage: language [language code]"
 
 class COMBAT:
 	SHIELDS_UP = "Cannot destroy structure while its shields are up."
