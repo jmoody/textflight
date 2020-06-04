@@ -174,6 +174,8 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			client.register_user(username, " ".join(args))
 			logging.info("Client '%s' registered account '%s'.", c.get_ip(), username)
 			c.send(strings.MISC.REGISTERED)
+	elif cmd == "language":
+		handle_language(c, args)
 	elif cmd == "exit":
 		c.quit()
 		return
