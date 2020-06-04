@@ -1,14 +1,21 @@
 import weakref
+import time
 
 import structure
 import production
 import faction
 import database
 import network
+import config
+
+SPAWN_SAFE = config.get_section("client").getint("SpawnSafe")
 
 conn = database.conn
 
 def add_target(s: structure.Structure, s2: structure.Structure) -> None:
+	now = time.time()
+	if now - s.created_at < SPAWN_SAFE or now - s2.created_at < SPAWN_SAFE:
+		return
 	s.targets.add(s2)
 	s2.targets.add(s)
 	if not s2 in s.tree:

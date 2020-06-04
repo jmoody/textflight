@@ -33,6 +33,7 @@ SSLKey =
 
 [client]
 SpawnTime = 600
+SpawnSafe = 7200
 ValidateRegex = "[^a-zA-Z0-9 ]+"
 
 [data]

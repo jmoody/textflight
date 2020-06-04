@@ -12,6 +12,7 @@ def create_table(sql: str) -> None:
 
 create_table("""users (
 	id INTEGER PRIMARY KEY,
+	created_at INTEGER DEFAULT (strftime('%%s', 'now')),
 	username TEXT UNIQUE NOT NULL,
 	passwd TEXT NOT NULL,
 	email TEXT,
@@ -28,6 +29,7 @@ create_table("""users (
 
 create_table("""factions (
 	id INTEGER PRIMARY KEY,
+	created_at INTEGER DEFAULT (strftime('%s', 'now')),
 	name TEXT UNIQUE NOT NULL,
 	password TEXT NOT NULL,
 	owner_id INTEGER,
@@ -73,6 +75,7 @@ create_table("""personal_reputation (
 
 create_table("""structures (
 	id INTEGER PRIMARY KEY,
+	created_at INTEGER DEFAULT (strftime('%s', 'now')),
 	name TEXT NOT NULL,
 	owner_id INTEGER NOT NULL,
 	type TEXT NOT NULL,

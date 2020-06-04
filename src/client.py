@@ -138,6 +138,7 @@ class Client:
 		if ctup == None or not bcrypt.checkpw(password.encode("utf-8"), ctup["passwd"]):
 			return False
 		self.id = ctup["id"]
+		self.created_at = ctup["created_at"]
 		self.username = ctup["username"]
 		self.email = ctup["email"]
 		self.faction_id = ctup["faction_id"]

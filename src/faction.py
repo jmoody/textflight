@@ -21,6 +21,7 @@ class Faction:
 	
 	def __init__(self, ftup) -> None:
 		self.id = ftup["id"]
+		self.created_at = ftup["created_at"]
 		self.name = ftup["name"]
 		self.password = ftup["password"]
 		self.owner_id = ftup["owner_id"]

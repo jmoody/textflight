@@ -18,6 +18,7 @@ class Structure:
 		
 		# Load general info
 		self.id = stup["id"]
+		self.created_at = stup["created_at"]
 		self.name = stup["name"]
 		self.owner_id = stup["owner_id"]
 		self.type = stup["type"]
