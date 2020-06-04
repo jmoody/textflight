@@ -54,6 +54,7 @@ CraftTime = 10
 CostFactorShip = 2
 CostFactorHabitable = 1
 CostFacotrPlanet = 1.5
+MaxOutfitSpace = 1024
 
 [faction]
 AttackMin = -1

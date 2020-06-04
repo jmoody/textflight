@@ -8,9 +8,12 @@ import structure
 import database
 import system
 import strings
+import config
 from cargo import Cargo
 from client import Client
 from system import PlanetType
+
+MAX_OUTFIT_SPACE = config.get_section("crafting").getint("MaxOutfitSpace")
 
 conn = database.conn
 
@@ -52,8 +55,8 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	if outfit_space < 1:
 		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
 		return
-	elif outfit_space > 1024:
-		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=1024)	# TODO: Configurable max
+	elif outfit_space > MAX_OUTFIT_SPACE:
+		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=MAX_OUTFIT_SPACE)
 		return
 	s = c.structure
 	report = production.update(s)
@@ -65,8 +68,8 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		total = outfit_space
 		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 			total+= pbase["outfit_space"]
-		if total > 1024:
-			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=1024)
+		if total > MAX_OUTFIT_SPACE:
+			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=MAX_OUTFIT_SPACE)
 			return
 	elif outfit_space > report.shipyard:
 		if report.shipyard == 0:

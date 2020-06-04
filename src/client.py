@@ -96,7 +96,7 @@ class Client:
 		self.email = email
 	
 	def set_language(self, lang: str) -> None:
-		conn.execute("UPDATE users SET language = ? WHERE id = ?;", (lang,))
+		conn.execute("UPDATE users SET language = ? WHERE id = ?;", (lang, self.id))
 		conn.commit()
 		self.language = translations.languages[lang]
 	

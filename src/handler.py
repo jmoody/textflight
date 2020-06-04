@@ -34,7 +34,7 @@ def handle_language(c: Client, args: List[str]) -> None:
 			c.send(lang)
 	elif len(args) == 1:
 		if not args[0] in translations.languages:
-			c.send(strings.MISC.NO_LANGUAGE)
+			c.send(strings.MISC.NO_LANGUAGE, lang=args[0])
 		else:
 			c.set_language(args[0])
 			c.send(strings.MISC.UPDATED_LANGUAGE)
