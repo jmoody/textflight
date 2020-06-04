@@ -6,6 +6,7 @@ import faction
 import territory
 import combat
 import strings
+import network
 from client import Client
 
 conn = database.conn
@@ -128,9 +129,11 @@ def handle_kick(c: Client, args: List[str]) -> None:
 		return
 	rowcount = conn.execute("UPDATE users SET faction_id = 0 WHERE faction_id = ? AND username = ? AND id != ?;",
 		(fact.id, args[0], c.id)).rowcount
-	# TODO: Update client.faction_id
 	if rowcount > 0:
 		conn.commit()
+		for client in network.clients:
+			if client.username == args[0]:
+				client.faction_id = 0
 		c.send(strings.FACTION.KICKED, username=args[0])
 	else:
 		c.send(strings.FACTION.NO_MEMBER)
