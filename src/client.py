@@ -1,4 +1,3 @@
-import gettext
 import bcrypt
 import time
 import re
@@ -12,6 +11,7 @@ import structure
 import config
 import system
 import strings
+import translations
 from outfit import Outfit
 from cargo import Cargo
 
@@ -39,6 +39,7 @@ class Client:
 	write_buffer = bytes()
 	msg_buffer = []
 	quitting = False
+	translator = translations.get_default()
 	
 	id = None
 	username = None
@@ -64,7 +65,7 @@ class Client:
 			return "[socket closed]"
 	
 	def translate(self, message: str) -> str:
-		return gettext.gettext(message)
+		return self.translator.gettext(message)
 	
 	def chat(self, mtype: MessageType, author: str, message: str) -> None:
 		msg = "[%s][%s] %s" % (mtype.value, author, message)

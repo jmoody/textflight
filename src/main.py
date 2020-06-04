@@ -11,6 +11,7 @@ if log_file == "":
 	log_file = None
 logging.basicConfig(filename=log_file, level=log_level, format=logc.get("LogFormat"))
 
+import translations
 import database
 import network
 import system

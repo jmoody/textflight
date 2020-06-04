@@ -38,6 +38,8 @@ ValidateRegex = "[^a-zA-Z0-9 ]+"
 [data]
 DataPath = data/
 DatabasePath = database.db
+Language = en
+LocaleDir = locale
 
 [mining]
 MiningInterval = 60

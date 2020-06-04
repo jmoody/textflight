@@ -5,6 +5,8 @@
 !src/handlers/*.py
 !data/
 !data/*.txt
+!locale/
 !*.md
 !textflight.conf.example
+!genlocales.sh
 !.gitignore
