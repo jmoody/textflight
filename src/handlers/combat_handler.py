@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import List
 
 import faction
@@ -21,8 +22,12 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 		c.send(strings.MISC.NAN)
 		return
 	s = structure.load_structure(sid)
+	now = time.time()
 	if s == None or s.system.id != c.structure.system.id:
 		c.send(strings.MISC.NO_STRUCT)
+		return
+	elif now - s.created_at < combat.SPAWN_SAFE:
+		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
 		return
 	report = production.update(c.structure)
 	if s.shield > 0:
@@ -54,8 +59,12 @@ def handle_target(c: Client, args: List[str]) -> None:
 			sid = int(args[0])
 		except ValueError:
 			c.send(strings.MISC.NAN)
+		now = time.time()
 		if sid == c.structure.id:
 			c.send(strings.COMBAT.TARGET_SELF)
+			return
+		elif now - c.structure.created_at < combat.SPAWN_SAFE:
+			c.send(strings.COMBAT.SAFE_NOTARGET, remaining=round(combat.SPAWN_SAFE - now + c.structure.created_at))
 			return
 		for struct in c.structure.targets:
 			if struct.id == sid:
@@ -64,6 +73,9 @@ def handle_target(c: Client, args: List[str]) -> None:
 		s = structure.load_structure(sid)
 		if s == None or s.system.id != c.structure.system.id:
 			c.send(strings.MISC.NO_STRUCT)
+			return
+		elif now - s.created_at < combat.SPAWN_SAFE:
+			c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
 			return
 		report = production.update(c.structure)
 		production.update(s, report.now)

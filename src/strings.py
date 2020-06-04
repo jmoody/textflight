@@ -83,6 +83,8 @@ class COMBAT:
 	ALREADY_TARGETING = "Already targeting '{id} {name}'."
 	NO_WEAPONS = "Weapons are not online."
 	TARGETING = "Targeting structure '{id} {name}'."
+	SAFE = "Structure is invulnerable to damage for {remaining} seconds."
+	SAFE_NOTARGET = "Cannot target structures while invulnerable; expires in {remaining} seconds."
 
 class CRAFT:
 	NO_QUEUE = "Queue does not exist."
