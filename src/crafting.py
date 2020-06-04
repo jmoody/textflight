@@ -72,7 +72,7 @@ def list_available(s: Structure) -> List[CraftQueue]:
 				q.count = min(q.count, int(cargo.count / q._rec2.inputs[cargo.type]))
 				if q.count < 1:
 					out.remove(q)
-					break
+					continue
 				del q._rec2.inputs[cargo.type]
 	
 	# Remove unavailable recipes

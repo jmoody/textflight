@@ -188,5 +188,5 @@ def handle_status(c: Client, args: List[str]) -> None:
 			c.send(strings.INFO.ANTIGRAVITy_ONLINE)
 	if report.mining_interval > 0:
 		progress = s.mining_progress / report.mining_interval * 100
-		c.send(strings.INFO.MINING_PROGRESS, progress=progress, interval="%.1f" % (report.mining_interval,))
+		c.send(strings.INFO.MINING_PROGRESS, progress=round(progress), interval="%.1f" % (report.mining_interval,))
 
