@@ -29,6 +29,9 @@ def client_read(client):
 		if e.errno != ssl.SSL_ERROR_WANT_READ:
 			raise
 		return
+	except:
+		client.quitting = True
+		return
 	if len(buf) == 0:
 		client.quitting = True
 		return
@@ -47,6 +50,10 @@ def client_read(client):
 			except BlockingIOError:
 				pass
 	except UnicodeDecodeError:
+		client.quitting = True
+		return
+	except Exception as ex:
+		logging.warning(str(ex))
 		client.quitting = True
 		return
 	index = client.read_buffer.find('\n')
