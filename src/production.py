@@ -262,6 +262,8 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	if s.planet_id != None:
 		ptype = s.system.planets[s.planet_id].ptype
 	if s.planet_id == None:
+		if s.system.asteroid_richness == 0:
+			return 0
 		interval*= MAX_ASTEROID_RICHNESS / s.system.asteroid_richness
 		count = int(elapsed / interval)
 		if count > 0:
