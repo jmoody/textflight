@@ -82,7 +82,8 @@ def handle_info(c: Client, args: List[str]) -> None:
 		c.send(strings.USAGE.FACTION_INFO)
 		return
 	c.send(strings.FACTION.NAME, faction_name=fact.name)
-	c.send(strings.FACTION.PASSWORD, faction_password=fact.password)
+	if c.id == fact.owner_id:
+		c.send(strings.FACTION.PASSWORD, faction_password=fact.password)
 	owner_name = conn.execute("SELECT username FROM users WHERE id = ?;", (fact.owner_id,)).fetchone()["username"]
 	c.send(strings.FACTION.OWNER, faction_owner=owner_name)
 	members = fact.list_members()
