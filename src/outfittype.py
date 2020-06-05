@@ -61,6 +61,8 @@ def handle_line(line: str, tabs: int, state: State) -> None:
 	elif tabs == 0:
 		if state.outfit != None:
 			logging.info("Loaded outfit '%s'.", state.outfit.name)
+			if state.recipe:
+				add_outfit_base(state.outfit.recipe)
 			outfits[state.outfit.name] = state.outfit
 			state.outfit = None
 		if line != "":
