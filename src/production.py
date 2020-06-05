@@ -207,6 +207,7 @@ def update_step(s: Structure, report: StatusReport):
 			else:
 				left = fission - used % fission
 			Cargo("Uranium Fuel Cell", fuel_used).remove(s)
+			Cargo("Empty Cell", fuel_used).add(s)
 		elif outfit.prop("fusion") > 0:
 			fusion = outfit.prop_nocharge("fusion", True)
 			fuel_used = int(used / fusion) + 1
@@ -215,6 +216,7 @@ def update_step(s: Structure, report: StatusReport):
 			else:
 				left = fusion - used % fusion
 			Cargo("Hydrogen Fuel Cell", fuel_used).remove(s)
+			Cargo("Empty Cell", fuel_used).add(s)
 		outfit.set_counter(left)
 	
 	# Update if systems have not failed
