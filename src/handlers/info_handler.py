@@ -64,7 +64,7 @@ def handle_nav(c: Client, args: List[str]) -> None:
 			c.send(strings.INFO.PLANET_NAMED, index=index, name=pname, faction=pfact.name, planet_type=c.translate(planet.ptype.name.lower().capitalize()))
 		elif pfid != None:
 			pfact = faction.get_faction(pfid)
-			c.send(strings.INFO.PLANET_CLAIMED, index=index, name=pfact.name, planet_type=c.translate(planet.ptype.name.lower().capitalize()))
+			c.send(strings.INFO.PLANET_CLAIMED, index=index, faction=pfact.name, planet_type=c.translate(planet.ptype.name.lower().capitalize()))
 		else:
 			c.send(strings.INFO.PLANET, index=index, planet_type=c.translate(planet.ptype.name))
 		index+= 1
