@@ -129,7 +129,7 @@ def handle_install(c: Client, args: List[str]):
 		mark = int(cargo.extra)
 		report = production.update(c.structure)
 		if report.outfit_space < mark:
-			c.send(strings.NO_OUTFIT_SPACE)
+			c.send(strings.STRUCT.NO_OUTFIT_SPACE)
 			return
 		Outfit(cargo.type, mark).install(c.structure)
 		cargo.less(1, c.structure)
