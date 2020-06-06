@@ -82,11 +82,8 @@ def handle_scan(c: Client, args: List[str]) -> None:
 			c.send(strings.MISC.NAN)
 			return
 		s = structure.load_structure(sid)
-		if s == None:
+		if s == None or s.system.id != c.structure.system.id:
 			c.send(strings.MISC.NO_STRUCT)
-			return
-		elif s.system.id != c.structure.system.id:
-			c.send(strings.MISC_NO_STRUCT)
 			return
 	elif len(args) > 1:
 		c.send(strings.USAGE.SCAN)

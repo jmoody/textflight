@@ -123,7 +123,7 @@ class Client:
 		c.execute("UPDATE users SET username = ? WHERE id = ?;", (username, self.id))
 		conn.commit()
 		self.username = username
-		logging.info("User %d changed their username to '%d'.", self.id, username)
+		logging.info("User %d changed their username to '%s'.", self.id, username)
 		return True
 	
 	def set_chat(self, chat: bool) -> None:
