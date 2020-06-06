@@ -30,7 +30,9 @@ def clear_targets(s: structure.Structure) -> None:
 		s2.targets.remove(s)
 		s2.tree.remove(s)
 	for client in network.clients:
-		if client.structure == s:
+		if client.id == None:
+			continue
+		elif client.structure == s:
 			client.tree = set()
 		elif client.structure in s.targets:
 			client.tree.remove(s)
