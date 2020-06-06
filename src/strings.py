@@ -68,7 +68,7 @@ class USAGE:
 	FACTION_REP = "Usage: faction_rep <username> [value]"
 	EMAIL = "Usage: email <new email>"
 	PASSWD = "Usage: passwd <new password>"
-	USRENAME = "Usage: username <new username>"
+	USERNAME = "Usage: username <new username>"
 	LOGIN = "Usage: login <username> <password>"
 	REGISTER = "Usage: register <username> <password>"
 	LANGUAGE = "Usage: language [language code]"
