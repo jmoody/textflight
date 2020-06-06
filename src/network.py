@@ -103,7 +103,7 @@ def init():
 				if SSL:
 					try:
 						sock = ssl_context.wrap_socket(sock, server_side=True)
-					except ssl.SSLError as ex:
+					except (ssl.SSLError, OSError) as ex:
 						logging.warning(str(ex))
 						continue
 				sock.setblocking(0)
