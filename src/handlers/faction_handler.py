@@ -133,7 +133,7 @@ def handle_kick(c: Client, args: List[str]) -> None:
 	if rowcount > 0:
 		conn.commit()
 		for client in network.clients:
-			if client.username == args[0]:
+			if client.id != None and client.username == args[0]:
 				client.faction_id = 0
 		c.send(strings.FACTION.KICKED, username=args[0])
 	else:

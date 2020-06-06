@@ -25,7 +25,7 @@ def handle_airlock(c: Client, args: List[str]):
 	if rc > 0:
 		conn.commit()
 		for client in network.clients:
-			if client.username == args[0]:
+			if client.id != None and client.username == args[0]:
 				client.structure = None
 				break
 		c.send(strings.STRUCT.AIRLOCK, username=args[0])
