@@ -1,5 +1,6 @@
 import time
 import logging
+import math
 from typing import List
 
 import crafting
@@ -85,7 +86,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		cost_factor = crafting.COST_FACTOR_HABITABLE
 	else:
 		cost_factor = crafting.COST_FACTOR_PLANET
-	cost = pow(outfit_space, cost_factor)
+	cost = ceil(pow(outfit_space, cost_factor))
 	
 	# Remove the materials
 	has_struct = False
