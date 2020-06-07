@@ -97,7 +97,7 @@ COMMANDS = {
 	"faction_list": ("List all factions.", faction_handler.handle_list),
 	"faction_name": ("Name a claimed system or planet.", faction_handler.handle_name),
 	"faction_passwd": ("Change your faction password.", faction_handler.handle_passwd),
-	"faction_release": ("Releas your faction's claim on a system or planet.", faction_handler.handle_release),
+	"faction_release": ("Release your faction's claim on a system or planet.", faction_handler.handle_release),
 	"faction_rename": ("Rename your faction.", faction_handler.handle_rename),
 	"faction_rep": ("View or set operator reputations.", faction_handler.handle_frep),
 	"faction_repf": ("View or set faction reputations.", faction_handler.handle_frepf),

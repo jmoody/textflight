@@ -31,7 +31,7 @@ def handle_dock(c: Client, args: List[str]) -> None:
 		c.send(strings.SHIP.ALREADY_DOCKED)
 		return
 	target = structure.load_structure(sid)
-	if target == None or target.system.id != s.system.id:
+	if target == None or target.system.id != s.system.id or target.planet_id != s.planet_id:
 		c.send(strings.MISC.NO_STRUCT)
 	elif target.dock_parent != None:
 		c.send(strings.SHIP.TARGET_ALREADY_DOCKED)
