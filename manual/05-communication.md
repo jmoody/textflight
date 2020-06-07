@@ -1,10 +1,8 @@
 ## SECTION 05: COMMUNICATION
 
-Operators can be messaged using the `subs` command to send a subspace message directly to their session, or the `fact` command which sends a subspace message to all operators in your faction.
+Operators can be messaged using the `subs` command to send a subspace message directly to their session, or the `fact` command which sends a subspace message to all operators in your faction. Structures can be communicated with using the `hail` command, or `locl` to hail every structure in the system with the same message. Structures not located in the same system as you cannot be hailed.
 
-Structures can be communicated with using the `hail` command, or `locl` to hail every structure in the system with the same message. Structures not located in the same system as you cannot be hailed.
-
-If your account has been marked with premium status, you can use format codes in your message. The following codes are available:
+Messages are displayed when you run any command. You can prevent messages from being sent to you by using the `chat` command to toggle chat on or off. If your account has been marked with premium status, you can use format codes in your message. The following codes are available:
 
 - `^0`: Clear formatting.
 - `^1`: Set text colour to red.

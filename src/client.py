@@ -74,9 +74,6 @@ class Client:
 	
 	def send(self, message: str, args = None, **kwargs) -> None:
 		msg = ""
-		for m in self.msg_buffer:
-			msg+= m + "\n"
-		self.msg_buffer = []
 		if self.client_mode:
 			msg+= "[]" + message + "|" + self.translate(message)
 			for k, v in kwargs.items():
@@ -85,6 +82,9 @@ class Client:
 		else:
 			msg+= self.translate(message) + "\n"
 			msg = msg.format(**kwargs)
+		for m in self.msg_buffer:
+			msg+= m + "\n"
+		self.msg_buffer = []
 		self.send_bytes(msg.encode("utf-8"))
 	
 	def prompt(self) -> None:
