@@ -119,7 +119,7 @@ create_table("""craft_queue (
 	type TEXT NOT NULL,
 	extra TEXT,
 	count INTEGER NOT NULL,
-	start REAL NOT NULL,
+	work REAL DEFAULT 0 NOT NULL,
 	structure_id INTEGER NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")

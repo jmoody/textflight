@@ -77,16 +77,16 @@ def list_available(s: Structure) -> List[CraftQueue]:
 	
 	# Remove unavailable recipes
 	for q in out.copy():
-		q.start = time.time()
+		q.work = craft_time(q)
 		if len(q._rec2.inputs) > 0 or q.count == inf:
 			out.remove(q)
 	
 	return out
 
-def craft_time(q: CraftQueue, assembly_rate: float) -> float:
+def craft_time(q: CraftQueue) -> float:
 	try:
 		base_rate = CRAFT_TIME * int(q.extra)
 	except:
 		base_rate = CRAFT_TIME
-	return max(1, base_rate / assembly_rate)
+	return base_rate
 

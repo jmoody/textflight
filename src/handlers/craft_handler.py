@@ -190,16 +190,15 @@ def handle_queue(c: Client, args: List[str]) -> None:
 	report = production.update(c.structure)
 	for q in c.structure.craft_queue:
 		if report.assembly_rate > 0:
-			elapsed = time.time() - q.start
-			craft_time = crafting.craft_time(q, report.assembly_rate)
-			ntime = craft_time - elapsed
-			ftime = craft_time * q.count - elapsed
+			craft_time = crafting.craft_time(q)
+			ntime = q.work / report.assembly_rate
+			ftime = (q.work + craft_time * q.count) / report.assembly_rate
 			time_str = "%ds/%ds" % (ntime, ftime)
 		else:
 			time_str = "never"
 		if q.extra == None:
-			c.send(strings.CRAFT.QUEUE, index=i, name=c.translate(q.type), count=q.count, time=time_str)
+			c.send(strings.CRAFT.QUEUE, index=i, name=c.translate(q.type), count=q.count + 1, time=time_str)
 		else:
-			c.send(strings.CRAFT.QUEUE_EXTRA, index=i, name=c.translate(q.type), extra=q.extra, count=q.count, time=time_str)
+			c.send(strings.CRAFT.QUEUE_EXTRA, index=i, name=c.translate(q.type), extra=q.extra, count=q.count + 1, time=time_str)
 		i+= 1
 

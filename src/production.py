@@ -92,7 +92,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 	# Apply planetary effects
 	if s.planet_id != None:
 		ptype = s.system.planets[s.planet_id]
-		if ptype == system.PlanetType.BARREN or system.PlanetType.GREENHOUSE:
+		if ptype == system.PlanetType.BARREN or ptype == system.PlanetType.GREENHOUSE:
 			report.heat_rate+= PLANET_HEAT_RATE * s.outfit_space
 	
 	# Parse outfits and cargo
@@ -224,7 +224,7 @@ def update_step(s: Structure, report: StatusReport):
 		active = stime - s.interrupt
 		report.mining_interval = update_mining(s, report.mining_power, active)
 		if report.assembly_rate > 0:
-			update_assembly(s, stime, report.assembly_rate)
+			update_assembly(s, report.assembly_rate, active)
 		s.heat+= active * report.heat_rate
 		s.energy-= (stime - gtime) * report.energy_rate
 		s.shield+= active * report.shield_rate
@@ -283,13 +283,23 @@ def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	s.mining_progress = elapsed - interval * count
 	return interval
 
-def update_assembly(s: Structure, stime: float, assembly_rate: float) -> float:
+def update_assembly(s: Structure, assembly_rate: float, active: float) -> None:
 	for q in s.craft_queue:
-		elapsed = stime - q.start
-		craft_time = crafting.craft_time(q, assembly_rate)
-		finished = min(q.count, int(elapsed / craft_time))
+		craft_time = crafting.craft_time(q)
+		work_done = active * assembly_rate - q.work
+		if work_done > 0:
+			finished = int(work_done / craft_time)
+			work_done-= finished * craft_time
+			if q.count > 0:
+				q.work = craft_time - work_done
+			else:
+				q.work = -1
+			finished = min(q.count, finished)
+			finished+= 1
+		else:
+			q.work = -work_done
+			finished = 0
 		if finished > 0:
 			Cargo(q.type, finished, q.extra).add(s)
-			q.start+= finished * craft_time
-			q.less(finished, s)
+		q.less(finished, s)
 
