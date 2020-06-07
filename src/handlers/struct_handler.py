@@ -160,7 +160,7 @@ def handle_load(c: Client, args: List[str]):
 	# Find docked target
 	if s.dock_parent != None:
 		if s.dock_parent.id != sid:
-			c.send(strings.struct.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 		target = s.dock_parent
 	else:
@@ -170,7 +170,7 @@ def handle_load(c: Client, args: List[str]):
 				target = ship
 				break
 		if target == None:
-			c.send(strings.struct.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK)
 			return
 	
 	# Move the cargo

@@ -325,7 +325,7 @@ def handle_rep(c: Client, args: List[str]) -> None:
 		else:
 			faction.set_personal_reputation(c.id, utup["id"], value)
 			combat.update_targets(c.structure.system.id)
-			c.send(strings.FACTOIN.SET_PERSONAL_REPUTATION, name=args[0], reputation=value)
+			c.send(strings.FACTION.SET_PERSONAL_REPUTATION, name=args[0], reputation=value)
 	else:
 		c.send(strings.USAGE.REP)
 

@@ -86,7 +86,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		cost_factor = crafting.COST_FACTOR_HABITABLE
 	else:
 		cost_factor = crafting.COST_FACTOR_PLANET
-	cost = ceil(pow(outfit_space, cost_factor))
+	cost = math.ceil(pow(outfit_space, cost_factor))
 	
 	# Remove the materials
 	has_struct = False
