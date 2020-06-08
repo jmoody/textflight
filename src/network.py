@@ -50,6 +50,7 @@ def client_read(client):
 			except BlockingIOError:
 				pass
 	except UnicodeDecodeError:
+		ligging.warning("Client %s sent invalid characters.", client.get_ip())
 		client.quitting = True
 		return
 	except Exception as ex:
@@ -71,7 +72,11 @@ def client_read(client):
 def client_write(client):
 	if len(client.write_buffer) > 0:
 		client.last_command = time.time()
-		client.write_buffer = client.write_buffer[client.sock.send(client.write_buffer):]
+		try:
+			client.write_buffer = client.write_buffer[client.sock.send(client.write_buffer):]
+		except IOError as ex:
+			logging.warning(str(ex))
+			client.quitting = True
 
 def init():
 	
