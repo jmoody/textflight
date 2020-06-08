@@ -26,6 +26,6 @@ def del_system(sys: System) -> None:
 	return del_planet(sys, None)
 
 def del_planet(sys: System, planet_id: int) -> None:
-	conn.execute("DELETE FROM faction_claims WHERE sys_id = ? AND planet = ?;", (sys.id_db, planet_id))
+	conn.execute("DELETE FROM faction_claims WHERE sys_id = ? AND planet is ?;", (sys.id_db, planet_id))
 	conn.commit()
 
