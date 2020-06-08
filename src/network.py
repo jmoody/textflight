@@ -28,8 +28,10 @@ def client_read(client):
 	except ssl.SSLError as e:
 		if e.errno != ssl.SSL_ERROR_WANT_READ:
 			raise
+		logging.warning(str(ex))
+		client.quitting = True
 		return
-	except:
+	except Exception as ex:
 		client.quitting = True
 		return
 	if len(buf) == 0:
@@ -50,7 +52,7 @@ def client_read(client):
 			except BlockingIOError:
 				pass
 	except UnicodeDecodeError:
-		ligging.warning("Client %s sent invalid characters.", client.get_ip())
+		logging.warning("Client %s sent invalid characters.", client.get_ip())
 		client.quitting = True
 		return
 	except Exception as ex:
@@ -74,7 +76,7 @@ def client_write(client):
 		client.last_command = time.time()
 		try:
 			client.write_buffer = client.write_buffer[client.sock.send(client.write_buffer):]
-		except IOError as ex:
+		except Exception as ex:
 			logging.warning(str(ex))
 			client.quitting = True
 
@@ -105,16 +107,16 @@ def init():
 		for s in (readable + exceptional):
 			if s is ss:
 				sock, addr = ss.accept()
-				if SSL:
-					try:
+				try:
+					if SSL:
 						sock = ssl_context.wrap_socket(sock, server_side=True)
-					except (ssl.SSLError, OSError) as ex:
-						logging.warning(str(ex))
-						continue
-				sock.setblocking(0)
-				c = Client(sock)
-				clients.append(c)
-				logging.info("Client '%s' connected.", c.get_ip())
+					sock.setblocking(0)
+					c = Client(sock)
+					clients.append(c)
+					logging.info("Client '%s' connected.", c.get_ip())
+				except Exception as ex:
+					logging.warning(str(ex))
+					continue
 			else:
 				if now - s.last_command < RATELIMIT:
 					s.quitting = True
@@ -139,6 +141,9 @@ def init():
 				session_length = now - s.session_start
 				if session_length < MIN_SESSION or session_length > MAX_SESSION:
 					logging.warn("Client '%s' exceeded allowed session bounds.", c.get_ip())
-				s.sock.close()
+				try:
+					s.sock.close()
+				except Exception:
+					pass
 				clients.remove(s)
 
