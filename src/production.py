@@ -124,6 +124,11 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report._fission_cells+= cargo.count
 		elif cargo.type == "Hydrogen Fuel Cell":
 			report._fusion_cells+= cargo.count
+	for q in s.craft_queue:
+		try:
+			report.mass+= int(q.extra) * (q.count + 1)
+		except:
+			report.mass+= q.count + 1
 	for outfit in s.outfits:
 		report.mass+= outfit.mark
 		report.outfit_space-= outfit.mark
