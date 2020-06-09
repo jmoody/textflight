@@ -57,6 +57,24 @@ class StatusReport:
 	def __init__(self):
 		self.generators = {}
 		self._gtimes = {}
+	
+	def zero(self) -> None:
+		self.heat_rate = 0
+		self.energy_rate = 0
+		self.shield_rate = 0
+		self.warp_rate = 0
+		self.antigravity = 0
+		self.electron_damage = 0
+		self.emp_damage = 0
+		self.hull_damage = 0
+		self.plasma_damage = 0
+		self.has_weapons = False
+		self.mining_power = 0
+		self.mining_interval = 0
+		self.assembly_rate = 0
+		self.shipyard = 0
+
+def zero_report(
 
 def update(s: Structure, now=None) -> StatusReport:
 	structs = list(s.tree)
@@ -234,10 +252,7 @@ def update_step(s: Structure, report: StatusReport):
 	if stime < report.now:
 		for outfit in s.outfits:
 			outfit.set_setting(0)
-		report.energy_rate = 0
-		report.heat_rate = 0
-		report.shield_rate = 0
-		report.warp_rate = 0
+		report.zero()
 	
 	# Write to database
 	s.heat = max(s.heat, 0)
