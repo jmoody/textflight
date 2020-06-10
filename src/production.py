@@ -74,8 +74,6 @@ class StatusReport:
 		self.assembly_rate = 0
 		self.shipyard = 0
 
-def zero_report(
-
 def update(s: Structure, now=None) -> StatusReport:
 	structs = list(s.tree)
 	if now == None:
