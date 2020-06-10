@@ -1,7 +1,7 @@
 Antigravity Engine
-	heat 1
+	heat 0.5
 	energy 1
-	antigravity 32
+	antigravity 64
 	recipe
 		Heavy Plating 4
 		Thermal Pipe 1
@@ -49,7 +49,7 @@ EMP Beam
 		Beam Guide 2
 
 Fission Reactor
-	heat 1
+	heat 4
 	energy -16
 	fission 3600
 	max_energy 120
@@ -93,7 +93,7 @@ Shield Matrix
 Shipyard
 	heat 1
 	energy 1
-	shipyard 2
+	shipyard 4
 	overcharge 0
 	recipe
 		Controller 2
