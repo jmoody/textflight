@@ -44,6 +44,7 @@ class USAGE:
 	LOCL = "Usage: locl <message>"
 	HAIL = "Usage: hail <structure ID> <message>"
 	AIRLOCK = "Usage: airlock <username>"
+	BEAM = "Usage: beam <structure ID>"
 	BOARD = "Usage: board <structure ID>"
 	EJECT = "Usage: eject [structure ID]"
 	INSTALL = "Usage: install <cargo ID>"
@@ -251,6 +252,7 @@ class SOCIAL:
 class STRUCT:
 	AIRLOCK = "Jettisoned operator '{username}' out the airlock."
 	NO_DOCK = "Unable to locate docked structure."
+	BEAMED = "Beamed onto '{id} {name}'."
 	BOARDED = "Boarded '{id} {name}'."
 	EJECT_ALL = "Ejected all docked structures."
 	EJECT = "Ejected from docked structure."
