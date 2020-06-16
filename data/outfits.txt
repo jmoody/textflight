@@ -1,7 +1,7 @@
 Antigravity Engine
-	heat 0.5
+	heat 1
 	energy 1
-	antigravity 64
+	antigravity 1024
 	recipe
 		Heavy Plating 4
 		Thermal Pipe 1
