@@ -38,7 +38,7 @@ create_table("""factions (
 
 create_table("""faction_claims (
 	sys_id INTEGER NOT NULL,
-	planet INTEGER,
+	planet INTEGER NOT NULL,
 	faction_id INTEGER NOT NULL,
 	name TEXT,
 	FOREIGN KEY(faction_id) REFERENCES factions(id),
