@@ -1,6 +1,6 @@
 Antigravity Engine
 	heat 1
-	energy 1
+	energy 2
 	antigravity 1024
 	recipe
 		Heavy Plating 4
@@ -8,7 +8,7 @@ Antigravity Engine
 
 Assembler
 	heat 1
-	energy 1
+	energy 2
 	assembler 1
 	recipe
 		Light Material 4
@@ -31,7 +31,7 @@ Coolant Pump
 
 Electron Beam
 	heat 1
-	energy 1
+	energy 2
 	electron 1
 	hull 8
 	recipe
@@ -41,7 +41,7 @@ Electron Beam
 
 EMP Beam
 	heat 1
-	energy 1
+	energy 2
 	emp 1
 	recipe
 		Silicon 4
@@ -75,16 +75,16 @@ Mining Beam
 		Steel 2
 
 Plasma Beam
-	heat 1
-	energy 1
+	heat 2
+	energy 2
 	plasma 1
 	recipe
 		Thermal Pipe 4
 		Beam Guide 2
 
 Shield Matrix
-	heat 1
-	energy 1
+	heat 0.5
+	energy 4
 	shield 1
 	max_shield 60
 	recipe
@@ -111,7 +111,7 @@ Solar Array
 Warp Engine
 	heat 1
 	energy 1
-	warp 1
+	warp 16
 	recipe
 		Controller 8
 		Heavy Plating 2
