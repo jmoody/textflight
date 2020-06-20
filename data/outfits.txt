@@ -111,7 +111,7 @@ Solar Array
 Warp Engine
 	heat 1
 	energy 1
-	warp 16
+	warp 8
 	recipe
 		Controller 8
 		Heavy Plating 2
