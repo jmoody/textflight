@@ -112,7 +112,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.heat_rate+= PLANET_HEAT_RATE * s.outfit_space
 	
 	# Parse outfits and cargo
-	report.mass+= len(s.craft_queue)
+	report.mass+= s.outfit_space
 	for cargo in s.cargo:
 		try:
 			report.mass+= int(cargo.extra) * cargo.count
