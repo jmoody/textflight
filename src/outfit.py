@@ -46,7 +46,7 @@ class Outfit:
 		elif self.setting <= 16:
 			return mod * self.performance()
 		else:
-			return mod * pow(2, self.setting / 8 - 2) * self.mark
+			return mod * pow(2, self.setting / 8 - 2) * self.mark * 2
 	
 	def prop(self, key: str, boost=False) -> int:
 		b = 1

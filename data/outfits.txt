@@ -51,7 +51,7 @@ EMP Beam
 Fission Reactor
 	heat 4
 	energy -16
-	fission 3600
+	fission 7200
 	max_energy 120
 	recipe
 		Heavy Plating 8
@@ -60,7 +60,7 @@ Fission Reactor
 Fusion Reactor
 	heat 1
 	energy -4
-	fusion 3600
+	fusion 7200
 	max_energy 60
 	recipe
 		Heavy Plating 8
@@ -101,8 +101,8 @@ Shipyard
 		Heavy Plating 4
 
 Solar Array
-	heat 0.25
-	solar 6
+	heat 1
+	solar 3
 	max_energy 60
 	recipe
 		Silicon 16
