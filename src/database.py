@@ -124,6 +124,10 @@ create_table("""craft_queue (
 	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")
 
+create_table("""keys (
+	id TEXT PRIMARY KEY
+);""")
+
 try:
 	conn.execute("INSERT INTO factions (id, name, password) VALUES (0, '', '');")
 except sqlite3.IntegrityError:
