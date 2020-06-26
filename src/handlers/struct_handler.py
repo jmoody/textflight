@@ -218,6 +218,8 @@ def handle_set(c: Client, args: List[str]):
 		c.send(strings.STRUCT.NO_OUTFIT)
 	elif setting < 0:
 		c.send(strings.STRUCT.SET_GTZ)
+	elif setting > 1024:
+		c.send(strings.STRUCT.SET_LT)
 	else:
 		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)

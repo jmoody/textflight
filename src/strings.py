@@ -264,6 +264,7 @@ class STRUCT:
 	LOADED = "Loaded {count} '{type}' into '{id} {name}'."
 	NO_OUTFIT = "Outfit does not exist."
 	SET_GTZ = "Setting must be greater than zero."
+	SET_LT = "Setting must be less than 1024."
 	SET = "Updated setting of outfit '{name}' to {setting}."
 	ENERGY_GTZ = "Energy must be greater than zero."
 	NO_ENERGY = "Insufficient energy."
