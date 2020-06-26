@@ -116,6 +116,14 @@ class Client:
 		conn.execute("UPDATE users SET passwd = ? WHERE id = ?;", (passwd, self.id))
 		conn.commit()
 	
+	def redeem_code(self, code: str) -> bool:
+		if conn.execute("DELETE FROM keys WHERE id = ?;", (code,)).rowcount > 0:
+			conn.execute("UPDATE users SET premium = 1 WHERE id = ?;", (self.id,))
+			self.premium = True
+			conn.commit()
+			return True
+		return False
+	
 	def set_username(self, username: str) -> bool:
 		c = conn.cursor()
 		if c.execute("SELECT * FROM users WHERE username = ?;", (username,)).fetchone() != None:

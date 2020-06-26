@@ -46,6 +46,16 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 	c.set_password(" ".join(args))
 	c.send(strings.MISC.UPDATED_PASSWORD)
 
+def handle_redeem(c: Client, args: List[str]) -> None:
+	if len(args) != 1:
+		c.send(strings.USAGE.REDEEM)
+	elif c.premium:
+		c.send(strings.MISC.ALREADY_PREMIUM)
+	elif c.redeem_code(args[0]):
+		c.send(strings.MISC.REDEEM_SUCCESS)
+	else:
+		c.send(strings.MISC.REDEEM_FAIL)
+
 def handle_username(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send(strings.USAGE.USERNAME)
@@ -116,6 +126,7 @@ COMMANDS = {
 	"passwd": ("Change your password.", handle_passwd),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
 	"rdock": ("Remotely dock a structure.", ship_handler.handle_rdock),
+	"redeem": ("Redeems a code to unlock premium status.", handle_redeem),
 	"rep": ("View or set personal operator reputations.", faction_handler.handle_rep),
 	"repf": ("View or set personal faction reputations.", faction_handler.handle_repf),
 	"scan": ("Scan nearby structures.", info_handler.handle_scan),
