@@ -10,7 +10,7 @@ from cargo import Cargo
 
 conn = database.conn
 
-MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS)
+MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS) - 1
 minc = config.get_section("mining")
 MINING_INTERVAL_BASE = minc.getint("MiningInterval")
 GAS_INTERVAL_MULTIPLIER = minc.getint("GasIntervalMultiplier")
@@ -145,7 +145,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.plasma_damage+= outfit.prop("plasma", True)
 		report.shield_rate+= outfit.prop("shield", True)
 		report.shipyard+= outfit.prop("shipyard", True)
-		report.energy_rate-= outfit.prop("solar", True) * (s.system.brightness / pow(2, system.BRIGHTNESS_BITS))
+		report.energy_rate-= outfit.prop("solar", True) * (s.system.brightness / (pow(2, system.BRIGHTNESS_BITS) - 1))
 		report.warp_rate+= outfit.prop("warp", True)
 		report.normal_warp+= outfit.prop_nocharge("warp", True)
 		if outfit.prop_nocharge("shield") > 0:
