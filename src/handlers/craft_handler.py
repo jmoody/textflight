@@ -14,7 +14,10 @@ from cargo import Cargo
 from client import Client
 from system import PlanetType
 
-MAX_OUTFIT_SPACE = config.get_section("crafting").getint("MaxOutfitSpace")
+crft = config.get_section("crafting")
+MAX_OUTFIT_SPACE = crft.getint("MaxOutfitSpace")
+MAX_PLANET_SPACE = crft.getint("MaxPlanetSpace")
+MAX_HABITABLE_SPACE = crft.getint("MaxHabitableSpace")
 
 conn = database.conn
 
@@ -56,21 +59,24 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	if outfit_space < 1:
 		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
 		return
-	elif outfit_space > MAX_OUTFIT_SPACE:
+	elif not base and outfit_space > MAX_OUTFIT_SPACE:
 		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=MAX_OUTFIT_SPACE)
 		return
 	s = c.structure
 	report = production.update(s)
 	name = " ".join(args)
 	if base:
+		pmax = MAX_PLANET_SPACE
 		if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
 			c.send(strings.CRAFT.NEED_ROCKY)
 			return
+		elif s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
+			pmax = MAX_HABITABLE_SPACE
 		total = outfit_space
 		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 			total+= pbase["outfit_space"]
-		if total > MAX_OUTFIT_SPACE:
-			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=MAX_OUTFIT_SPACE)
+		if total > pmax:
+			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax)
 			return
 	elif outfit_space > report.shipyard:
 		if report.shipyard == 0:
