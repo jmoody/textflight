@@ -6,7 +6,7 @@ Use the `jump` command with the link ID to jump. You need 100% warp charge to ju
 
 The `jump` command can also be given the IDs of other ships as arguments, if you wish to jump an entire fleet at once. Remote jump initiation will not function if you do not have high enough reputation with the ship's owner, or if an operator has boarded the ship.
 
-Antigravity engines are used to land and take off from planets, with the `land` and `launch` commands respectively. Planet IDs are listed in the output from the `nav` command. Antigravity engines operate instantly, but can only lift 32 times their mass at default operation settings. As a result, ships with large quantities of outfits or cargo will need larger antigravity engines to compensate for the additional load.
+Antigravity engines are used to land and take off from planets, with the `land` and `launch` commands respectively. Planet IDs are listed in the output from the `nav` command. Antigravity engines operate instantly, but can only lift a limited amount of mass. As a result, ships with large quantities of outfits or cargo will need larger antigravity engines to compensate for the additional load.
 
 Systems vary in their available resources; each system carries a specific type of ore, with varying densities. Planets can be used to construct bases, with the exception of gas giants. Each type also carries their own unique traits:
 
