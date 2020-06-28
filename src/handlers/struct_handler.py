@@ -45,7 +45,7 @@ def handle_beam(c: Client, args: List[str]):
 	s = structure.load_structure(sid)
 	if s == None or s.system.id != c.structure.system.id:
 		c.send(strings.MISC.NO_STRUCT)
-	elif not faction.has_permission(c, s, faction.BOARD_MIN):
+	elif not faction.has_permission(c, s, faction.TRANS_MIN):
 		c.send(strings.MISC.PERMISSION_DENIED)
 	else:
 		c.structure = s
@@ -53,9 +53,9 @@ def handle_beam(c: Client, args: List[str]):
 		conn.commit()
 		c.send(strings.STRUCT.BEAMED, id=sid, name=s.name)
 
-def handle_board(c: Client, args: List[str]):
+def handle_trans(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send(strings.USAGE.BOARD)
+		c.send(strings.USAGE.TRANS)
 		return
 	try:
 		sid = int(args[0])
@@ -76,13 +76,13 @@ def handle_board(c: Client, args: List[str]):
 			c.send(strings.STRUCT.NO_DOCK)
 			return
 		s = c.structure.dock_parent
-	if not faction.has_permission(c, s, faction.BOARD_MIN):
+	if not faction.has_permission(c, s, faction.TRANS_MIN):
 		c.send(strings.MISC.PERMISSION_DENIED)
 		return
 	c.structure = s
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
 	conn.commit()
-	c.send(strings.STRUCT.BOARDED, id=sid, name=s.name)
+	c.send(strings.STRUCT.TRANSFERRED, id=sid, name=s.name)
 
 def handle_eject(c: Client, args: List[str]):
 	s = c.structure

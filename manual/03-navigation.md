@@ -4,7 +4,7 @@ The universe is a difficult place to navigate. To begin, use the `nav` command t
 
 Use the `jump` command with the link ID to jump. You need 100% warp charge to jump, however only some of the charge will be consumed. How much charge is consumed depends on the drag value of the hyperspace link. Warp engines can be charged by directing power to them; if not set to full power, they will be unable to reach 100% charge, but will still charge partially (albeit at a slower rate). Overcharging warp engines will cause them to charge faster, but will not grant additional charge beyond 100%. The greater a structure's mass, the longer it will take to charge. Jettisoning cargo can be used to provide a quick escape if not enough time is present to fully charge the warp engines.
 
-The `jump` command can also be given the IDs of other ships as arguments, if you wish to jump an entire fleet at once. Remote jump initiation will not function if you do not have high enough reputation with the ship's owner, or if an operator has boarded the ship.
+The `jump` command can also be given the IDs of other ships as arguments, if you wish to jump an entire fleet at once. Remote jump initiation will not function if you do not have high enough reputation with the ship's owner, or if an operator has transferred their control core to the ship.
 
 Antigravity engines are used to land and take off from planets, with the `land` and `launch` commands respectively. Planet IDs are listed in the output from the `nav` command. Antigravity engines operate instantly, but can only lift 32 times their mass at default operation settings. As a result, ships with large quantities of outfits or cargo will need larger antigravity engines to compensate for the additional load.
 

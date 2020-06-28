@@ -88,7 +88,7 @@ COMMANDS = {
 	"airlock": ("Remove someone from your structure.", struct_handler.handle_airlock),
 	"base": ("Construct a planetary base.", craft_handler.handle_base),
 	"beam": ("Beam onto another structure.", struct_handler.handle_beam),
-	"board": ("Board another structure.", struct_handler.handle_board),
+	"trans": ("Transfer control core to another structure.", struct_handler.handle_trans),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
 	"chat": ("Toggles chat on or off.", handle_chat),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),

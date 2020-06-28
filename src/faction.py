@@ -11,7 +11,7 @@ facf = config.get_section("faction")
 ATTACK_MIN = facf.getint("AttackMin")
 DOCK_MIN = facf.getint("DockMin")
 JUMP_MIN = facf.getint("JumpMin")
-BOARD_MIN = facf.getint("BoardMin")
+TRANS_MIN = facf.getint("TransMin")
 
 ATTACK_PENALTY = facf.getint("AttackPenalty")
 DESTROY_PENALTY = facf.getint("DestroyPenalty")
