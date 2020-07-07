@@ -322,10 +322,15 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 		s.energy-= active * report.energy_rate
 		s.shield+= active * report.shield_rate
 		s.warp_charge+= active * report.warp_rate
+		
+		# Update crew
 		for outfit in report.living_spaces:
 			max_crew = max(min(outfit.prop("crew", True), report.food), 0)
+			if s.planet_id != None and s.system.planets[s.planet_id] == system.PlanetType.HABITABLE:
+				max_crew = outfit.prop("crew", True) * 128
+			else:
+				report.food-= outfit.counter
 			outfit.set_counter(min(max_crew, outfit.counter + active / BREED_TIME))
-			report.food-= outfit.counter
 			report.crew+= outfit.counter
 	
 	# Handle system failure
