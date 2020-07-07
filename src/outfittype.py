@@ -9,10 +9,12 @@ class OutfitType:
 	properties = {
 		"antigravity": 0,
 		"assembler": 0,
+		"crew": 0,
 		"electron": 0,
 		"emp": 0,
 		"energy": 0,
 		"fission": 0,
+		"food": 0,
 		"fusion": 0,
 		"heat": 0,
 		"hull": 0,
@@ -23,6 +25,7 @@ class OutfitType:
 		"plasma": 0,
 		"shield": 0,
 		"shipyard": 0,
+		"supplies": 0,
 		"solar": 0,
 		"warp": 0,
 		

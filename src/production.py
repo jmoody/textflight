@@ -37,6 +37,7 @@ HYDROGEN_COUNT = minc.getint("HydrogenCount")
 OXYGEN_COUNT = minc.getint("OxygenCount")
 XENON_COUNT = minc.getint("XenonCount")
 PLANET_HEAT_RATE = minc.getfloat("PlanetHeat")
+BREED_RATE = config.get_section("crafting").getint("BreedRate")
 
 class StatusReport:
 	
@@ -54,6 +55,7 @@ class StatusReport:
 	
 	_fission_cells = 0
 	_fusion_cells = 0
+	_supplies = 0
 	
 	shield_rate = 0
 	max_shield = 0
@@ -74,8 +76,12 @@ class StatusReport:
 	assembly_rate = 0
 	shipyard = 0
 	
+	crew = 0
+	food = 0
+	
 	def __init__(self):
 		self.generators = {}
+		self.living_spaces = []
 		self._gtimes = {}
 	
 	def zero(self) -> None:
@@ -156,6 +162,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report._fission_cells+= cargo.count
 		elif cargo.type == "Hydrogen Fuel Cell":
 			report._fusion_cells+= cargo.count
+		elif cargo.type == "Supply Packages":
+			report._supplies+= cargo.count
 	for q in s.craft_queue:
 		try:
 			report.mass+= int(q.extra) * (q.count + 1)
@@ -184,6 +192,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.energy_rate-= outfit.prop("solar", True) * (s.system.brightness / (pow(2, system.BRIGHTNESS_BITS) - 1))
 		report.warp_rate+= outfit.prop("warp", True)
 		report.normal_warp+= outfit.prop_nocharge("warp", True)
+		report.food+= outfit.prop("food", True)
 		if outfit.prop_nocharge("shield") > 0:
 			report.has_shields = True
 		if outfit.prop_nocharge("fission") > 0:
@@ -194,6 +203,12 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			if outfit.setting > 0:
 				fuel = outfit.counter + report._fusion_cells * outfit.prop_nocharge("fusion", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
+		elif outfit.prop_nocharge("supplies") > 0:
+			if outfit.setting > 0:
+				fuel = outfit.counter + report._supplies * outfit.prop_nocharge("supplies", True)
+				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
+		elif outfit.prop_nocharge["crew"] > 0:
+			report.living_spaces.append(outfit)
 	
 	# Apply properties from enemy weapons
 	for struct in s.targets:
@@ -268,9 +283,10 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 			# Remove from cargo
 			Cargo("Uranium Fuel Cell", fuel_used).remove(s)
 			Cargo("Empty Cell", fuel_used).add(s)
+		
 		elif outfit.prop("fusion") > 0:
 			
-			# The same as the above code, but for fusion instead of fission
+			# The same as the above code, but for fusion
 			fusion = outfit.prop_nocharge("fusion", True)
 			fuel_used = int(used / fusion) + 1
 			if used == fuelout - s.interrupt:
@@ -280,8 +296,21 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 			Cargo("Hydrogen Fuel Cell", fuel_used).remove(s)
 			Cargo("Empty Cell", fuel_used).add(s)
 		
+		elif outfit.prop("supplies") > 0:
+			
+			# The same as the above code, but for supplies
+			supplies = outfit.prop_nocharge("supplies", True)
+			fuel_used = int(used / supplies) + 1
+			if used == fuelout - s.interrupt:
+				left = 0
+			else:
+				left = supplies - used % supplies
+			Cargo("Supply Packages", fuel_used).remove(s)
+		
 		# Update outfit counter
 		outfit.set_counter(left)
+		if left == 0:
+			outfit.set_setting(0)
 	
 	# Update if systems have not failed and have been active for more than 0 seconds
 	if s.interrupt != stime and not report.shutdown:
@@ -293,11 +322,18 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 		s.energy-= active * report.energy_rate
 		s.shield+= active * report.shield_rate
 		s.warp_charge+= active * report.warp_rate
+		for outfit in report.living_spaces:
+			max_crew = max(min(outfit.prop("crew", True), report.food), 0)
+			outfit.set_counter(min(max_crew, outfit.counter + active / BREED_TIME))
+			report.food-= outfit.counter
+			report.crew+= outfit.counter
 	
 	# Handle system failure
 	if report.shutdown:
 		for outfit in s.outfits:
 			outfit.set_setting(0)
+			if outfit.type == "Living Spaces":
+				outfit.set_counter(0)
 		report.zero()
 	
 	# Write to database

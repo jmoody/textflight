@@ -58,6 +58,7 @@ CostFactorPlanet = 1.5
 MaxOutfitSpace = 1024
 MaxPlanetSpace = 2048
 MaxHabitableSpace = 4096
+BreedRate = 60
 
 [faction]
 AttackMin = -1
