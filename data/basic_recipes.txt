@@ -30,6 +30,15 @@ Hydrogen Fuel Cell
 Light Material
 	Carbon Alloy 4
 
+Medicine
+	Iron 1
+	Hydrogen 1
+	Water 1
+
+Nutrients
+	Carbon 1
+	Water 1
+
 Outfit Frame
 	Light Material 4
 	Controller 1
@@ -37,9 +46,20 @@ Outfit Frame
 Steel
 	Iron 4
 
+Supply Packages
+	Oxygen 16
+	Water 16
+	Nutrients 16
+	Medicine 16
+
 Thermal Pipe
 	Copper 4
 
 Uranium Fuel Cell
 	Empty Cell 1
 	Enriched Uranium 1
+
+Water
+	Oxygen 1
+	Hydrogen 2
+
