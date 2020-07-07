@@ -8,6 +8,25 @@ import system
 from structure import Structure
 from cargo import Cargo
 
+
+
+#
+# Oh boy, if you have to edit this file, I do *not* envy you...
+# I'm sorry in advance.
+#
+# Ok, here's a simple explanation of how this works. Since ships in combat have
+# stats that affect each other, we need to update them at the same time, and
+# things are further complicated by generators which change the rate at which
+# energy is consumed/heat is produced. The way we handle this is by updating
+# structures in steps; we determine the "stime" for each structure, which is the
+# next time the rate of change in that structure's stats will change. Then we
+# take the lowest stime for all of the structures involved (capping out at the
+# current time, since we don't want to update structures into the future), and
+# update all the structures to that time. If a structure shuts down, we remove
+# it from the cycle, as there's no longer any point in updating it.
+#
+
+
 conn = database.conn
 
 MAX_ASTEROID_RICHNESS = pow(2, system.ASTEROID_RICHNESS_BITS) - 1
@@ -22,6 +41,7 @@ PLANET_HEAT_RATE = minc.getfloat("PlanetHeat")
 class StatusReport:
 	
 	_stime = 0
+	shutdown = False
 	
 	mass = 0
 	outfit_space = 0
@@ -79,25 +99,39 @@ def update(s: Structure, now=None) -> StatusReport:
 	if now == None:
 		now = time.time()
 	report = None
+	
+	# Update all linked structures
 	while len(structs) > 0:
 		min_stime = now
 		reports = {}
+		
+		# Determine the next stime
 		for struct in structs.copy():
 			r = determine_stime(struct, now)
 			reports[struct] = r
 			if r._stime != s.interrupt:
 				reports[struct] = r
 				min_stime = min(min_stime, r._stime)
+		
+		# Update all structures to the lowest stime
 		for struct in structs.copy():
 			r = reports[struct]
-			if r._stime <= min_stime:
+			
+			# Remove structure from tree if it's shut down
+			do_write = True
+			if r.shutdown or min_stime == now:
 				if struct == s:
 					report = r
 				structs.remove(struct)
+				do_write = False
 			else:
 				r._stime = min_stime
 				r.now = min_stime
-			update_step(struct, r)
+			
+			# Update structure to stime
+			update_step(struct, r, do_write)
+	
+	# Return StatusReport for target structure
 	return report
 
 def determine_stime(s: Structure, now: float) -> StatusReport:
@@ -111,7 +145,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		if ptype == system.PlanetType.BARREN or ptype == system.PlanetType.GREENHOUSE:
 			report.heat_rate+= PLANET_HEAT_RATE * s.outfit_space
 	
-	# Parse outfits and cargo
+	# Add mass for cargo and crafting queue
 	report.mass+= s.outfit_space
 	for cargo in s.cargo:
 		try:
@@ -127,6 +161,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.mass+= int(q.extra) * (q.count + 1)
 		except:
 			report.mass+= q.count + 1
+	
+	# Load outfit properties
 	for outfit in s.outfits:
 		report.mass+= outfit.mark
 		report.outfit_space-= outfit.mark
@@ -158,11 +194,15 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			if outfit.setting > 0:
 				fuel = outfit.counter + report._fusion_cells * outfit.prop_nocharge("fusion", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
+	
+	# Apply properties from enemy weapons
 	for struct in s.targets:
 		for outfit in struct.outfits:
 			report.heat_rate+= outfit.prop("plasma", True)
 			report.energy_rate+= outfit.prop("emp", True)
 			report.shield_rate-= outfit.prop("electron", True)
+	
+	# Determine whether we have weapons or not
 	if report.electron_damage > 0 or report.emp_damage > 0 or report.plasma_damage > 0 or report.hull_damage > 0:
 		report.has_weapons = True
 	
@@ -175,23 +215,13 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.overheat_time = s.interrupt + (report.max_heat - s.heat) / report.heat_rate
 		if report.overheat_time != None and report.overheat_time < stime:
 			stime = report.overheat_time
+			report.shutdown = True
 	
 	# Determine stime for generators
-	gtime = s.interrupt
-	ctime = None
-	for outfit, fuelout in sorted(report.generators.items(), key=lambda item: item[1]):
-		if fuelout >= stime:
-			continue
-		if report.energy_rate > 0:
-			ctime = s.interrupt + s.energy / report.energy_rate
-			if ctime < fuelout and ctime < stime:
-				stime = ctime
-		if ctime == None or ctime >= fuelout:
-			s.energy-= (fuelout - gtime) * report.energy_rate
-			s.energy = max(min(report.max_energy, s.energy), 0)
-			gtime = fuelout
-			report._gtimes[fuelout] = s.energy
-			report.energy_rate-= outfit.prop("energy")
+	if len(report.generators) > 0:
+		gtime = sorted(report.generators.values())[0]
+		if gtime < stime:
+			stime = gtime
 	
 	# Determine stime for energy
 	if report.energy_rate >= 0:
@@ -201,35 +231,46 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
 		if report.powerloss_time != None and report.powerloss_time < stime:
 			stime = report.powerloss_time
+			report.shutdown = true
 	
 	report._stime = stime
 	return report
 
-def update_step(s: Structure, report: StatusReport):
+def update_step(s: Structure, report: StatusReport, do_write: bool):
 	stime = report._stime
-	if len(report._gtimes) > 0:
-		gtime = sorted(report._gtimes)[-1]
-		s.energy = report._gtimes[gtime]
-	else:
-		gtime = s.interrupt
 	
 	# Update counters and fuel
 	for outfit, fuelout in report.generators.items():
-		used = min(fuelout, stime) - s.interrupt
+		
+		# Determine seconds of fuel used
+		used = stime - s.interrupt
 		used*= outfit.performance()
 		left = 0
+		
+		# Subtract directly from counter if we can
 		if used < outfit.counter:
 			left = outfit.counter - used
+		
+		# Subtract from cargo
 		elif outfit.prop("fission") > 0:
+			
+			# Determine how many fuel items have been consumed
+			# Add one to refill the outfit charge
 			fission = outfit.prop_nocharge("fission", True)
 			fuel_used = int(used / fission) + 1
+			
+			# Figure out what the outfit charge should be now
 			if used == fuelout - s.interrupt:
 				left = 0
 			else:
 				left = fission - used % fission
+			
+			# Remove from cargo
 			Cargo("Uranium Fuel Cell", fuel_used).remove(s)
 			Cargo("Empty Cell", fuel_used).add(s)
 		elif outfit.prop("fusion") > 0:
+			
+			# The same as the above code, but for fusion instead of fission
 			fusion = outfit.prop_nocharge("fusion", True)
 			fuel_used = int(used / fusion) + 1
 			if used == fuelout - s.interrupt:
@@ -238,21 +279,23 @@ def update_step(s: Structure, report: StatusReport):
 				left = fusion - used % fusion
 			Cargo("Hydrogen Fuel Cell", fuel_used).remove(s)
 			Cargo("Empty Cell", fuel_used).add(s)
+		
+		# Update outfit counter
 		outfit.set_counter(left)
 	
-	# Update if systems have not failed
-	if s.interrupt != stime:
+	# Update if systems have not failed and have been active for more than 0 seconds
+	if s.interrupt != stime and not report.shutdown:
 		active = stime - s.interrupt
 		report.mining_interval = update_mining(s, report.mining_power, active)
 		if report.assembly_rate > 0:
 			update_assembly(s, report.assembly_rate, active)
 		s.heat+= active * report.heat_rate
-		s.energy-= (stime - gtime) * report.energy_rate
+		s.energy-= active * report.energy_rate
 		s.shield+= active * report.shield_rate
 		s.warp_charge+= active * report.warp_rate
 	
 	# Handle system failure
-	if stime < report.now:
+	if report.shutdown:
 		for outfit in s.outfits:
 			outfit.set_setting(0)
 		report.zero()
@@ -264,15 +307,12 @@ def update_step(s: Structure, report: StatusReport):
 	if report.normal_warp > 0:
 		s.warp_charge = max(min(min(report.warp_rate / report.normal_warp * report.mass, report.mass), s.warp_charge), 0)
 	s.interrupt = report.now
-	conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
-		(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))
-	conn.commit()
+	if do_write:
+		conn.execute("UPDATE structures SET interrupt = ?, heat = ?, energy = ?, shield = ?, warp_charge = ?, mining_progress = ? WHERE id = ?;",
+			(s.interrupt, s.heat, s.energy, s.shield, s.warp_charge, s.mining_progress, s.id))
+		conn.commit()
 	
 	return report
-
-def set_mining_progress(s: Structure, progress: float) -> None:
-	s.mining_progress = progress
-	conn.execute("UPDATE structures SET mining_progress = ? WHERE id = ?;", (progress, s.id))
 
 def update_mining(s: Structure, beam_power: float, active: float) -> float:
 	if beam_power == 0:
