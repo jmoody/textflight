@@ -193,6 +193,9 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.warp_rate+= outfit.prop("warp", True)
 		report.normal_warp+= outfit.prop_nocharge("warp", True)
 		report.food+= outfit.prop("food", True)
+		if s.type == "base":
+			report.energy_rate+= outfit.prop("geo")
+			report.heat_rate+= outfit.prop("sink")
 		if outfit.prop_nocharge("shield") > 0:
 			report.has_shields = True
 		if outfit.prop_nocharge("fission") > 0:

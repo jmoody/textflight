@@ -71,6 +71,17 @@ Fusion Reactor
 		Heavy Plating 8
 		Empty Cell 4
 
+Geothermal Pump
+	heat 1
+	geo -32
+	max_energy 60
+
+Heat Sink
+	energy 1
+	sink -16
+	max_heat 60
+	overcharge 0
+
 Living Spaces
 	heat 1
 	energy 1
