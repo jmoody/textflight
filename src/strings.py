@@ -34,6 +34,7 @@ class MISC:
 	HELP_MESSAGE = "No such command '{command}'. Use 'help' for a list of commands."
 
 class USAGE:
+	NAV = "Usage: nav [x] [y]"
 	SCAN = "Usage: scan [structure ID]"
 	DESTROY = "Usage: destroy <structure ID>"
 	TARGET = "Usage: target <structure ID>"
@@ -150,6 +151,8 @@ class FACTION:
 	SET_PERSONAL_REPUTATION = "Set personal reputation of '{name}' to {reputation}."
 
 class INFO:
+	
+	NOT_DISCOVERED = "No available data on system."
 	SYSTEM = "System: {name}"
 	CLAIMED_BY = "Claimed by '{faction}'."
 	BRIGHTNESS = "Brightness: {brightness}"

@@ -124,6 +124,13 @@ create_table("""craft_queue (
 	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
 );""")
 
+create_table("""map (
+	user_id INTEGER NOT NULL,
+	sys_id INTEGER NOT NULL,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+	PRIMARY KEY (user_id, sys_id)
+);""")
+
 create_table("""keys (
 	id TEXT PRIMARY KEY
 );""")

@@ -14,6 +14,23 @@ conn = database.conn
 
 def handle_nav(c: Client, args: List[str]) -> None:
 	sys = c.structure.system
+	remote = False
+	if len(args) == 2:
+		try:
+			x = int(args[0])
+			y = int(args[1])
+		except ValueError:
+			c.send(strings.MISC.NAN)
+			return
+		sys = system.System(system.to_system_id(sys.x + x, sys.y + y))
+		rows = conn.execute("SELECT * FROM map WHERE user_id = ? AND sys_id = ?;", (c.id, sys.id_db))
+		if len(rows.fetchall()) == 0:
+			c.send(strings.INFO.NOT_DISCOVERED)
+			return
+		remote = True
+	elif len(args) != 0:
+		c.send(strings.USAGE.NAV)
+		return
 	fid, name = territory.get_system(sys)
 	if name != None:
 		c.send(strings.INFO.SYSTEM, name=name)
@@ -68,10 +85,11 @@ def handle_nav(c: Client, args: List[str]) -> None:
 		else:
 			c.send(strings.INFO.PLANET, index=index, planet_type=c.translate(planet.ptype.name))
 		index+= 1
-	c.send(strings.INFO.STRUCTURES)
-	for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id_db,)):
-		sid, name = stup
-		c.send(strings.INFO.STRUCTURE, id=sid, name=name)
+	if not remote:
+		c.send(strings.INFO.STRUCTURES)
+		for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id_db,)):
+			sid, name = stup
+			c.send(strings.INFO.STRUCTURE, id=sid, name=name)
 
 def handle_scan(c: Client, args: List[str]) -> None:
 	s = c.structure

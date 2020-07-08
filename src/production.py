@@ -207,7 +207,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			if outfit.setting > 0:
 				fuel = outfit.counter + report._supplies * outfit.prop_nocharge("supplies", True)
 				report.generators[outfit] = s.interrupt + fuel / outfit.performance()
-		elif outfit.prop_nocharge["crew"] > 0:
+		elif outfit.prop_nocharge("crew") > 0:
 			report.living_spaces.append(outfit)
 	
 	# Apply properties from enemy weapons
@@ -225,7 +225,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 	stime = report.now
 	if report.heat_rate >= 0:
 		if s.heat == report.max_heat:
-			report.overheat_time = s.interrupt
+			report.overheat_time = 0
 		elif report.heat_rate > 0:
 			report.overheat_time = s.interrupt + (report.max_heat - s.heat) / report.heat_rate
 		if report.overheat_time != None and report.overheat_time < stime:
@@ -241,12 +241,12 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 	# Determine stime for energy
 	if report.energy_rate >= 0:
 		if s.energy == 0:
-			report.powerloss_time = s.interrupt
+			report.powerloss_time = 0
 		elif report.energy_rate > 0:
 			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
 		if report.powerloss_time != None and report.powerloss_time < stime:
 			stime = report.powerloss_time
-			report.shutdown = true
+			report.shutdown = True
 	
 	report._stime = stime
 	return report

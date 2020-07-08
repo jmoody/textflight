@@ -191,6 +191,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		conn.execute("UPDATE structures SET sys_id = ?, warp_charge = ?, mining_progress = 0 WHERE id = ?",
 			(sys.id_db, ship.warp_charge, ship.id))
 	c.send(strings.SHIP.ENGAGING)
+	conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (c.id, sys.id_db))
 	conn.commit()
 	combat.clear_targets(s)
 	combat.update_targets(sys.id)

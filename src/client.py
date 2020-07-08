@@ -167,6 +167,7 @@ class Client:
 				(self.structure.id, self.id))
 			logging.info("User %d spawned.", self.id)
 		conn.execute("UPDATE users SET last_login = strftime('%s', 'now') WHERE id = ?", (self.id,))
+		conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (self.id, self.structure.system.id_db))
 		conn.commit()
 		combat.update_targets(self.structure.system.id)
 		return True
