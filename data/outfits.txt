@@ -33,6 +33,10 @@ Distribution Center
 	energy 1
 	supplies 86400
 	food 4
+	recipe
+		Supply Packages 4
+		Controller 8
+		Steel 16
 
 Electron Beam
 	heat 1
@@ -75,17 +79,29 @@ Geothermal Pump
 	heat 1
 	geo -32
 	max_energy 60
+	recipe
+		Controller 1
+		Heavy Plating 2
+		Thermal Pipe 8
 
 Heat Sink
 	energy 1
 	sink -16
 	max_heat 60
 	overcharge 0
+	recipe
+		Heavy Plating 1
+		Steel 16
+		Thermal Pipe 16
 
 Living Spaces
 	heat 1
 	energy 1
 	crew 4
+	recipe
+		Supply Packages 4
+		Thermal Pipe 4
+		Steel 32
 
 Mining Beam
 	heat 1
