@@ -70,14 +70,14 @@ class Planet:
 	ptype = None
 	
 	def __init__(self, r: random.Random) -> None:
-		type_roll = r.randint(0, 1000) / 10
-		if type_roll <= 40:
+		type_roll = r.randint(0, 1000)
+		if type_roll <= 400:
 			self.ptype = PlanetType.GAS
-		elif type_roll <= 80:
+		elif type_roll <= 800:
 			self.ptype = PlanetType.BARREN
-		elif type_roll <= 90:
+		elif type_roll <= 900:
 			self.ptype = PlanetType.FROZEN
-		elif type_roll <= 99.9:
+		elif type_roll <= 999:
 			self.ptype = PlanetType.GREENHOUSE
 		else:
 			self.ptype = PlanetType.HABITABLE

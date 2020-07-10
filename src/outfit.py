@@ -51,7 +51,7 @@ class Outfit:
 	def prop(self, key: str, boost=False) -> int:
 		b = 0
 		if boost:
-			b = (self.mark - 1) / 10
+			b = (self.mark - 1) / 10 * (self.setting / 16)
 		charge = self.performance() + b
 		if self.type.properties["overcharge"] == 0:
 			charge = min(charge, self.mark + b)
@@ -60,7 +60,7 @@ class Outfit:
 	def prop_nocharge(self, key: str, boost=False) -> int:
 		b = 0
 		if boost:
-			b+= (self.mark - 1) / 10
+			b+= (self.mark - 1) / 10 * (self.setting / 16)
 		return self.type.properties[key] * self.mark + b
 
 def load_outfit(otup) -> Outfit:

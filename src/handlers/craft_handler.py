@@ -88,7 +88,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	# Determine the cost
 	if not base:
 		cost_factor = crafting.COST_FACTOR_SHIP
-	elif s.system.planets[s.planet_id] == PlanetType.HABITABLE:
+	elif s.system.planets[s.planet_id].ptype == PlanetType.HABITABLE:
 		cost_factor = crafting.COST_FACTOR_HABITABLE
 	else:
 		cost_factor = crafting.COST_FACTOR_PLANET

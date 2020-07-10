@@ -201,6 +201,8 @@ def handle_status(c: Client, args: List[str]) -> None:
 			c.send(strings.INFO.ANTIGRAVITY_OVERLOADED)
 		else:
 			c.send(strings.INFO.ANTIGRAVITY_ONLINE)
+	if report.crew > 0:
+		c.send(strings.INFO.CREW, crew=int(report.crew))
 	if report.mining_interval > 0:
 		progress = s.mining_progress / report.mining_interval * 100
 		c.send(strings.INFO.MINING_PROGRESS, progress=round(progress), interval="%.1f" % (report.mining_interval,))

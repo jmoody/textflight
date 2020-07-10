@@ -124,12 +124,12 @@ def update(s: Structure, now=None) -> StatusReport:
 			r = reports[struct]
 			
 			# Remove structure from tree if it's shut down
-			do_write = True
+			do_write = False
 			if r.shutdown or min_stime == now:
 				if struct == s:
 					report = r
 				structs.remove(struct)
-				do_write = False
+				do_write = True
 			else:
 				r._stime = min_stime
 				r.now = min_stime
@@ -147,7 +147,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 	
 	# Apply planetary effects
 	if s.planet_id != None:
-		ptype = s.system.planets[s.planet_id]
+		ptype = s.system.planets[s.planet_id].ptype
 		if ptype == system.PlanetType.BARREN or ptype == system.PlanetType.GREENHOUSE:
 			report.heat_rate+= PLANET_HEAT_RATE * s.outfit_space
 	
@@ -329,11 +329,11 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 		# Update crew
 		for outfit in report.living_spaces:
 			max_crew = max(min(outfit.prop("crew", True), report.food), 0)
-			if s.planet_id != None and s.system.planets[s.planet_id] == system.PlanetType.HABITABLE:
+			if s.type == "base" and s.planet_id != None and s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
 				max_crew = outfit.prop("crew", True) * 128
 			else:
 				report.food-= outfit.counter
-			outfit.set_counter(min(max_crew, outfit.counter + active / BREED_TIME))
+			outfit.set_counter(min(max_crew, outfit.counter + active / BREED_RATE))
 			report.crew+= outfit.counter
 	
 	# Handle system failure

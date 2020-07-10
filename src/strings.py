@@ -207,7 +207,7 @@ class INFO:
 	POWER_STATUS_BROWNOUT_IN = "\tPower status: Brownout in {remaining} seconds!"
 	POWER_STATUS_BROWNOUT = "\tPower status: BROWNOUT"
 	NET_ENERGY = "\tNet energy consumption: {energy_rate}/s"
-	REACTORS = "Reactors:"
+	REACTORS = "Fuel:"
 	REACTOR = "\t[{index}] {name} mark {mark}: {remaining} seconds of fuel remaining"
 	REACTOR_NOFUEL = "\t[{index}] {name} mark {mark}: OUT OF FUEL"
 	SHIELDS_ONLINE = "Shields: Online"
@@ -219,6 +219,7 @@ class INFO:
 	WARP_OFFLINE = "Warp engines: Offline"
 	ANTIGRAVITY_OVERLOADED = "Antigravity engines: OVERLOADED"
 	ANTIGRAVITY_ONLINE = "Antigravity engines: Online"
+	CREW = "Colonists: {crew}"
 	MINING_PROGRESS = "Mining progress: {progress}% ({interval} second interval)"
 
 class SHIP:
