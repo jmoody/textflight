@@ -344,7 +344,7 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 		for outfit in s.outfits:
 			outfit.set_setting(0)
 			if outfit.type == "Living Spaces":
-				outfit.set_counter(0)
+				outfit.set_counter(max(0, outfit.counter - active / BREED_RATE))
 		report.zero()
 	
 	# Write to database
