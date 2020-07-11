@@ -52,7 +52,7 @@ PlanetHeat = 0.25
 
 [crafting]
 CraftTime = 10
-CostFactorShip = 2
+CostFactorShip = 4
 CostFactorHabitable = 1
 CostFactorPlanet = 1.5
 MaxOutfitSpace = 1024
