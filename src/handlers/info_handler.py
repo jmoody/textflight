@@ -183,8 +183,8 @@ def handle_status(c: Client, args: List[str]) -> None:
 	if report.has_shields:
 		if s.shield == report.max_shield:
 			c.send(strings.INFO.SHIELDS_ONLINE)
-		elif report.shield_rate > 0:
-			c.send(strings.INFO.SHIELDS_REGENERATING, shield=round(s.shield), max=report.max_shield)
+		elif report.shield_rate != 0:
+			c.send(strings.INFO.SHIELDS_REGENERATING, shield=round(s.shield), max=report.max_shield, rate="%.1f" % report.shield_rate)
 		elif s.shield > 0:
 			c.send(strings.INFO.SHIELDS_OFFLINE, shield=round(s.shield), max=report.max_shield)
 		else:

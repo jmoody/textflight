@@ -211,7 +211,7 @@ class INFO:
 	REACTOR = "\t[{index}] {name} mark {mark}: {remaining} seconds of fuel remaining"
 	REACTOR_NOFUEL = "\t[{index}] {name} mark {mark}: OUT OF FUEL"
 	SHIELDS_ONLINE = "Shields: Online"
-	SHIELDS_REGENERATING = "Shields: Regenerating ({shield}/{max})"
+	SHIELDS_REGENERATING = "Shields: Regenerating at {rate}/s ({shield}/{max})"
 	SHIELDS_OFFLINE = "Shields: Offline ({shield}/{max})"
 	SHIELDS_FAILED = "Shields: FAILED"
 	WARP_READY = "Warp engines: Ready to engage"
