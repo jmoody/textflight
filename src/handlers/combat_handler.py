@@ -37,6 +37,12 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 	else:
 		s._destroyed = True
 		conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ?;", (s.id,))
+		conn.execute("UPDATE structures SET dock_id = NULL WHERE dock_id = ?;", (s.id,))
+		if s.dock_parent != None:
+			s.dock_parent.dock_children.remove(s)
+		else:
+			for struct in s.dock_children:
+				struct.dock_parent = None
 		conn.execute("DELETE FROM structures WHERE id = ?;", (s.id,))
 		conn.commit()
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.DESTROY_PENALTY)
