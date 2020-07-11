@@ -333,7 +333,10 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 				max_crew = outfit.prop("crew", True) * 128
 			else:
 				report.food-= outfit.counter
-			outfit.set_counter(min(max_crew, outfit.counter + active / BREED_RATE))
+			if max_crew < outfit.counter:
+				outfit.set_counter(max(max_crew, outfit.counter - active / BREED_RATE))
+			else:
+				outfit.set_counter(min(max_crew, outfit.counter + active / BREED_RATE))
 			report.crew+= outfit.counter
 	
 	# Handle system failure
