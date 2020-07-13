@@ -5,7 +5,7 @@ from typing import List
 import network
 import structure
 import strings
-from client import Client, MessageType
+from client import Client, MessageType, ChatMode
 
 validchars = re.compile(r"[^ -~]+")	# Only allow printable ASCII
 
@@ -38,10 +38,23 @@ def handle_fact(c: Client, args: List[str]) -> None:
 	if c.premium:
 		message = apply_format_codes(message)
 	for client in network.clients:
-		if client.id != None and client.chat_on and client.faction_id == c.faction_id:
+		if client.id != None and client.chat_mode.value >= ChatMode.LOCAL.value and client.faction_id == c.faction_id:
 			client.chat(MessageType.FACTION, c.username, message)
 	logging.info("Faction message '%s' sent by %d.", message, c.id)
 	c.send(strings.SOCIAL.FACTION)
+
+def handle_glob(c: Client, args: List[str]) -> None:
+	if len(args) < 1:
+		c.send(strings.USAGE.GLOBAL)
+		return
+	message = validchars.sub("", " ".join(args))
+	if c.premium:
+		message = apply_format_codes(message)
+	for client in network.clients:
+		if client.id != None and client.chat_mode.value >= ChatMode.GLOBAL.value:
+			client.chat(MessageType.GLOBAL, c.username, message)
+	logging.info("Global message '%s' sent by %d.", message, c.id)
+	c.send(strings.SOCIAL.GLOBAL)
 
 def handle_subs(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
@@ -50,7 +63,7 @@ def handle_subs(c: Client, args: List[str]) -> None:
 	username = args.pop(0)
 	for client in network.clients:
 		if client.id != None and client.username == username:
-			if not client.chat_on:
+			if client.chat_mode.value < ChatMode.DIRECT.value:
 				c.send(strings.SOCIAL.NO_CHAT)
 				return
 			message = validchars.sub("", " ".join(args))
@@ -71,7 +84,7 @@ def handle_locl(c: Client, args: List[str]) -> None:
 	if c.premium:
 		message = apply_format_codes(message)
 	for client in network.clients:
-		if client.id != None and client.chat_on and client.structure.system.id == c.structure.system.id:
+		if client.id != None and client.chat_mode.value >= ChatMode.LOCAL.value and client.structure.system.id == c.structure.system.id:
 			client.chat(MessageType.LOCAL, name, message)
 	logging.info("Local message '%s' sent by %d.", message, c.id)
 	c.send(strings.SOCIAL.LOCAL)
@@ -90,8 +103,9 @@ def handle_hail(c: Client, args: List[str]) -> None:
 			if client.structure.system.id != c.structure.system.id:
 				c.send(strings.MISC.NO_STRUCT)
 				return
-			elif not client.chat_on:
+			elif client.chat_mode.value < ChatMode.DIRECT.value:
 				c.send(strings.SOCIAL.NO_CHAT)
+				return
 			message = validchars.sub("", " ".join(args))
 			if c.premium:
 				message = apply_format_codes(message)

@@ -14,7 +14,7 @@ import handlers.info_handler as info_handler
 import handlers.ship_handler as ship_handler
 import handlers.social_handler as social_handler
 import handlers.struct_handler as struct_handler
-from client import Client
+from client import Client, ChatMode
 
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
@@ -67,11 +67,28 @@ def handle_username(c: Client, args: List[str]) -> None:
 		c.send(strings.MISC.USERNAME_TAKEN, username=args[0])
 
 def handle_chat(c: Client, args: List[str]) -> None:
-	c.set_chat(not c.chat_on)
-	if c.chat_on:
-		c.send(strings.MISC.ENABLED_CHAT)
+	if len(args) != 1:
+		c.send(strings.USAGE.CHAT)
+		return
+	try:
+		mode = int(args[0])
+	except ValueError:
+		c.send(strings.MISC.NAN)
+		return
+	chat_mode = None
+	if mode == 0:
+		chat_mode = ChatMode.OFF
+	elif mode == 1:
+		chat_mode = ChatMode.DIRECT
+	elif mode == 2:
+		chat_mode = ChatMode.LOCAL
+	elif mode == 3:
+		chat_mode = ChatMode.GLOBAL
 	else:
-		c.send(strings.MISC.DISABLED_CHAT)
+		c.send(strings.MISC.INVALID_CHAT)
+		return
+	c.set_chat(chat_mode)
+	c.send(strings.MISC.SET_CHAT)
 
 def handle_help(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
@@ -112,6 +129,7 @@ COMMANDS = {
 	"faction_rename": ("Rename your faction.", faction_handler.handle_rename),
 	"faction_rep": ("View or set operator reputations.", faction_handler.handle_frep),
 	"faction_repf": ("View or set faction reputations.", faction_handler.handle_frepf),
+	"glob": ("Broadcast a message to the entire universe.", social_handler.handle_glob),
 	"hail": ("Hail a structure.", social_handler.handle_hail),
 	"help": ("Show list of commands, or usage of a given command.", handle_help),
 	"install": ("Install an outfit from cargo.", struct_handler.handle_install),

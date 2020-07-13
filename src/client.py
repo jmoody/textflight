@@ -15,6 +15,12 @@ import translations
 from outfit import Outfit
 from cargo import Cargo
 
+class ChatMode(Enum):
+	OFF = 0
+	DIRECT = 1
+	LOCAL = 2
+	GLOBAL = 3
+
 WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
 | |_  ___ __ __| |_  / _|| |(_)/ _` || |_  | |_
 |  _|/ -_)\ \ /|  _||  _|| || |\__. ||   \ |  _|
@@ -33,6 +39,7 @@ class MessageType(Enum):
 	LOCAL = "LOCL"
 	HAIL = "HAIL"
 	FACTION = "FACT"
+	GLOBAL = "GLOB"
 
 class Client:
 	read_buffer = ""
@@ -134,9 +141,9 @@ class Client:
 		logging.info("User %d changed their username to '%s'.", self.id, username)
 		return True
 	
-	def set_chat(self, chat: bool) -> None:
-		self.chat_on = chat
-		conn.execute("UPDATE users SET chat_on = ? WHERE id = ?;", (int(chat), self.id))
+	def set_chat(self, chat_mode: ChatMode) -> None:
+		self.chat_mode = chat_mode
+		conn.execute("UPDATE users SET chat_mode = ? WHERE id = ?;", (chat_mode.value, self.id))
 		conn.commit()
 	
 	def login(self, username: str, password: str) -> bool:
@@ -150,7 +157,18 @@ class Client:
 		self.username = ctup["username"]
 		self.email = ctup["email"]
 		self.faction_id = ctup["faction_id"]
-		self.chat_on = bool(ctup["chat_on"])
+		chat_mode = ctup["chat_mode"]
+		if chat_mode == 0:
+			self.chat_mode = ChatMode.OFF
+		elif chat_mode == 1:
+			self.chat_mode = ChatMode.DIRECT
+		elif chat_mode == 2:
+			self.chat_mode = ChatMode.LOCAL
+		elif chat_mode == 3:
+			self.chat_mode = ChatMode.GLOBAL
+		else:
+			self.chat_mode = ChatMode.GLOBAL
+			logging.warning("User %d has been set to invalid chat mode '%d'.", chat_mode)
 		self.language = translations.languages[ctup["language"]]
 		self.premium = bool(ctup["premium"])
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	

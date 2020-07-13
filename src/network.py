@@ -120,14 +120,14 @@ def init():
 			else:
 				if now - s.last_command < RATELIMIT:
 					s.quitting = True
-					logging.warn("Client '%s' exceeded ratelimit.", c.get_ip())
+					logging.warning("Client '%s' exceeded ratelimit.", c.get_ip())
 				client_read(s)
 		
 		# Write to clients
 		for s in clients:
 			if now - s.last_command > TIMEOUT:
 				s.quitting = True
-				logging.warn("Client '%s' timed out.", c.get_ip())
+				logging.warning("Client '%s' timed out.", c.get_ip())
 			else:
 				client_write(s)
 		
@@ -140,7 +140,7 @@ def init():
 					logging.info("Client '%s' disconnected.", s.get_ip())
 				session_length = now - s.session_start
 				if session_length < MIN_SESSION or session_length > MAX_SESSION:
-					logging.warn("Client '%s' exceeded allowed session bounds.", c.get_ip())
+					logging.warning("Client '%s' exceeded allowed session bounds.", c.get_ip())
 				try:
 					s.sock.close()
 				except Exception:

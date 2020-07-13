@@ -18,7 +18,7 @@ create_table("""users (
 	email TEXT,
 	structure_id INTEGER,
 	faction_id INTEGER DEFAULT 0 NOT NULL,
-	chat_on INTEGER DEFAULT 1 NOT NULL,
+	chat_mode INTEGER DEFAULT 3 NOT NULL,
 	language TEXT DEFAULT "%s" NOT NULL,
 	premium INTEGER DEFAULT 0 NOT NULL,
 	last_login INTEGER DEFAULT 0 NOT NULL,
