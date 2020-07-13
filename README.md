@@ -7,7 +7,7 @@ A command line space exploration MMO.
 You can use any SSL-secured socket client to connect to the server. Here is an example using the program `socat`:
 
 ```
-socat - openssl:leagueh.xyz:10000
+socat - ssl:leagueh.xyz:10000
 ```
 
 ## Translation
@@ -45,11 +45,12 @@ By default, the server runs without SSL on port `10000`. You can connect using s
 The following tables can be safely modified. Never modify any other tables while the server is running, as this could cause undefined behaviour or data loss.
 
 - `factions`
-- `faction_systems`
-- `faction_planets`
+- `faction_claims`
 - `faction_reputation`
 - `user_reputation`
 - `personal_reputation`
+- `map`
+- `keys`
 
 When deleting rows from the `users` table, ensure that all rows referencing that user in other tables have also been deleted. When deleting rows from the `structures` table, ensure that all rows referencing that structure in other tables have also been deleted, with the exception of `users.structure_id`, which should be set to `NULL` instead.
 
