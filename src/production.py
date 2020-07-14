@@ -78,6 +78,8 @@ class StatusReport:
 	
 	crew = 0
 	food = 0
+	attack = 1
+	defence = 1
 	
 	def __init__(self):
 		self.generators = {}
@@ -99,6 +101,10 @@ class StatusReport:
 		self.mining_interval = 0
 		self.assembly_rate = 0
 		self.shipyard = 0
+		self.crew = 0
+		self.food = 0
+		self.attack = 1
+		self.defence = 1
 
 def update(s: Structure, now=None) -> StatusReport:
 	structs = list(s.tree)
@@ -177,6 +183,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		
 		report.antigravity+= outfit.prop("antigravity", True)
 		report.assembly_rate+= outfit.prop("assembler", True)
+		report.attack+= outfit.prop("attack", True)
+		report.defence+= outfit.prop("defence", True)
 		report.electron_damage+= outfit.prop("electron", True)
 		report.emp_damage+= outfit.prop("emp", True)
 		report.energy_rate+= outfit.prop("energy")

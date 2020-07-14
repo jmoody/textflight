@@ -12,6 +12,67 @@ from client import Client
 
 conn = database.conn
 
+def handle_capture(c: Client, args: List[str]) -> None:
+	if len(args) != 1:
+		c.send(strings.USAGE.CAPTURE)
+		return
+	try:
+		sid = int(args[0])
+	except ValueError:
+		c.send(strings.MISC.NAN)
+		return
+	s = structure.load_structure(sid)
+	now = time.time()
+	if s == None or s.system.id != c.structure.system.id:
+		c.send(strings.MISC.NO_STRUCT)
+		return
+	elif now - s.created_at < combat.SPAWN_SAFE:
+		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
+		return
+	report = production.update(c.structure)
+	report2 = production.update(s)
+	if s.shield > 0:
+		c.send(strings.COMBAT.SHIELDS_UP)
+		return
+	elif report.crew < 1:
+		c.send(strings.COMBAT.NO_H2H)
+		return
+	
+	# Determine casualties
+	ratio = (report2.defence * report2.crew) / (report.attack * report.crew)
+	deaths2 = report2.crew
+	deaths1 = report2.crew * ratio
+	if deaths1 > report.crew:
+		deaths1 = report.crew
+		deaths2 = report.crew / ratio
+	report.crew-= deaths1
+	c.send(strings.COMBAT.CASUALTIES, enemy=int(deaths2), friendly=int(deaths1))
+	
+	# Apply casualties for our ship
+	for outfit in report.living_spaces:
+		if outfit.counter >= deaths1:
+			outfit.set_counter(outfit.counter - deaths1)
+			break
+		deaths1-= outfit.counter
+	
+	# Apply casualties for enemy ship
+	for outfit in report2.living_spaces:
+		if outfit.counter >= deaths2:
+			outfit.set_counter(outfit.counter - deaths2)
+			break
+		deaths2-= outfit.counter
+		outfit.set_counter(0)
+		outfit.set_counter(0)
+	
+	if report.crew < 1:
+		c.send(strings.COMBAT.CAPTURE_FAILED)
+	else:
+		s.owner_id = c.id
+		conn.execute("UPDATE structures SET owner_id = ? WHERE id = ?;", (c.id, s.id))
+		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.CAPTURE_PENALTY)
+		c.send(strings.COMBAT.CAPTURE_SUCCEEDED)
+		combat.update_targets(c.structure.system.id)
+
 def handle_destroy(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
 		c.send(strings.USAGE.DESTROY)
@@ -30,6 +91,7 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
 		return
 	report = production.update(c.structure)
+	production.update(s)
 	if s.shield > 0:
 		c.send(strings.COMBAT.SHIELDS_UP)
 	elif report.hull_damage < s.outfit_space:
@@ -44,7 +106,6 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 			for struct in s.dock_children:
 				struct.dock_parent = None
 		conn.execute("DELETE FROM structures WHERE id = ?;", (s.id,))
-		conn.commit()
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.DESTROY_PENALTY)
 		combat.clear_targets(s)
 		logging.info("Structure '%d %s' destroyed by %d.", s.id, s.name, c.id)

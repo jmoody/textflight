@@ -94,6 +94,15 @@ Heat Sink
 		Steel 16
 		Thermal Pipe 16
 
+Laser Rifles
+	energy 1
+	attack 1
+	defence 1
+	overcharge 0
+	recipe
+		Beam Guide 1
+		Steel 2
+
 Living Spaces
 	heat 1
 	energy 1

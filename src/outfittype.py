@@ -9,7 +9,9 @@ class OutfitType:
 	properties = {
 		"antigravity": 0,
 		"assembler": 0,
+		"attack": 0,
 		"crew": 0,
+		"defence": 0,
 		"electron": 0,
 		"emp": 0,
 		"energy": 0,

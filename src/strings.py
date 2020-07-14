@@ -38,6 +38,7 @@ class MISC:
 class USAGE:
 	NAV = "Usage: nav [x] [y]"
 	SCAN = "Usage: scan [structure ID]"
+	CAPTURE = "Usage: capture <structure ID>"
 	DESTROY = "Usage: destroy <structure ID>"
 	TARGET = "Usage: target <structure ID>"
 	CANCEL = "Usage: cancel <queue ID> <count>"
@@ -84,6 +85,10 @@ class USAGE:
 
 class COMBAT:
 	SHIELDS_UP = "Cannot destroy structure while its shields are up."
+	NO_H2H = "Crew are needed to capture a structure."
+	CASUALTIES = "{enemy} hostile crew killed. {friendly} crew deceased."
+	CAPTURE_FAILED = "Capture was unsuccessful"
+	CAPTURE_SUCCEEDED = "Capture succeeded."
 	NOT_POWERFUL = "Weapons are not powerful enough to destroy target."
 	DESTROYED = "Destroyed structure '{id} {name}'."
 	NO_TARGETS = "Weapons are not targeting any structures."

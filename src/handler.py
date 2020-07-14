@@ -105,8 +105,8 @@ COMMANDS = {
 	"airlock": ("Remove someone from your structure.", struct_handler.handle_airlock),
 	"base": ("Construct a planetary base.", craft_handler.handle_base),
 	"beam": ("Beam onto another structure.", struct_handler.handle_beam),
-	"trans": ("Transfer control core to another structure.", struct_handler.handle_trans),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
+	"capture": ("Attempt to capture a nearby structure.", combat_handler.handle_capture),
 	"chat": ("Toggles chat on or off.", handle_chat),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
@@ -153,6 +153,7 @@ COMMANDS = {
 	"subs": ("Send subspace message to another user.", social_handler.handle_subs),
 	"supply": ("Supply energy to a docked structure.", struct_handler.handle_supply),
 	"target": ("View or add combat targets.", combat_handler.handle_target),
+	"trans": ("Transfer control core to another structure.", struct_handler.handle_trans),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
 	"username": ("Change your username.", handle_username),
 }
