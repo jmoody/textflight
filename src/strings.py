@@ -183,6 +183,7 @@ class INFO:
 	PLANET_CLAIMED = "\t[{index}] (faction: {faction}) ({planet_type})"
 	PLANET = "\t[{index}] ({planet_type})"
 	STRUCTURES = "Structures:"
+	SHIP = "\t{id} {name} [{sclass}]"
 	STRUCTURE = "\t{id} {name}"
 	
 	CALLSIGN = "{id} {name}"

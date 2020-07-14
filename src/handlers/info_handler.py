@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from enum import Enum
 
 import database
 import system
@@ -11,6 +12,19 @@ import strings
 from client import Client
 
 conn = database.conn
+
+class ShipClass(Enum):
+	JUNK = "JNK"
+	SATELLITE = "SAT"
+	METEOR = "MET"
+	ASTEROID = "AST"
+	LUNAR = "LUN"
+	PLANETARY = "PLA"
+	GIANT = "GIA"
+	DWARF = "DWA"
+	STELLAR = "STE"
+	NEBULA = "NEB"
+	GALAXY = "GAL"
 
 def handle_nav(c: Client, args: List[str]) -> None:
 	sys = c.structure.system
@@ -94,9 +108,33 @@ def handle_nav(c: Client, args: List[str]) -> None:
 		index+= 1
 	if not remote:
 		c.send(strings.INFO.STRUCTURES)
-		for stup in conn.execute("SELECT id, name FROM structures WHERE sys_id = ?;", (c.structure.system.id_db,)):
-			sid, name = stup
-			c.send(strings.INFO.STRUCTURE, id=sid, name=name)
+		for stup in conn.execute("SELECT id, name, type, outfit_space FROM structures WHERE sys_id = ?;", (c.structure.system.id_db,)):
+			sid, name, stype, os = stup
+			if stype == "ship":
+				sclass = ShipClass.JUNK
+				if os >= 1024:
+					sclass = ShipClass.GALAXY
+				elif os >= 512:
+					sclass = ShipClass.NEBULA
+				elif os >= 256:
+					sclass = ShipClass.STELLAR
+				elif os >= 128:
+					sclass = ShipClass.DWARF
+				elif os >= 64:
+					sclass = ShipClass.GIANT
+				elif os >= 32:
+					sclass = ShipClass.PLANETARY
+				elif os >= 16:
+					sclass = ShipClass.LUNAR
+				elif os >= 8:
+					sclass = ShipClass.ASTEROID
+				elif os >= 4:
+					sclass = ShipClass.METEOR
+				elif os >= 2:
+					sclass = ShipClass.SATELLITE
+				c.send(strings.INFO.SHIP, id=sid, name=name, sclass=sclass.value)
+			else:
+				c.send(strings.INFO.STRUCTURE, id=sid, name=name)
 
 def handle_scan(c: Client, args: List[str]) -> None:
 	s = c.structure
