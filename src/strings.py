@@ -161,6 +161,7 @@ class FACTION:
 class INFO:
 	
 	NOT_DISCOVERED = "No available data on system."
+	COORDS = "Coordinates: {x},{y}"
 	SYSTEM = "System: {name}"
 	CLAIMED_BY = "Claimed by '{faction}'."
 	BRIGHTNESS = "Brightness: {brightness}"

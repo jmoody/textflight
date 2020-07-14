@@ -31,6 +31,13 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	elif len(args) != 0:
 		c.send(strings.USAGE.NAV)
 		return
+	cx = sys.x
+	cy = sys.y
+	if cx > pow(2, 31):
+		cx-= 1 << 32
+	if cy > pow(2, 31):
+		cy-= 1 << 32
+	c.send(strings.INFO.COORDS, x=cx, y=cy)
 	fid, name = territory.get_system(sys)
 	if name != None:
 		c.send(strings.INFO.SYSTEM, name=name)
