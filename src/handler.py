@@ -14,7 +14,7 @@ import handlers.info_handler as info_handler
 import handlers.ship_handler as ship_handler
 import handlers.social_handler as social_handler
 import handlers.struct_handler as struct_handler
-from client import Client, ChatMode
+from client import Client, ChatMode, MessageType
 
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
@@ -180,7 +180,13 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip())
 			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
 			c.send(strings.MISC.LOGGED_IN, username=username)
+			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
+			# TODO: Send global join message
+			for cl in network.clients:
+				if cl.id != None and cl.chat_mode.value >= ChatMode.GLOBAL.value:
+					message = cl.translate(strings.MISC.JOINED).format(username=c.username)
+					cl.chat(MessageType.GLOBAL, "", message)
 			if c.email == None:
 				c.send(strings.MISC.EMAIL_WARNING)
 		elif c.quitting:

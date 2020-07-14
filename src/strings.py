@@ -26,6 +26,8 @@ class MISC:
 	DISCONNECTED_BY = "You have been disconnected by another session."
 	DISCONNECTED_EXISTING = "Disconnected an existing session from '{ip}'."
 	LOGGED_IN = "Logged in as '{username}'."
+	CLIENTS_CONNECTED = "{num} operators connected."
+	JOINED = "'{username}' connected to server."
 	EMAIL_WARNING = "WARNING: Please set an email address with the 'email' command. This is used only for resetting your password."
 	INCORRECT_LOGIN = "Incorrect username or password."
 	REGISTERED = "Registration successful! Try logging in with 'login <username> <password>'."
