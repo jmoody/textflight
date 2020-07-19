@@ -6,7 +6,6 @@ import client
 import system
 import network
 import strings
-import translations
 import handlers.combat_handler as combat_handler
 import handlers.craft_handler as craft_handler
 import handlers.faction_handler as faction_handler
@@ -14,81 +13,8 @@ import handlers.info_handler as info_handler
 import handlers.ship_handler as ship_handler
 import handlers.social_handler as social_handler
 import handlers.struct_handler as struct_handler
+import handlers.user_handler as user_handler
 from client import Client, ChatMode, MessageType
-
-def handle_email(c: Client, args: List[str]) -> None:
-	if len(args) != 1:
-		c.send(strings.USAGE.EMAIL)
-		return
-	c.set_email(args[0])
-	c.send(strings.MISC.UPDATED_EMAIL)
-
-def handle_exit(c: Client, args: List[str]) -> None:
-	c.quit()
-
-def handle_language(c: Client, args: List[str]) -> None:
-	if len(args) == 0:
-		for lang in translations.languages.keys():
-			c.send(lang)
-	elif len(args) == 1:
-		if args[0] != "client" and not args[0] in translations.languages:
-			c.send(strings.MISC.NO_LANGUAGE, lang=args[0])
-		else:
-			c.set_language(args[0])
-			c.send(strings.MISC.UPDATED_LANGUAGE)
-	else:
-		c.send(strings.USAGE.LANGUAGE)
-
-def handle_passwd(c: Client, args: List[str]) -> None:
-	if len(args) < 1:
-		c.send(strings.USAGE.PASSWD)
-		return
-	c.set_password(" ".join(args))
-	c.send(strings.MISC.UPDATED_PASSWORD)
-
-def handle_redeem(c: Client, args: List[str]) -> None:
-	if len(args) != 1:
-		c.send(strings.USAGE.REDEEM)
-	elif c.premium:
-		c.send(strings.MISC.ALREADY_PREMIUM)
-	elif c.redeem_code(args[0]):
-		c.send(strings.MISC.REDEEM_SUCCESS)
-	else:
-		c.send(strings.MISC.REDEEM_FAIL)
-
-def handle_username(c: Client, args: List[str]) -> None:
-	if len(args) != 1:
-		c.send(strings.USAGE.USERNAME)
-	elif not c.checkvalid(args[0]):
-		c.send(strings.MISC.ALPHANUM_USERNAME)
-	elif c.set_username(args[0]):
-		c.send(strings.MISC.UPDATED_USERNAME)
-	else:
-		c.send(strings.MISC.USERNAME_TAKEN, username=args[0])
-
-def handle_chat(c: Client, args: List[str]) -> None:
-	if len(args) != 1:
-		c.send(strings.USAGE.CHAT)
-		return
-	try:
-		mode = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
-		return
-	chat_mode = None
-	if mode == 0:
-		chat_mode = ChatMode.OFF
-	elif mode == 1:
-		chat_mode = ChatMode.DIRECT
-	elif mode == 2:
-		chat_mode = ChatMode.LOCAL
-	elif mode == 3:
-		chat_mode = ChatMode.GLOBAL
-	else:
-		c.send(strings.MISC.INVALID_CHAT)
-		return
-	c.set_chat(chat_mode)
-	c.send(strings.MISC.SET_CHAT)
 
 def handle_help(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
@@ -107,14 +33,14 @@ COMMANDS = {
 	"beam": ("Beam onto another structure.", struct_handler.handle_beam),
 	"cancel": ("Cancel a queued assembly. Yields no resources.", craft_handler.handle_cancel),
 	"capture": ("Attempt to capture a nearby structure.", combat_handler.handle_capture),
-	"chat": ("Toggles chat on or off.", handle_chat),
+	"chat": ("Toggles chat on or off.", user_handler.handle_chat),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
 	"destroy": ("Destroy a nearby structure.", combat_handler.handle_destroy),
 	"dock": ("Dock to a nearby structure.", ship_handler.handle_dock),
 	"eject": ("Disconnect docked structures.", struct_handler.handle_eject),
-	"email": ("Set your email address.", handle_email),
-	"exit": ("Disconnect from server.", handle_exit),
+	"email": ("Set your email address.", user_handler.handle_email),
+	"exit": ("Disconnect from server.", user_handler.handle_exit),
 	"fact": ("Broadcast a message to your faction.", social_handler.handle_fact),
 	"faction_chown": ("Change faction owner.", faction_handler.handle_chown),
 	"faction_claim": ("Claim a system or planet for your faction.", faction_handler.handle_claim),
@@ -136,15 +62,15 @@ COMMANDS = {
 	"jettison": ("Discard cargo into space.", craft_handler.handle_jettison),
 	"jump": ("Jump to another system.", ship_handler.handle_jump),
 	"land": ("Land on a planet.", ship_handler.handle_land),
-	"language": ("Set your language.", handle_language),
+	"language": ("Set your language.", user_handler.handle_language),
 	"launch": ("Launch off a planet.", ship_handler.handle_launch),
 	"load": ("Load cargo onto another structure.", struct_handler.handle_load),
 	"locl": ("Broadcast a message to the local system.", social_handler.handle_locl),
 	"nav": ("Get navigation information.", info_handler.handle_nav),
-	"passwd": ("Change your password.", handle_passwd),
+	"passwd": ("Change your password.", user_handler.handle_passwd),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
 	"rdock": ("Remotely dock a structure.", ship_handler.handle_rdock),
-	"redeem": ("Redeems a code to unlock premium status.", handle_redeem),
+	"redeem": ("Redeems a code to unlock premium status.", user_handler.handle_redeem),
 	"rep": ("View or set personal operator reputations.", faction_handler.handle_rep),
 	"repf": ("View or set personal faction reputations.", faction_handler.handle_repf),
 	"scan": ("Scan nearby structures.", info_handler.handle_scan),
@@ -155,7 +81,7 @@ COMMANDS = {
 	"target": ("View or add combat targets.", combat_handler.handle_target),
 	"trans": ("Transfer control core to another structure.", struct_handler.handle_trans),
 	"uninstall": ("Uninstall an outfit into cargo.", struct_handler.handle_uninstall),
-	"username": ("Change your username.", handle_username),
+	"username": ("Change your username.", user_handler.handle_username),
 }
 
 def handle_command(c: Client, cmd: str, args: List[str]) -> None:
@@ -179,7 +105,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					c2.send(strings.MISC.DISCONNECTED_BY)
 					c2.quitting = True
 					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip())
-			c.send("\033[2J\033[H" + client.WELCOME_MESSAGE)
+			c.send("\033[2J\033[H" + strings.MISC.WELCOME_MESSAGE)
 			c.send(strings.MISC.LOGGED_IN, username=username)
 			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)

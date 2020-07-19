@@ -10,21 +10,16 @@ class MISC:
 	
 	GOODBYE = "Goodbye."
 	RESPAWN = "Please wait {remaining} seconds before respawning."
-	UPDATED_EMAIL = "Updated email address."
-	UPDATED_LANGUAGE = "Updated language."
-	NO_LANGUAGE = "Language '{lang}' is not available."
-	UPDATED_PASSWORD = "Updated password."
-	ALREADY_PREMIUM = "This account already has premium status."
-	REDEEM_SUCCESS = "Redeemed premium unlock code. Enjoy your premium status!"
-	REDEEM_FAIL = "Premium code is invalid. Please check that the code was entered correctly."
-	ALPHANUM_USERNAME = "Username can only contain letters and numbers."
-	UPDATED_USERNAME = "Updated username."
-	USERNAME_TAKEN = "Username '{username}' is already taken."
-	INVALID_CHAT = "Invalid chat mode. Acceptable values between 0 and 3."
-	SET_CHAT = "Updated chat settings."
 	NO_COMMAND = "No command '{command}'."
 	DISCONNECTED_BY = "You have been disconnected by another session."
 	DISCONNECTED_EXISTING = "Disconnected an existing session from '{ip}'."
+	WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
+| |_  ___ __ __| |_  / _|| |(_)/ _` || |_  | |_
+|  _|/ -_)\ \ /|  _||  _|| || |\__. ||   \ |  _|
+ \__|\___|/_\_\ \__||_|  |_||_||___/ |_||_| \__|
+
+TEXTFLIGHT remote access protocol v0.1a.
+Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 	LOGGED_IN = "Logged in as '{username}'."
 	CLIENTS_CONNECTED = "{num} operators connected."
 	JOINED = "'{username}' connected to server."
@@ -82,6 +77,20 @@ class USAGE:
 	LOGIN = "Usage: login <username> <password>"
 	REGISTER = "Usage: register <username> <password>"
 	LANGUAGE = "Usage: language [language code]"
+
+class USER:
+	UPDATED_EMAIL = "Updated email address."
+	UPDATED_LANGUAGE = "Updated language."
+	NO_LANGUAGE = "Language '{lang}' is not available."
+	UPDATED_PASSWORD = "Updated password."
+	ALREADY_PREMIUM = "This account already has premium status."
+	REDEEM_SUCCESS = "Redeemed premium unlock code. Enjoy your premium status!"
+	REDEEM_FAIL = "Premium code is invalid. Please check that the code was entered correctly."
+	ALPHANUM_USERNAME = "Username can only contain letters and numbers."
+	UPDATED_USERNAME = "Updated username."
+	USERNAME_TAKEN = "Username '{username}' is already taken."
+	INVALID_CHAT = "Invalid chat mode. Acceptable values between 0 and 3."
+	SET_CHAT = "Updated chat settings."
 
 class COMBAT:
 	SHIELDS_UP = "Cannot destroy structure while its shields are up."

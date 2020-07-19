@@ -21,13 +21,6 @@ class ChatMode(Enum):
 	LOCAL = 2
 	GLOBAL = 3
 
-WELCOME_MESSAGE = """ _              _     __  _  _  __ _  _     _
-| |_  ___ __ __| |_  / _|| |(_)/ _` || |_  | |_
-|  _|/ -_)\ \ /|  _||  _|| || |\__. ||   \ |  _|
- \__|\___|/_\_\ \__||_|  |_||_||___/ |_||_| \__|
-
-TEXTFLIGHT remote access protocol v0.1a.
-Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 ccf = config.get_section("client")
 SPAWN_TIME = ccf.getint("SpawnTime")
 
@@ -58,7 +51,7 @@ class Client:
 		self.tree = set()
 		self.session_start = time.time()
 		self.last_command = time.time()
-		self.send(WELCOME_MESSAGE)
+		self.send(strings.MISC.WELCOME_MESSAGE)
 		self.prompt()
 	
 	def fileno(self) -> int:
@@ -77,7 +70,9 @@ class Client:
 		return self.translator.gettext(message)
 	
 	def chat(self, mtype: MessageType, author: str, message: str) -> None:
-		msg = "[%s][%s] %s" % (mtype.value, author, message)
+		msg = message
+		if author != "":
+			msg = "[%s][%s] %s" % (mtype.value, author, message)
 		self.msg_buffer.append(msg)
 	
 	def send(self, message: str, args = None, **kwargs) -> None:
