@@ -183,7 +183,6 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			c.send(strings.MISC.LOGGED_IN, username=username)
 			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
-			# TODO: Send global join message
 			for cl in network.clients:
 				if cl.id != None and cl.chat_mode.value >= ChatMode.GLOBAL.value:
 					message = cl.translate(strings.MISC.JOINED).format(username=c.username)

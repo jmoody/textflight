@@ -32,6 +32,7 @@ ccf = config.get_section("client")
 SPAWN_TIME = ccf.getint("SpawnTime")
 
 conn = database.conn
+DAY = 60 * 60 * 24
 VALIDREGEX = re.compile(ccf.get("ValidateRegex"))
 
 class MessageType(Enum):
@@ -173,6 +174,14 @@ class Client:
 			logging.warning("User %d has been set to invalid chat mode '%d'.", chat_mode)
 		self.language = translations.languages[ctup["language"]]
 		self.premium = bool(ctup["premium"])
+		self.streak = ctup["streak"]
+		last_login_day = int(ctup["last_login"] / DAY)
+		today = int(time.time() / DAY)
+		if last_login_day < today - 1:
+			self.streak = 0
+		elif last_login_day < today:
+			self.streak+= 1
+			# TODO: Give reward
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:
@@ -186,7 +195,7 @@ class Client:
 			conn.execute("UPDATE users SET structure_id = ?, last_spawn = strftime('%s', 'now') WHERE id = ?;",
 				(self.structure.id, self.id))
 			logging.info("User %d spawned.", self.id)
-		conn.execute("UPDATE users SET last_login = strftime('%s', 'now') WHERE id = ?", (self.id,))
+		conn.execute("UPDATE users SET last_login = strftime('%s', 'now'), streak = ? WHERE id = ?", (self.id, self.streak))
 		conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (self.id, self.structure.system.id_db))
 		conn.commit()
 		combat.update_targets(self.structure.system.id)
