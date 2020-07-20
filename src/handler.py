@@ -36,6 +36,7 @@ COMMANDS = {
 	"chat": ("Toggles chat on or off.", user_handler.handle_chat),
 	"construct": ("Construct a new structure.", craft_handler.handle_construct),
 	"craft": ("Queue an item for assembly.", craft_handler.handle_craft),
+	"crate": ("Unpack a crate.", user_handler.handle_crate),
 	"destroy": ("Destroy a nearby structure.", combat_handler.handle_destroy),
 	"dock": ("Dock to a nearby structure.", ship_handler.handle_dock),
 	"eject": ("Disconnect docked structures.", struct_handler.handle_eject),

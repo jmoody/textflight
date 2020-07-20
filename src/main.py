@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import random
 
 import config
 
@@ -16,4 +17,5 @@ import database
 import network
 import system
 
+random.seed()
 network.init()

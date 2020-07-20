@@ -169,14 +169,8 @@ class Client:
 			logging.warning("User %d has been set to invalid chat mode '%d'.", chat_mode)
 		self.language = translations.languages[ctup["language"]]
 		self.premium = bool(ctup["premium"])
-		self.streak = ctup["streak"]
-		last_login_day = int(ctup["last_login"] / DAY)
-		today = int(time.time() / DAY)
-		if last_login_day < today - 1:
-			self.streak = 0
-		elif last_login_day < today:
-			self.streak+= 1
-			# TODO: Give reward
+		
+		# Check that user is in a structure
 		c.execute("SELECT * FROM structures WHERE id = ?;", (ctup["structure_id"],))	
 		self.structure = structure.load_structure(ctup["structure_id"])
 		if self.structure == None:
@@ -190,6 +184,20 @@ class Client:
 			conn.execute("UPDATE users SET structure_id = ?, last_spawn = strftime('%s', 'now') WHERE id = ?;",
 				(self.structure.id, self.id))
 			logging.info("User %d spawned.", self.id)
+		
+		# Daily rewards
+		self.streak = ctup["streak"]
+		last_login_day = int(ctup["last_login"] / DAY)
+		today = int(time.time() / DAY)
+		if last_login_day < today - 1:
+			self.streak = 0
+		elif last_login_day < today:
+			self.streak+= 1
+			quality = pow(2, int(math.log2(self.streak)))
+			Cargo("Crate", 1, quality).add(self.structure)
+			self.send(strings.MISC.RECEIVED_CRATE, streak=self.streak)
+		
+		# Update database
 		conn.execute("UPDATE users SET last_login = strftime('%s', 'now'), streak = ? WHERE id = ?", (self.id, self.streak))
 		conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (self.id, self.structure.system.id_db))
 		conn.commit()

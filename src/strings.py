@@ -29,6 +29,7 @@ Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 	NOT_LOGGED_IN = "You are not logged in. Use 'login <username> <password>' to log in, or 'register <username> <password>' to create a new account."
 	STRUCT_DESTROYED = "Your structure was destroyed. Log in again to respawn."
 	HELP_MESSAGE = "No such command '{command}'. Use 'help' for a list of commands."
+	RECEIVED_CRATE = "Received a crate for {streak} day login streak!"
 
 class USAGE:
 	NAV = "Usage: nav [x] [y]"
@@ -77,6 +78,7 @@ class USAGE:
 	LOGIN = "Usage: login <username> <password>"
 	REGISTER = "Usage: register <username> <password>"
 	LANGUAGE = "Usage: language [language code]"
+	CRATE = "Usage: crate <cargo ID> <count>"
 
 class USER:
 	UPDATED_EMAIL = "Updated email address."
@@ -91,6 +93,9 @@ class USER:
 	USERNAME_TAKEN = "Username '{username}' is already taken."
 	INVALID_CHAT = "Invalid chat mode. Acceptable values between 0 and 3."
 	SET_CHAT = "Updated chat settings."
+	NOT_CRATE = "This is not a crate."
+	CRATE_EXTRA = "Uncrated {name} ({extra})!"
+	CRATE = "Uncrated {name} x{count}!"
 
 class COMBAT:
 	SHIELDS_UP = "Cannot destroy structure while its shields are up."

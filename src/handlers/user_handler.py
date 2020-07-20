@@ -2,7 +2,13 @@ from typing import List
 
 import translations
 import strings
+import crafting
+import config
+import random
 from client import Client, ChatMode
+from cargo import Cargo
+
+CRATE_MAX_OUTFIT = config.get_section("crafting").getint("CrateMaxOutfit")
 
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
@@ -77,4 +83,34 @@ def handle_chat(c: Client, args: List[str]) -> None:
 		return
 	c.set_chat(chat_mode)
 	c.send(strings.USER.SET_CHAT)
+
+def handle_crate(c: Client, args: List[str]) -> None:
+	if len(args) != 2:
+		c.send(strings.USAGE.CRATE)
+		return
+	try:
+		cindex = int(args[0])
+		count = int(args[1])
+	except ValueError:
+		c.send(strings.MISC.NAN)
+		return
+	if cindex >= len(c.structure.cargo):
+		c.send(strings.MISC.NO_CARGO)
+		return
+	cargo = c.structure.cargo[cindex]
+	if cargo.type != "Crate":
+		c.send(strings.USER.NOT_CRATE)
+		return
+	cargo.extra = int(cargo.extra)
+	for i in range(count):
+		recipe = random.choice(list(crafting.recipes.values()))
+		if recipe.has_extra:
+			extra = random.randint(cargo.extra / 2, min(cargo.extra, CRATE_MAX_OUTFIT))
+			Cargo(recipe.output, 1, extra).add(c.structure)
+			c.send(strings.USER.CRATE_EXTRA, name=recipe.output, extra=extra)
+		else:
+			count = random.randint(cargo.extra / 2, cargo.extra)
+			Cargo(recipe.output, count).add(c.structure)
+			c.send(strings.USER.CRATE, name=recipe.output, count=count)
+	cargo.less(count, c.structure)
 
