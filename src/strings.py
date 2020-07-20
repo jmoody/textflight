@@ -18,7 +18,7 @@ class MISC:
 |  _|/ -_)\ \ /|  _||  _|| || |\__. ||   \ |  _|
  \__|\___|/_\_\ \__||_|  |_||_||___/ |_||_| \__|
 
-TEXTFLIGHT remote access protocol v0.1a.
+TEXTFLIGHT remote access protocol {version}.
 Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 	LOGGED_IN = "Logged in as '{username}'."
 	CLIENTS_CONNECTED = "{num} operators connected."

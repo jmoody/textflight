@@ -51,7 +51,7 @@ class Client:
 		self.tree = set()
 		self.session_start = time.time()
 		self.last_command = time.time()
-		self.send(strings.MISC.WELCOME_MESSAGE)
+		self.send(strings.MISC.WELCOME_MESSAGE, version=config.VERSION)
 		self.prompt()
 	
 	def fileno(self) -> int:

@@ -6,6 +6,7 @@ import client
 import system
 import network
 import strings
+import config
 import handlers.combat_handler as combat_handler
 import handlers.craft_handler as craft_handler
 import handlers.faction_handler as faction_handler
@@ -107,7 +108,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					c2.send(strings.MISC.DISCONNECTED_BY)
 					c2.quitting = True
 					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip())
-			c.send("\033[2J\033[H" + strings.MISC.WELCOME_MESSAGE)
+			c.send("\033[2J\033[H" + strings.MISC.WELCOME_MESSAGE, version=config.VERSION)
 			c.send(strings.MISC.LOGGED_IN, username=username)
 			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
