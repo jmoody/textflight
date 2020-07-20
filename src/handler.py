@@ -43,6 +43,7 @@ COMMANDS = {
 	"eject": ("Disconnect docked structures.", struct_handler.handle_eject),
 	"email": ("Set your email address.", user_handler.handle_email),
 	"exit": ("Disconnect from server.", user_handler.handle_exit),
+	"expand": ("Expand a base.", craft_handler.handle_expand),
 	"fact": ("Broadcast a message to your faction.", social_handler.handle_fact),
 	"faction_chown": ("Change faction owner.", faction_handler.handle_chown),
 	"faction_claim": ("Claim a system or planet for your faction.", faction_handler.handle_claim),

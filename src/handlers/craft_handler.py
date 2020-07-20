@@ -175,6 +175,74 @@ def handle_craft(c: Client, args: List[str]) -> None:
 	else:
 		c.send(strings.USAGE.CRAFT)
 
+def handle_expand(c: Client, args: List[str]) -> None:
+	
+	# Validate input
+	s = c.structure
+	if len(args) != 1:
+		c.send(strings.USAGE.EXPAND)
+		return
+	try:
+		count = int(args[0])
+	except ValueError:
+		c.send(strings.MISC.NAN)
+		return
+	if count < 1:
+		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
+		return
+	elif s.type != "base":
+		c.send(strings.CRAFT.NOT_BASE)
+		return
+	outfit_space = s.outfit_space + count
+	
+	# Check max outfit space
+	pmax = MAX_PLANET_SPACE
+	if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
+		c.send(strings.CRAFT.NEED_ROCKY)
+		return
+	elif s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
+		pmax = MAX_HABITABLE_SPACE
+	total = outfit_space
+	for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
+		total+= pbase["outfit_space"]
+	if total > pmax:
+		c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax)
+		return
+	
+	# Determine the cost
+	if s.system.planets[s.planet_id].ptype == PlanetType.HABITABLE:
+		cost_factor = crafting.COST_FACTOR_HABITABLE
+	else:
+		cost_factor = crafting.COST_FACTOR_PLANET
+	cost = math.ceil(pow(outfit_space, cost_factor)) - math.ceil(pow(s.outfit_space, cost_factor))
+	
+	# Remove the materials
+	has_struct = False
+	has_plating = False
+	for cargo in s.cargo:
+		if cargo.type == "Light Material":
+			has_struct = cargo.count >= cost
+			if not has_struct:
+				break
+		elif cargo.type == "Heavy Plating":
+			has_plating = cargo.count >= outfit_space
+			if not has_plating:
+				break
+	if not has_struct:
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
+		return
+	if not has_plating:
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
+		return
+	Cargo("Light Material", cost).remove(s)
+	Cargo("Heavy Plating", outfit_space).remove(s)
+	
+	# Increase outfit space
+	s.outfit_space = outfit_space
+	conn.execute("UPDATE structures SET outfit_space = ? WHERE id = ?;", (outfit_space, s.id))
+	conn.commit()
+	c.send(strings.CRAFT.EXPANDED, id=s.id, name=s.name, size=outfit_space)
+
 def handle_jettison(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
 		c.send(strings.USAGE.JETTISON)
