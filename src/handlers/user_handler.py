@@ -101,16 +101,20 @@ def handle_crate(c: Client, args: List[str]) -> None:
 	if cargo.type != "Crate":
 		c.send(strings.USER.NOT_CRATE)
 		return
+	elif cargo.count < count:
+		c.send(strings.CRAFT.INSUFFICIENTS)
+		return
 	cargo.extra = int(cargo.extra)
 	for i in range(count):
 		recipe = random.choice(list(crafting.recipes.values()))
 		if recipe.has_extra:
-			extra = min(random.randint(cargo.extra / 2), CRATE_MAX_OUTFIT)
+			extra = min(random.randint(cargo.extra / 2, cargo.extra), CRATE_MAX_OUTFIT)
 			Cargo(recipe.output, 1, extra).add(c.structure)
 			c.send(strings.USER.CRATE_EXTRA, name=recipe.output, extra=extra)
 		else:
-			count = random.randint(cargo.extra / 2, cargo.extra)
-			Cargo(recipe.output, count).add(c.structure)
-			c.send(strings.USER.CRATE, name=recipe.output, count=count)
+			ccount = random.randint(cargo.extra / 2, cargo.extra)
+			Cargo(recipe.output, ccount).add(c.structure)
+			c.send(strings.USER.CRATE, name=recipe.output, count=ccount)
+	print(count)
 	cargo.less(count, c.structure)
 
