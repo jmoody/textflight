@@ -272,6 +272,32 @@ def handle_supply(c: Client, args: List[str]):
 	conn.commit()
 	c.send(strings.STRUCT.SUPPLIED, count=count, id=sid, name=target.name)
 
+def handle_swap(c: Client, args: List[str]):
+	if len(args) != 2:
+		c.send(strings.USAGE.SWAP)
+		return
+	try:
+		oindex1 = int(args[0])
+		oindex2 = int(args[1])
+	except ValueError:
+		c.send(strings.MISC.NAN)
+		return
+	if oindex1 >= len(c.structure.outfits) or oindex2 >= len(c.structure.outfits):
+		c.send(strings.STRUCT.NO_OUTFIT)
+		return
+	outfit1 = c.structure.outfits[oindex1]
+	outfit2 = c.structure.outfits[oindex2]
+	conn.execute("UPDATE outfits SET type = ?, mark = ?, setting = ?, counter = ? WHERE id = ?;",
+		(outfit1.type.name, outfit1.mark, outfit1.setting, outfit1.counter, outfit2.id))
+	conn.execute("UPDATE outfits SET type = ?, mark = ?, setting = ?, counter = ? WHERE id = ?;",
+		(outfit2.type.name, outfit2.mark, outfit2.setting, outfit2.counter, outfit1.id))
+	c.structure.outfits[oindex1] = outfit2
+	c.structure.outfits[oindex2] = outfit1
+	id1 = outfit1.id
+	outfit1.id = outfit2.id
+	outfit2.id = outfit1.id
+	c.send(strings.STRUCT.SWAPPED)
+
 def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:
 		c.send(strings.USAGE.UNINSTALL)

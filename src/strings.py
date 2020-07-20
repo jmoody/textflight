@@ -54,6 +54,7 @@ class USAGE:
 	LOAD = "Usage: load <structure ID> <cargo ID> <count>"
 	SET = "Usage: set <outfit ID> <setting>"
 	SUPPLY = "Usage: supply <structure ID> <energy>"
+	SWAP = "Usage: swap <outfit ID> <outfit ID>"
 	UNINSTALL = "Usage: uninstall <outfit ID>"
 	DOCK = "Usage: dock <structure ID>"
 	RDOCK = "Usage: rdock <structure ID>"
@@ -302,5 +303,6 @@ class STRUCT:
 	ENERGY_GTZ = "Energy must be greater than zero."
 	NO_ENERGY = "Insufficient energy."
 	SUPPLIED = "Supplied {count} energy to '{id} {name}'."
+	SWAPPED = "Swapped outfits."
 	UNINSTALLED = "Uninstalled outfit '{name}' into cargo."
 
