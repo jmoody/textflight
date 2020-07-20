@@ -127,6 +127,7 @@ class CRAFT:
 	INSUFFICIENT = "Insufficient '{material}' (needs {count})."
 	CREATED_STRUCT = "Successfully created structure '{name}' with size {size}."
 	RECIPE = "[{index}] {name} (x{count})"
+	NO_ASSEMBLERS = "Assemblers are not online."
 	NO_RECIPE = "Recipe does not exist."
 	INSUFFICIENTS = "Insufficient resources."
 	MISSING_MARK = "Mark not specified."

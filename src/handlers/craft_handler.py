@@ -124,7 +124,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	c.send(strings.CRAFT.CREATED_STRUCT, name=name, size=outfit_space)
 
 def handle_craft(c: Client, args: List[str]) -> None:
-	production.update(c.structure)
+	report = production.update(c.structure)
 	available = crafting.list_available(c.structure)
 	if len(args) < 1:
 		i = 0
@@ -132,6 +132,9 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			c.send(strings.CRAFT.RECIPE, index=i, name=c.translate(q.type), count=q.count)
 			i+= 1
 	elif 1 < len(args) < 4:
+		if report.assembly_rate == 0:
+			c.send(strings.CRAFT.NO_ASSEMBLERS)
+			return
 		
 		# Validate input
 		try:
