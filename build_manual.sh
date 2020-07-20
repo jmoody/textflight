@@ -18,6 +18,5 @@ for f in $SRCDIR/*.md; do
 done
 
 # Generate HTML and PDF manuals
-# TODO: Fancy formatting and stuff
 pandoc -s $MANUAL_MD -o $MANUAL_HTML
 pandoc -s $MANUAL_MD -o $MANUAL_PDF
