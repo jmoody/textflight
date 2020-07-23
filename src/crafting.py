@@ -15,14 +15,14 @@ COST_FACTOR_SHIP = crfc.getfloat("CostFactorShip")
 COST_FACTOR_HABITABLE = crfc.getfloat("CostFactorHabitable")
 COST_FACTOR_PLANET = crfc.getfloat("CostFactorPlanet")
 
-def load_recipes(name: str) -> Dict[str, Recipe]:
+def load_recipes(name: str) -> List[Recipe]:
 	f = config.opendata(name + ".txt")
-	out = {}
+	out = []
 	current = None
 	for line in f:
 		line = line.strip()
 		if line == "":
-			out[current.output] = current
+			out.append(current)
 			current = None
 		elif current == None:
 			current = Recipe(line, {})
@@ -34,52 +34,54 @@ def load_recipes(name: str) -> Dict[str, Recipe]:
 	f.close()
 	return out
 
-def load_all_recipes() -> Dict[str, Recipe]:
+def load_all_recipes() -> List[Recipe]:
 	recipes = load_recipes("basic_recipes")
 	
 	# Load outfit recipes
 	for outfit in outfittype.outfits.values():
 		if outfit.recipe != None:
-			recipes[outfit.name] = outfit.recipe
+			recipes.append(outfit.recipe)
 	
 	# Load ore recipes
 	for atype in system.AsteroidType:
 		ore = atype.value
 		ref = ore[:-4]
-		recipes[ref] = Recipe(ref, {ore: 1})
+		recipes.append(Recipe(ref, {ore: 1}))
 	
 	return recipes
 
 def generate_craftqueues(recipes: Dict[str, Recipe]) -> List[CraftQueue]:
-	craft_queues = []
-	for recipe in recipes.values():
+	craft_queues = {}
+	rid = 0
+	for recipe in recipes:
 		q = CraftQueue(recipe.output, inf)
 		q._rec = recipe
 		q._rec2 = copy.deepcopy(recipe)
-		craft_queues.append(q)
+		craft_queues[rid] = q
+		rid+= 1
 	return craft_queues
 
 recipes = load_all_recipes()
 craft_queues = generate_craftqueues(recipes)
 
-def list_available(s: Structure) -> List[CraftQueue]:
+def list_available(s: Structure) -> Dict[int, CraftQueue]:
 	out = copy.deepcopy(craft_queues)
 	
 	# Determine maximum count of each recipe
 	for cargo in s.cargo:
-		for q in out.copy():
+		for rid, q in out.copy().items():
 			if cargo.type in q._rec2.inputs:
 				q.count = min(q.count, int(cargo.count / q._rec2.inputs[cargo.type]))
 				if q.count < 1:
-					out.remove(q)
+					del out[rid]
 					continue
 				del q._rec2.inputs[cargo.type]
 	
 	# Remove unavailable recipes
-	for q in out.copy():
+	for rid, q in out.copy().items():
 		q.work = craft_time(q)
 		if len(q._rec2.inputs) > 0 or q.count == inf:
-			out.remove(q)
+			del out[rid]
 	
 	return out
 

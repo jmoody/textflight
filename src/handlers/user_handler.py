@@ -106,7 +106,7 @@ def handle_crate(c: Client, args: List[str]) -> None:
 		return
 	cargo.extra = int(cargo.extra)
 	for i in range(count):
-		recipe = random.choice(list(crafting.recipes.values()))
+		recipe = random.choice(crafting.recipes)
 		if recipe.has_extra:
 			extra = min(random.randint(cargo.extra / 2, cargo.extra), CRATE_MAX_OUTFIT)
 			Cargo(recipe.output, 1, extra).add(c.structure)

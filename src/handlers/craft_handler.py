@@ -127,10 +127,8 @@ def handle_craft(c: Client, args: List[str]) -> None:
 	report = production.update(c.structure)
 	available = crafting.list_available(c.structure)
 	if len(args) < 1:
-		i = 0
-		for q in available:
-			c.send(strings.CRAFT.RECIPE, index=i, name=c.translate(q.type), count=q.count)
-			i+= 1
+		for rid, q in available.items():
+			c.send(strings.CRAFT.RECIPE, index=rid, name=c.translate(q.type), count=q.count)
 	elif 1 < len(args) < 4:
 		if report.assembly_rate == 0:
 			c.send(strings.CRAFT.NO_ASSEMBLERS)
@@ -149,7 +147,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 		if count < 1:
 			c.send(strings.MISC.COUNT_GTZ)
 			return
-		elif index >= len(available):
+		elif not index in available:
 			c.send(strings.CRAFT.NO_RECIPE)
 			return
 		q = available[index]

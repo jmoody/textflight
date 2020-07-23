@@ -8,7 +8,7 @@ def print_prop(outfit, desc: str, prop: str) -> None:
 
 print("## SECTION 09: DATA FILES\n")
 print("Basic materials:\n")
-for recipe in crafting.recipes.values():
+for recipe in crafting.recipes:
 	if not recipe.output in outfittype.outfits:
 		print("- " + recipe.output)
 		mats = "\t- Materials: "

@@ -35,7 +35,8 @@ for name, obj in inspect.getmembers(strings):
 	if inspect.isclass(obj):
 		load_strings_class(output, obj)
 output.update(outfittype.outfits.keys())
-output.update(crafting.recipes.keys())
+for recipe in crafting.recipes:
+	output.add(recipe.output)
 for pt in system.PlanetType:
 	output.add(pt.name.lower().capitalize())
 for at in system.AsteroidType:
