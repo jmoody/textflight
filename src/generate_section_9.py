@@ -39,6 +39,7 @@ for outfit in outfittype.outfits.values():
 	print_prop(outfit, "Drains %d shield per second from targets.", "electron")
 	print_prop(outfit, "Drains %d energy per second from targets.", "emp")
 	print_prop(outfit, "Consumes one Uranium Fuel Cell every %d seconds.", "fission")
+	print_prop(outfit, "Provides food for %d colonists.", "food")
 	print_prop(outfit, "Consumes one Hydrogen Fuel Cell every %d seconds.", "fusion")
 	print_prop(outfit, "Generates %d energy per second on bases.", "geo")
 	print_prop(outfit, "Deals %d hull damage using the destroy command.", "hull")
@@ -50,6 +51,7 @@ for outfit in outfittype.outfits.values():
 	print_prop(outfit, "Regenerates %d shield energy per second.", "shield")
 	print_prop(outfit, "Allows construction of ships. (%d)", "shipyard")
 	print_prop(outfit, "Cools %d heat per second on bases.", "sink")
+	print_prop(outfit, "Consumes one Supply Packages every %d seconds.", "supplies")
 	print_prop(outfit, "Generates a maximum of %d solar energy.", "solar")
 	print_prop(outfit, "Generates %d warp charge per second.", "warp")
 

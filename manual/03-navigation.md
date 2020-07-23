@@ -23,9 +23,9 @@ Antigravity engines are used to land and take off from planets, with the `land` 
 Systems vary in their available resources; each system carries a specific type of ore, with varying densities. Planets can be used to construct bases, with the exception of gas giants. Each type also carries their own unique traits:
 
 - Gas: Various gases can be collected using mining beams, but no bases can be constructed.
-- Barren: Causes additional heat production based on the structure's size.
-- Frozen: No special traits.
-- Greenhouse: Various gases can be collected using mining beams, and causes additional heat production based on the structure's size.
-- Habitable: Bases are extremely cheap to construct.
+- Barren: Causes additional heat production based on the structure's size. Bases can have up to 2048 outfit space.
+- Frozen: No special traits. Bases can have up to 2048 outfit space.
+- Greenhouse: Various gases can be collected using mining beams, and causes additional heat production based on the structure's size. Bases can have up to 2048 outfit space.
+- Habitable: Bases are extremely cheap to construct, and can have up to 4096 outfit space. Living spaces don't require Distribution Centers and have increased capacity.
 
 To dock to another structure, use the `dock` command. The `dock` command can be executed on a remote ship using the `rdock` command. Ships can only be docked to one structure at a time, and ships cannot be docked to if they are already docked to another structure. Other types of structures, such as bases, cannot be docked but can be docked to. The `eject` command is used to eject docked structures; passing without arguments will eject all docked structures.
