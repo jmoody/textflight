@@ -119,7 +119,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	if base:
 		struct = structure.create_structure(name, c.id, "base", outfit_space, s.system, s.planet_id)
 	else:
-		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system, s.planet_id, s.id)
+		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system, s.planet_id)
 	logging.info("Structure '%d %s' created by %d.", struct.id, name, c.id)
 	c.send(strings.CRAFT.CREATED_STRUCT, name=name, size=outfit_space)
 
