@@ -67,6 +67,7 @@ COMMANDS = {
 	"land": ("Land on a planet.", ship_handler.handle_land),
 	"language": ("Set your language.", user_handler.handle_language),
 	"launch": ("Launch off a planet.", ship_handler.handle_launch),
+	"leaderboard": ("Display the colonies leaderboard.", faction_handler.handle_leaderboard),
 	"load": ("Load cargo onto another structure.", struct_handler.handle_load),
 	"locl": ("Broadcast a message to the local system.", social_handler.handle_locl),
 	"nav": ("Get navigation information.", info_handler.handle_nav),

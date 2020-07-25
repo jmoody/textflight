@@ -176,6 +176,10 @@ class FACTION:
 	PERSONAL_REPUTATION_OF = "Personal reputation of '{name}': {reputation}"
 	PERSONAL_REPUTATION_WITH = "Personal reputation with '{name}': {reputation}"
 	SET_PERSONAL_REPUTATION = "Set personal reputation of '{name}' to {reputation}."
+	LEADERBOARD_FACTIONS = "Factions:"
+	LEADERBOARD_FACTION = "\t#{rank}: {name} ({score})"
+	LEADERBOARD_OPERATORS = "Operators:"
+	LEADERBOARD_OPERATOR = "\t#{rank}: {name} ({score})"
 
 class INFO:
 	

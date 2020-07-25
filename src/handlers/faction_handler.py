@@ -139,6 +139,19 @@ def handle_kick(c: Client, args: List[str]) -> None:
 	else:
 		c.send(strings.FACTION.NO_MEMBER)
 
+def handle_leaderboard(c: Client, args: List[str]) -> None:
+	c.send(strings.FACTION.LEADERBOARD_FACTIONS)
+	i = 1
+	results = conn.execute("SELECT name, (SELECT SUM(score) FROM users WHERE users.faction_id = factions.id) AS score FROM factions WHERE id != 0 ORDER BY score DESC LIMIT 9;")
+	for frow in results:
+		c.send(strings.FACTION.LEADERBOARD_FACTION, rank=i, name=frow["name"], score=frow["score"])
+		i+= 1
+	c.send(strings.FACTION.LEADERBOARD_OPERATORS)
+	i = 1
+	for urow in conn.execute("SELECT username, score FROM users ORDER BY score DESC LIMIT 9;"):
+		c.send(strings.FACTION.LEADERBOARD_OPERATOR, rank=i, name=urow["username"], score=urow["score"])
+		i+= 1
+
 def handle_leave(c: Client, args: List[str]) -> None:
 	fact = faction.get_faction(c.faction_id)
 	members = fact.list_members()
