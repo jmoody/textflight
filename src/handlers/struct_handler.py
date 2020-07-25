@@ -54,15 +54,17 @@ def handle_beam(c: Client, args: List[str]):
 		c.send(strings.STRUCT.BEAMED, id=sid, name=s.name)
 
 def handle_trans(c: Client, args: List[str]):
-	if len(args) != 1:
-		c.send(strings.USAGE.TRANS)
-		return
-	try:
-		sid = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
-		return
-	if c.structure.dock_parent == None:
+	if c.structure.dock_parent != None:
+		s = c.structure.dock_parent
+	else:
+		if len(args) != 1:
+			c.send(strings.USAGE.TRANS)
+			return
+		try:
+			sid = int(args[0])
+		except ValueError:
+			c.send(strings.MISC.NAN)
+			return
 		s = None
 		for struct in c.structure.dock_children:
 			if struct.id == sid:
@@ -71,18 +73,13 @@ def handle_trans(c: Client, args: List[str]):
 		if s == None:
 			c.send(strings.STRUCT.NO_DOCK)
 			return
-	else:
-		if c.structure.dock_parent.id != sid:
-			c.send(strings.STRUCT.NO_DOCK)
-			return
-		s = c.structure.dock_parent
 	if not faction.has_permission(c, s, faction.TRANS_MIN):
 		c.send(strings.MISC.PERMISSION_DENIED)
 		return
 	c.structure = s
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
 	conn.commit()
-	c.send(strings.STRUCT.TRANSFERRED, id=sid, name=s.name)
+	c.send(strings.STRUCT.TRANSFERRED, id=s.id, name=s.name)
 
 def handle_eject(c: Client, args: List[str]):
 	s = c.structure
@@ -160,13 +157,12 @@ def handle_load(c: Client, args: List[str]):
 	
 	# Validate input
 	s = c.structure
-	if len(args) != 3:
+	if len(args) < 2:
 		c.send(strings.USAGE.LOAD)
 		return
 	try:
-		sid = int(args[0])
+		count = int(args[0])
 		cindex = int(args[1])
-		count = int(args[2])
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
@@ -180,11 +176,16 @@ def handle_load(c: Client, args: List[str]):
 	
 	# Find docked target
 	if s.dock_parent != None:
-		if s.dock_parent.id != sid:
-			c.send(strings.STRUCT.NO_DOCK)
-			return
 		target = s.dock_parent
 	else:
+		if len(args) != 3:
+			c.send(strings.USAGE.LOAD)
+			return
+		try:
+			sid = int(args[2])
+		except ValueError:
+			c.send(strings.MISC.NAN)
+			return
 		target = None
 		for ship in s.dock_children:
 			if ship.id == sid:
@@ -202,7 +203,7 @@ def handle_load(c: Client, args: List[str]):
 	s.cargo[cindex].less(count, s)
 	car.count = count
 	car.add(target)
-	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=sid, name=target.name)
+	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=target.id, name=target.name)
 
 def handle_set(c: Client, args: List[str]):
 	if len(args) != 2:
@@ -227,13 +228,12 @@ def handle_set(c: Client, args: List[str]):
 		c.send(strings.STRUCT.SET, name=c.translate(outfit.type.name), setting=setting)
 
 def handle_supply(c: Client, args: List[str]):
-	if len(args) != 2:
+	if len(args) < 1:
 		c.send(strings.USAGE.SUPPLY)
 		return
 	s = c.structure
 	try:
-		sid = int(args[0])
-		count = int(args[1])
+		count = int(args[0])
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
@@ -247,11 +247,16 @@ def handle_supply(c: Client, args: List[str]):
 	
 	# Find docked target
 	if s.dock_parent != None:
-		if s.dock_parent.id != sid:
-			c.send(strings.STRUCT.NO_DOCK)
-			return
 		target = s.dock_parent
 	else:
+		if len(args) != 2:
+			c.send(strings.USAGE.SUPPLY)
+			return
+		try:
+			sid = int(args[1])
+		except ValueError:
+			c.send(strings.MISC.NAN)
+			return
 		target = None
 		for ship in s.dock_children:
 			if ship.id == sid:
@@ -268,9 +273,9 @@ def handle_supply(c: Client, args: List[str]):
 	s.energy-= count
 	target.energy+= count
 	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (s.energy, s.id))
-	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (target.energy, sid))
+	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (target.energy, target.id))
 	conn.commit()
-	c.send(strings.STRUCT.SUPPLIED, count=count, id=sid, name=target.name)
+	c.send(strings.STRUCT.SUPPLIED, count=count, id=target.id, name=target.name)
 
 def handle_swap(c: Client, args: List[str]):
 	if len(args) != 2:
