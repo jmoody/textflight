@@ -161,13 +161,13 @@ def handle_load(c: Client, args: List[str]):
 		c.send(strings.USAGE.LOAD)
 		return
 	try:
-		count = int(args[0])
-		cindex = int(args[1])
+		cindex = int(args[0])
+		count = int(args[1])
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
 	production.update(s)
-	if count < 1:
+	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
 		return
 	elif cindex >= len(s.cargo):
@@ -197,9 +197,13 @@ def handle_load(c: Client, args: List[str]):
 	
 	# Move the cargo
 	car = copy.copy(s.cargo[cindex])
-	if car.count < count:
-		c.send(strings.CRAFT.INSUFFICIENTS)
-		return
+	if count == 0:
+		count = car.count
+	elif car.count < count:
+		count = car.count
+		if count < 0:
+			c.send(strings.CRAFT.INSUFFICIENTS)
+			return
 	s.cargo[cindex].less(count, s)
 	car.count = count
 	car.add(target)

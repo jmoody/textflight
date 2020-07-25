@@ -251,11 +251,13 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
-	if count < 1:
+	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
 	elif cindex >= len(c.structure.cargo):
 		c.send(strings.MISC.NO_CARGO)
 	else:
+		if count == 0:
+			count = c.structure.cargo[cindex].count
 		count = min(c.structure.cargo[cindex].count, count)
 		c.structure.cargo[cindex].less(count, c.structure)
 		c.send(strings.CRAFT.JETTISONED, count=count)
