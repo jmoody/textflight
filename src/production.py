@@ -324,6 +324,7 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 			outfit.set_setting(0)
 	
 	# Update if systems have not failed and have been active for more than 0 seconds
+	delta_crew = 0
 	if s.interrupt != stime and not report.shutdown:
 		active = stime - s.interrupt
 		report.mining_interval = update_mining(s, report.mining_power, active)
@@ -341,11 +342,14 @@ def update_step(s: Structure, report: StatusReport, do_write: bool):
 				max_crew = outfit.prop("crew", True) * 128
 			else:
 				report.food-= outfit.counter
+			orig_counter = outfit.counter
 			if max_crew < outfit.counter:
 				outfit.set_counter(max(max_crew, outfit.counter - active / BREED_RATE))
 			else:
 				outfit.set_counter(min(max_crew, outfit.counter + active / BREED_RATE))
+			delta_crew+= int(outfit.counter) - int(orig_counter)
 			report.crew+= outfit.counter
+	conn.execute("UPDATE users SET score = score + ? WHERE id = ?;", (delta_crew, s.owner_id))
 	
 	# Handle system failure
 	if report.shutdown:

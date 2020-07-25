@@ -24,6 +24,7 @@ create_table("""users (
 	last_login INTEGER DEFAULT 0 NOT NULL,
 	last_spawn INTEGER DEFAULT 0 NOT NULL,
 	streak INTEGER DEFAULT 0 NOT NULL,
+	score INTEGER DEFAULT 0 NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id),
 	FOREIGN KEY(faction_id) REFERENCES factions(id)
 );""" % (config.get_section("data").get("Language"),))
