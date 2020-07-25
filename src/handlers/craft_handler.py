@@ -41,6 +41,7 @@ def handle_cancel(c: Client, args: List[str]) -> None:
 	else:
 		c.structure.craft_queue[qindex].less(count, c.structure)
 		c.send(strings.CRAFT.CANCELLED, count=count)
+		production.update(c.structure, send_updates=True)
 
 def handle_construct(c: Client, args: List[str], base = False) -> None:
 	
@@ -122,6 +123,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		struct = structure.create_structure(name, c.id, "ship", outfit_space, s.system, s.planet_id)
 	logging.info("Structure '%d %s' created by %d.", struct.id, name, c.id)
 	c.send(strings.CRAFT.CREATED_STRUCT, name=name, size=outfit_space)
+	production.update(c.structure, send_updates=True)
 
 def handle_craft(c: Client, args: List[str]) -> None:
 	report = production.update(c.structure)
@@ -169,6 +171,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			q.extra = extra
 		q.add(c.structure)
 		c.send(strings.CRAFT.QUEUED, count=count)
+		production.update(c.structure, send_updates=True)
 		
 	else:
 		c.send(strings.USAGE.CRAFT)
@@ -240,6 +243,7 @@ def handle_expand(c: Client, args: List[str]) -> None:
 	conn.execute("UPDATE structures SET outfit_space = ? WHERE id = ?;", (outfit_space, s.id))
 	conn.commit()
 	c.send(strings.CRAFT.EXPANDED, id=s.id, name=s.name, size=outfit_space)
+	production.update(c.structure, send_updates=True)
 
 def handle_jettison(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
@@ -261,6 +265,7 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 		count = min(c.structure.cargo[cindex].count, count)
 		c.structure.cargo[cindex].less(count, c.structure)
 		c.send(strings.CRAFT.JETTISONED, count=count)
+	production.update(c.structure, send_updates=True)
 
 def handle_queue(c: Client, args: List[str]) -> None:
 	i = 0

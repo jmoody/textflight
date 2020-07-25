@@ -78,6 +78,7 @@ def handle_capture(c: Client, args: List[str]) -> None:
 		c.send(strings.COMBAT.CAPTURE_SUCCEEDED)
 		combat.update_targets(c.structure.system.id)
 	conn.commit()
+	production.update(c.structure, send_updates=True)
 
 def handle_destroy(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
@@ -161,6 +162,7 @@ def handle_target(c: Client, args: List[str]) -> None:
 		combat.update_targets(s.system.id)
 		logging.info("User %d targeting structures '%d %s'.", (c.id, s.id, s.name))
 		c.send(strings.COMBAT.TARGETING, id=s.id, name=s.name)
+		production.update(c.structure, send_updates=True)
 	else:
 		c.send(strings.USAGE.TARGET)
 

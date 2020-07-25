@@ -80,6 +80,7 @@ def handle_trans(c: Client, args: List[str]):
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
 	conn.commit()
 	c.send(strings.STRUCT.TRANSFERRED, id=s.id, name=s.name)
+	production.update(c.structure, send_updates=True)
 
 def handle_eject(c: Client, args: List[str]):
 	s = c.structure
@@ -208,6 +209,7 @@ def handle_load(c: Client, args: List[str]):
 	car.count = count
 	car.add(target)
 	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=target.id, name=target.name)
+	production.update(c.structure, send_updates=True)
 
 def handle_set(c: Client, args: List[str]):
 	if len(args) != 2:
@@ -230,6 +232,7 @@ def handle_set(c: Client, args: List[str]):
 		production.update(c.structure)
 		outfit.set_setting(setting)
 		c.send(strings.STRUCT.SET, name=c.translate(outfit.type.name), setting=setting)
+		production.update(c.structure, send_updates=True)
 
 def handle_supply(c: Client, args: List[str]):
 	if len(args) < 1:
@@ -280,6 +283,7 @@ def handle_supply(c: Client, args: List[str]):
 	conn.execute("UPDATE structures SET energy = ? WHERE id = ?;", (target.energy, target.id))
 	conn.commit()
 	c.send(strings.STRUCT.SUPPLIED, count=count, id=target.id, name=target.name)
+	production.update(c.structure, send_updates=True)
 
 def handle_swap(c: Client, args: List[str]):
 	if len(args) != 2:

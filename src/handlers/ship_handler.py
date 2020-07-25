@@ -106,6 +106,7 @@ def handle_land(c: Client, args: List[str]) -> None:
 	conn.execute("UPDATE structures SET planet_id = ?, mining_progress = 0 WHERE id = ?;", (pid, c.structure.id))
 	conn.commit()
 	c.send(strings.SHIP.LANDED, planet=pid)
+	production.update(c.structure, send_updates=True)
 
 def handle_launch(c: Client, args: List[str]) -> None:
 	s = c.structure
@@ -130,6 +131,7 @@ def handle_launch(c: Client, args: List[str]) -> None:
 	conn.execute("UPDATE structures SET planet_id = NULL, mining_progress = 0 WHERE id = ?;", (s.id,))
 	conn.commit()
 	c.send(strings.SHIP.LAUNCHED)
+	production.update(c.structure, send_updates=True)
 
 def handle_jump(c: Client, args: List[str]) -> None:
 	
@@ -196,4 +198,5 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	combat.clear_targets(s)
 	combat.update_targets(sys.id)
 	c.send(strings.SHIP.JUMP_COMPLETE, charge=round(s.warp_charge / report.mass * 100))
+	production.update(c.structure, send_updates=True)
 

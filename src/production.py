@@ -5,6 +5,8 @@ import database
 import crafting
 import config
 import system
+import network
+from statusreport import StatusReport
 from structure import Structure
 from cargo import Cargo
 
@@ -39,74 +41,7 @@ XENON_COUNT = minc.getint("XenonCount")
 PLANET_HEAT_RATE = minc.getfloat("PlanetHeat")
 BREED_RATE = config.get_section("crafting").getint("BreedRate")
 
-class StatusReport:
-	
-	_stime = 0
-	shutdown = False
-	
-	mass = 0
-	outfit_space = 0
-	heat_rate = 0
-	max_heat = 0
-	energy_rate = 0
-	max_energy = 0
-	overheat_time = None
-	powerloss_time = None
-	
-	_fission_cells = 0
-	_fusion_cells = 0
-	_supplies = 0
-	
-	shield_rate = 0
-	max_shield = 0
-	has_shields = False
-	
-	warp_rate = 0
-	normal_warp = 0
-	antigravity = 0
-	
-	electron_damage = 0
-	emp_damage = 0
-	hull_damage = 0
-	plasma_damage = 0
-	has_weapons = False
-	
-	mining_power = 0
-	mining_interval = 0
-	assembly_rate = 0
-	shipyard = 0
-	
-	crew = 0
-	food = 0
-	attack = 1
-	defence = 1
-	
-	def __init__(self):
-		self.generators = {}
-		self.living_spaces = []
-		self._gtimes = {}
-	
-	def zero(self) -> None:
-		self.heat_rate = 0
-		self.energy_rate = 0
-		self.shield_rate = 0
-		self.warp_rate = 0
-		self.antigravity = 0
-		self.electron_damage = 0
-		self.emp_damage = 0
-		self.hull_damage = 0
-		self.plasma_damage = 0
-		self.has_weapons = False
-		self.mining_power = 0
-		self.mining_interval = 0
-		self.assembly_rate = 0
-		self.shipyard = 0
-		self.crew = 0
-		self.food = 0
-		self.attack = 1
-		self.defence = 1
-
-def update(s: Structure, now=None) -> StatusReport:
+def update(s: Structure, now=None, send_updates=False) -> StatusReport:
 	structs = list(s.tree)
 	if now == None:
 		now = time.time()
@@ -131,6 +66,8 @@ def update(s: Structure, now=None) -> StatusReport:
 			
 			# Remove structure from tree if it's shut down
 			do_write = False
+			bf_stime = r._stime
+			r._stime = min(now, r._stime)
 			if r.shutdown or min_stime == now:
 				if struct == s:
 					report = r
@@ -142,6 +79,12 @@ def update(s: Structure, now=None) -> StatusReport:
 			
 			# Update structure to stime
 			update_step(struct, r, do_write)
+			if send_updates and (r.shutdown or min_stime == now):
+				r._stime = bf_stime
+				r._now = now
+				for client in network.clients:
+					if client.client_mode and client.structure == struct:
+						client.send_bytes(str(r).encode("utf-8"))
 	
 	# Return StatusReport for target structure
 	return report
@@ -233,7 +176,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.has_weapons = True
 	
 	# Determine stime for heat
-	stime = report.now
+	stime = float("inf")
 	if report.heat_rate >= 0:
 		if s.heat == report.max_heat:
 			report.overheat_time = 0

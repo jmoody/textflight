@@ -78,7 +78,7 @@ class Client:
 	def send(self, message: str, args = None, **kwargs) -> None:
 		msg = ""
 		if self.client_mode:
-			msg+= "[]" + message + "|" + self.translate(message)
+			msg+= message + "|" + self.translate(message)
 			for k, v in kwargs.items():
 				msg+= "|%s=%s" % (k, v)
 			msg+= "\n"
