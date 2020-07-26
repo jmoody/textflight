@@ -196,7 +196,7 @@ class Client:
 			self.display_streak_message = True
 		elif last_login_day < today:
 			self.streak+= 1
-			quality = int(pow(2, int(math.log2(self.streak))))
+			quality = str(int(pow(2, int(math.log2(self.streak)))))
 			Cargo("Crate", 1, quality).add(self.structure)
 			self.display_streak_message = True
 		

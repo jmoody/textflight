@@ -9,7 +9,7 @@ class Cargo:
 	def __init__(self, ctype, count, extra = None, id = None, structure_id = None) -> None:
 		self.type = ctype
 		self.count = count
-		self.extra = str(extra)
+		self.extra = extra
 		self.id = id
 		self.structure_id = structure_id
 	
