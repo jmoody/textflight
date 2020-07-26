@@ -176,7 +176,7 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 		report.has_weapons = True
 	
 	# Determine stime for heat
-	stime = float("inf")
+	stime = now
 	if report.heat_rate >= 0:
 		if s.heat == report.max_heat:
 			report.overheat_time = 0
@@ -184,7 +184,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.overheat_time = s.interrupt + (report.max_heat - s.heat) / report.heat_rate
 		if report.overheat_time != None and report.overheat_time < stime:
 			stime = report.overheat_time
-			report.shutdown = True
+			if report.overheat_time < now:
+				report.shutdown = True
 	
 	# Determine stime for generators
 	if len(report.generators) > 0:
@@ -200,7 +201,8 @@ def determine_stime(s: Structure, now: float) -> StatusReport:
 			report.powerloss_time = s.interrupt + s.energy / report.energy_rate
 		if report.powerloss_time != None and report.powerloss_time < stime:
 			stime = report.powerloss_time
-			report.shutdown = True
+			if report.powerloss_time < now:
+				report.shutdown = True
 	
 	report._stime = stime
 	return report
