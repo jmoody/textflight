@@ -2,6 +2,7 @@ import bcrypt
 import time
 import re
 import logging
+import math
 from enum import Enum
 from threading import Lock
 
@@ -42,6 +43,7 @@ class Client:
 	quitting = False
 	translator = translations.get_default()
 	client_mode = False
+	display_streak_message = False
 	
 	id = None
 	username = None
@@ -191,14 +193,15 @@ class Client:
 		today = int(time.time() / DAY)
 		if last_login_day < today - 1:
 			self.streak = 0
+			self.display_streak_message = True
 		elif last_login_day < today:
 			self.streak+= 1
-			quality = pow(2, int(math.log2(self.streak)))
+			quality = int(pow(2, int(math.log2(self.streak))))
 			Cargo("Crate", 1, quality).add(self.structure)
-			self.send(strings.MISC.RECEIVED_CRATE, streak=self.streak)
+			self.display_streak_message = True
 		
 		# Update database
-		conn.execute("UPDATE users SET last_login = strftime('%s', 'now'), streak = ? WHERE id = ?", (self.id, self.streak))
+		conn.execute("UPDATE users SET last_login = strftime('%s', 'now'), streak = ? WHERE id = ?", (self.streak, self.id))
 		conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (self.id, self.structure.system.id_db))
 		conn.commit()
 		combat.update_targets(self.structure.system.id)

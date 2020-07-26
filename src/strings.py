@@ -29,6 +29,7 @@ Protocol manual available for transfer: https://leagueh.xyz/tf/"""
 	NOT_LOGGED_IN = "You are not logged in. Use 'login <username> <password>' to log in, or 'register <username> <password>' to create a new account."
 	STRUCT_DESTROYED = "Your structure was destroyed. Log in again to respawn."
 	HELP_MESSAGE = "No such command '{command}'. Use 'help' for a list of commands."
+	RESET_STREAK = "You lost your login streak."
 	RECEIVED_CRATE = "Received a crate for {streak} day login streak!"
 
 class USAGE:

@@ -113,6 +113,11 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			c.send("\033[2J\033[H" + strings.MISC.WELCOME_MESSAGE, version=config.VERSION)
 			c.send(strings.MISC.LOGGED_IN, username=username)
 			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
+			if c.display_streak_message:
+				if c.streak == 0:
+					c.send(strings.MISC.RESET_STREAK)
+				else:
+					c.send(strings.MISC.RECEIVED_CRATE, streak=c.streak)
 			logging.info("Client '%s' logged in as %d ('%s').", c.get_ip(), c.id, username)
 			for cl in network.clients:
 				if cl.id != None and cl.chat_mode.value >= ChatMode.GLOBAL.value:
