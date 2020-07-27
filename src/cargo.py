@@ -15,7 +15,7 @@ class Cargo:
 	
 	def add(self, s) -> None:
 		for c in s.cargo:
-			if c.type == self.type and c.extra == self.extra:
+			if c.type == self.type and str(c.extra) == str(self.extra):
 				c.count+= self.count
 				conn.execute("UPDATE cargo SET count = ? WHERE id = ?;", (c.count, c.id))
 				conn.commit()
@@ -29,7 +29,7 @@ class Cargo:
 	
 	def remove(self, s) -> bool:
 		for c in s.cargo:
-			if c.type == self.type and c.extra == self.extra:
+			if c.type == self.type and str(c.extra) == str(self.extra):
 				c.less(self.count, s)
 				return True
 		return False

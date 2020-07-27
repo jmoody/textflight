@@ -304,6 +304,7 @@ def handle_swap(c: Client, args: List[str]):
 		(outfit1.type.name, outfit1.mark, outfit1.setting, outfit1.counter, outfit2.id))
 	conn.execute("UPDATE outfits SET type = ?, mark = ?, setting = ?, counter = ? WHERE id = ?;",
 		(outfit2.type.name, outfit2.mark, outfit2.setting, outfit2.counter, outfit1.id))
+	conn.commit()
 	c.structure.outfits[oindex1] = outfit2
 	c.structure.outfits[oindex2] = outfit1
 	id1 = outfit1.id
