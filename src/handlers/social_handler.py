@@ -45,7 +45,7 @@ def handle_fact(c: Client, args: List[str]) -> None:
 
 def handle_glob(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.GLOBAL)
+		c.send(strings.USAGE.GLOB)
 		return
 	message = validchars.sub("", " ".join(args))
 	if c.premium:

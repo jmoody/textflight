@@ -45,6 +45,7 @@ class USAGE:
 	EXPAND = "Usage: expand <outfit space>"
 	JETTISON = "Usage: jettison <cargo ID> <count>"
 	FACT = "Usage: fact <message>"
+	GLOB = "Usage: glob <message>"
 	SUBS = "Usage: subs <username> <message>"
 	LOCL = "Usage: locl <message>"
 	HAIL = "Usage: hail <structure ID> <message>"
