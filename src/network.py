@@ -62,6 +62,7 @@ def client_read(client):
 	index = client.read_buffer.find('\n')
 	while index != -1:
 		command = client.read_buffer[:index].strip().split(' ')
+		client.last_command = time.time()
 		if client.id == None:
 			handler.handle_login(client, command[0], command[1:])
 		elif client.structure == None or client.structure._destroyed:
@@ -73,7 +74,6 @@ def client_read(client):
 
 def client_write(client):
 	if len(client.write_buffer) > 0:
-		client.last_command = time.time()
 		try:
 			client.write_buffer = client.write_buffer[client.sock.send(client.write_buffer):]
 		except Exception as ex:
