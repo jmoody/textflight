@@ -191,7 +191,7 @@ def handle_scan(c: Client, args: List[str]) -> None:
 
 def handle_status(c: Client, args: List[str]) -> None:
 	s = c.structure
-	report = production.update(s)
+	report = production.update(s, send_updates=True)
 	
 	# Heat and energy management
 	c.send(strings.INFO.GENERAL)
