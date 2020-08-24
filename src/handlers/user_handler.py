@@ -115,6 +115,5 @@ def handle_crate(c: Client, args: List[str]) -> None:
 			ccount = random.randint(cargo.extra / 2, cargo.extra)
 			Cargo(recipe.output, ccount).add(c.structure)
 			c.send(strings.USER.CRATE, name=recipe.output, count=ccount)
-	print(count)
 	cargo.less(count, c.structure)
 

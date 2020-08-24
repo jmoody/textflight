@@ -63,7 +63,7 @@ def update_target_duo(fact: faction.Faction, s: structure.Structure, stup, repor
 				break
 		if not found:
 			s2 = structure.load_structure(stup["id"])
-			report2 = production.update(s2, report.now)
+			report2 = production.update(s2, report.now, send_updates=True)
 			if report.has_weapons or report2.has_weapons:
 				add_target(s, s2)
 
