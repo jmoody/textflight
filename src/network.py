@@ -32,6 +32,7 @@ def client_read(client):
 		client.quitting = True
 		return
 	except Exception as ex:
+		logging.warning(str(ex))
 		client.quitting = True
 		return
 	if len(buf) == 0:
