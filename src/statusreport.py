@@ -67,8 +67,10 @@ class StatusReport:
 		self.attack = 1
 		self.defence = 1
 	
-	def __str__(self) -> str:
+	def to_str(self, s) -> str:
 		out = "STATUSREPORT BEGIN\n"
+		
+		# StatusReport values
 		out+= "now: %f\n" % self.now
 		out+= "stime: %f\n" % self._stime
 		out+= "shutdown: %d\n" % int(self.shutdown)
@@ -94,6 +96,17 @@ class StatusReport:
 		out+= "food: %f\n" % self.food
 		out+= "attack: %f\n" % self.attack
 		out+= "defence: %f\n" % self.defence
+		
+		# Structure values
+		out+= "id: %d\n" % s.id
+		out+= "name: %s\n" % s.name
+		out+= "type: %s\n" % s.type
+		out+= "total_outfit_space: %s\n" % s.outfit_space
+		out+= "heat: %f\n" % s.heat
+		out+= "energy: %f\n" % s.energy
+		out+= "shield: %f\n" % s.shield
+		out+= "warp_charge: %f\n" % s.warp_charge
+		
 		out+= "STATUSREPORT END\n"
 		return out
 

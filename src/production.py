@@ -84,7 +84,7 @@ def update(s: Structure, now=None, send_updates=False) -> StatusReport:
 				r._now = now
 				for client in network.clients:
 					if client.client_mode and client.structure == struct:
-						client.send_bytes(str(r).encode("utf-8"))
+						client.send_bytes(r.to_str(client.structure).encode("utf-8"))
 	
 	# Return StatusReport for target structure
 	return report
