@@ -115,8 +115,8 @@ class StatusReport:
 		out+= "asteroid_richness: %d\n" % s.system.asteroid_richness
 		for planet in s.system.planets:
 			out+= "planet: %d\n" % planet.ptype.value
-		if s._dock_id != None:
-			out+= "dock_id: %d\n" % s._dock_id
+		if s.dock_parent != None:
+			out+= "dock_id: %d\n" % s.dock_parent.id
 		out+= "queue_size: %d\n" % len(s.craft_queue)
 		out+= "targets_size: %d\n" % len(s.targets)
 		
