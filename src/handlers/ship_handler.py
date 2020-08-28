@@ -41,7 +41,7 @@ def handle_dock(c: Client, args: List[str]) -> None:
 		target.dock_children.append(s)
 		s.dock_parent = target
 		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (sid, s.id))
-		conn.commit()
+		production.update(s, send_updates=True)
 		c.send(strings.SHIP.DOCKED_TO, id=sid, name=target.name)
 
 def handle_rdock(c: Client, args: List[str]) -> None:
@@ -73,7 +73,7 @@ def handle_rdock(c: Client, args: List[str]) -> None:
 		s.dock_children.append(target)
 		target.dock_parent = s
 		conn.execute("UPDATE structures SET dock_id = ? WHERE id = ?;", (s.id, sid))
-		conn.commit()
+		production.update(s, send_updates=True)
 		c.send(strings.SHIP.DOCKED, id=sid, name=target.name)
 
 def handle_land(c: Client, args: List[str]) -> None:
@@ -104,7 +104,6 @@ def handle_land(c: Client, args: List[str]) -> None:
 	c.structure.planet_id = pid
 	c.structure.mining_progress = 0
 	conn.execute("UPDATE structures SET planet_id = ?, mining_progress = 0 WHERE id = ?;", (pid, c.structure.id))
-	conn.commit()
 	c.send(strings.SHIP.LANDED, planet=pid)
 	production.update(c.structure, send_updates=True)
 
@@ -129,7 +128,6 @@ def handle_launch(c: Client, args: List[str]) -> None:
 	s.planet_id = None
 	s.mining_progress = 0
 	conn.execute("UPDATE structures SET planet_id = NULL, mining_progress = 0 WHERE id = ?;", (s.id,))
-	conn.commit()
 	c.send(strings.SHIP.LAUNCHED)
 	production.update(c.structure, send_updates=True)
 
@@ -194,7 +192,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 			(sys.id_db, ship.warp_charge, ship.id))
 	c.send(strings.SHIP.ENGAGING)
 	conn.execute("INSERT OR IGNORE INTO map (user_id, sys_id) VALUES (?, ?);", (c.id, sys.id_db))
-	conn.commit()
+	production.update(s, send_updates=True)
 	combat.clear_targets(s)
 	combat.update_targets(sys.id)
 	c.send(strings.SHIP.JUMP_COMPLETE, charge=round(s.warp_charge / report.mass * 100))
