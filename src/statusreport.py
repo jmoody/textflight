@@ -99,13 +99,26 @@ class StatusReport:
 		
 		# Structure values
 		out+= "id: %d\n" % s.id
+		out+= "created_at: %f\n" % s.created_at
 		out+= "name: %s\n" % s.name
 		out+= "type: %s\n" % s.type
-		out+= "total_outfit_space: %s\n" % s.outfit_space
+		out+= "total_outfit_space: %d\n" % s.outfit_space
 		out+= "heat: %f\n" % s.heat
 		out+= "energy: %f\n" % s.energy
 		out+= "shield: %f\n" % s.shield
 		out+= "warp_charge: %f\n" % s.warp_charge
+		out+= "mining_progress: %f\n" % s.mining_progress
+		out+= "sys_id: %d\n" % s.system.id
+		if s.planet_id != None:
+			out+= "planet_id: %d\n" % s.planet_id
+		out+= "asteroid_type: %s\n" % s.system.asteroid_type.value
+		out+= "asteroid_richness: %d\n" % s.system.asteroid_richness
+		for planet in s.system.planets:
+			out+= "planet: %d\n" % planet.ptype.value
+		if s._dock_id != None:
+			out+= "dock_id: %d\n" % s._dock_id
+		out+= "queue_size: %d\n" % len(s.craft_queue)
+		out+= "targets_size: %d\n" % len(s.targets)
 		
 		out+= "STATUSREPORT END\n"
 		return out
