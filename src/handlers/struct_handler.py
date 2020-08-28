@@ -90,13 +90,13 @@ def handle_eject(c: Client, args: List[str]):
 				ship.dock_parent = None
 			s.dock_children = []
 			conn.execute("UPDATE structures SET dock_id = NULL where dock_id = ?;", (s.id,))
-			conn.commit()
+			production.update(c.structure, send_updates=True)
 			c.send(strings.STRUCT.EJECT_ALL)
 		else:
 			s.dock_parent.dock_children.remove(s)
 			s.dock_parent = None
 			conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
-			conn.commit()
+			production.update(c.structure, send_updates=True)
 			c.send(strings.STRUCT.EJECT)
 	elif len(args) == 1:
 		try:
@@ -109,7 +109,7 @@ def handle_eject(c: Client, args: List[str]):
 				s.dock_parent.dock_children.remove(s)
 				s.dock_parent = None
 				conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (s.id,))
-				conn.commit()
+				production.update(c.structure, send_updates=True)
 				c.send(strings.STRUCT.EJECT)
 			else:
 				c.send(strings.STRUCT.NO_DOCK)
@@ -119,6 +119,7 @@ def handle_eject(c: Client, args: List[str]):
 					s.dock_children.remove(ship)
 					ship.dock_parent = None
 					conn.execute("UPDATE structures SET dock_id = NULL WHERE id = ?;", (ship.id,))
+					production.update(c.structure, send_updates=True)
 					c.send(strings.STRUCT.EJECTED, id=ship.id, name=ship.name)
 					return
 			c.send(strings.STRUCT.NO_DOCK)
