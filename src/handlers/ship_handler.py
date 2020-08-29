@@ -85,7 +85,7 @@ def handle_land(c: Client, args: List[str]) -> None:
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
-	if pid > len(c.structure.system.planets):
+	if pid > len(c.structure.system.planets) - 1:
 		c.send(strings.SHIP.NO_PLANET)
 		return
 	elif c.structure.planet_id != None:
