@@ -136,9 +136,9 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 			c.prompt()
 			return
 		if not c.checkvalid(args[0]):
-			c.send(strings.MISC.ALPHANUM_USERNAME)
+			c.send(strings.USER.ALPHANUM_USERNAME)
 		elif database.get_user_by_username(args[0]) != None:
-			c.send(strings.MISC.USERNAME_TAKEN, username=args[0])
+			c.send(strings.USER.USERNAME_TAKEN, username=args[0])
 		else:
 			username = args.pop(0)
 			client.register_user(username, " ".join(args))
