@@ -198,10 +198,7 @@ def handle_expand(c: Client, args: List[str]) -> None:
 	
 	# Check max outfit space
 	pmax = MAX_PLANET_SPACE
-	if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
-		c.send(strings.CRAFT.NEED_ROCKY)
-		return
-	elif s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
+	if s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
 		pmax = MAX_HABITABLE_SPACE
 	total = outfit_space
 	for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
@@ -231,9 +228,9 @@ def handle_expand(c: Client, args: List[str]) -> None:
 				break
 	if not has_struct:
 		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
-		return
 	if not has_plating:
 		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
+	if not has_struct or not has_plating:
 		return
 	Cargo("Light Material", cost).remove(s)
 	Cargo("Heavy Plating", outfit_space).remove(s)

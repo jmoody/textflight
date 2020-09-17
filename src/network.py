@@ -28,7 +28,7 @@ def client_read(client):
 	except ssl.SSLError as e:
 		if e.errno != ssl.SSL_ERROR_WANT_READ:
 			raise
-		logging.warning(str(ex))
+		logging.warning(str(e))
 		client.quitting = True
 		return
 	except Exception as ex:

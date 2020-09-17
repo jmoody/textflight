@@ -7,7 +7,7 @@ A command line space exploration MMO.
 You can use any SSL-secured socket client to connect to the server. Here is an example using the program `socat`:
 
 ```
-socat - ssl:leagueh.xyz:10000
+socat readline ssl:leagueh.xyz:10000
 ```
 
 ## Translation
