@@ -110,6 +110,7 @@ def init():
 				sock, addr = ss.accept()
 				try:
 					if SSL:
+						sock.settimeout(1.0)
 						sock = ssl_context.wrap_socket(sock, server_side=True)
 					sock.setblocking(0)
 					c = Client(sock)
