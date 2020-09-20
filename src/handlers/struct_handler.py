@@ -1,6 +1,7 @@
 import copy
 from typing import List
 
+import util
 import outfittype
 import production
 import database
@@ -159,35 +160,39 @@ def handle_load(c: Client, args: List[str]):
 	
 	# Validate input
 	s = c.structure
-	if len(args) < 2:
+	if len(args) < 3:
 		c.send(strings.USAGE.LOAD)
 		return
 	try:
-		cindex = int(args[0])
-		count = int(args[1])
+		count = int(args.pop(0))
+		sid = int(args.pop(0))
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
+	try:
+		cindex = int(args[0])
+		if cindex >= len(s.cargo):
+			c.send(strings.MISC.NO_CARGO)
+			return
+		car = s.cargo[cindex]
+	except ValueError:
+		query = " ".join(args)
+		car = util.search_cargo(query, s.cargo, c)
+		if car == None:
+			c.send(strings.MISC.NO_CARGO)
+			return
 	production.update(s)
 	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
-		return
-	elif cindex >= len(s.cargo):
-		c.send(strings.MISC.NO_CARGO)
 		return
 	
 	# Find docked target
 	if s.dock_parent != None:
 		target = s.dock_parent
+		if target.id != sid:
+			c.send(strings.STRUCT.NO_DOCK)
+			return
 	else:
-		if len(args) != 3:
-			c.send(strings.USAGE.LOAD)
-			return
-		try:
-			sid = int(args[2])
-		except ValueError:
-			c.send(strings.MISC.NAN)
-			return
 		target = None
 		for ship in s.dock_children:
 			if ship.id == sid:
@@ -198,17 +203,14 @@ def handle_load(c: Client, args: List[str]):
 			return
 	
 	# Move the cargo
-	car = copy.copy(s.cargo[cindex])
+	car2 = copy.copy(car)
 	if count == 0:
-		count = car.count
-	elif car.count < count:
-		count = car.count
-		if count < 0:
-			c.send(strings.CRAFT.INSUFFICIENTS)
-			return
-	s.cargo[cindex].less(count, s)
-	car.count = count
-	car.add(target)
+		count = car2.count
+	elif car2.count < count:
+		count = car2.count
+	car.less(count, s)
+	car2.count = count
+	car2.add(target)
 	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=target.id, name=target.name)
 	production.update(c.structure, send_updates=True)
 

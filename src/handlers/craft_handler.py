@@ -3,6 +3,7 @@ import logging
 import math
 from typing import List
 
+import util
 import crafting
 import production
 import structure
@@ -247,21 +248,30 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 		c.send(strings.USAGE.JETTISON)
 		return
 	try:
-		cindex = int(args[0])
-		count = int(args[1])
+		count = int(args.pop(0))
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
+	try:
+		cindex = int(args[0])
+		if cindex >= len(c.structure.cargo):
+			c.send(strings.MISC.NO_CARGO)
+			return
+		car = s.cargo[cindex]
+	except ValueError:
+		query = " ".join(args)
+		car = util.search_cargo(query, c.structure.cargo, c)
+		if car == None:
+			c.send(strings.MISC.NO_CARGO)
+			return
 	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
-	elif cindex >= len(c.structure.cargo):
-		c.send(strings.MISC.NO_CARGO)
 	else:
 		if count == 0:
-			count = c.structure.cargo[cindex].count
-		count = min(c.structure.cargo[cindex].count, count)
-		c.structure.cargo[cindex].less(count, c.structure)
-		c.send(strings.CRAFT.JETTISONED, count=count)
+			count = car.count
+		count = min(car.count, count)
+		car.less(count, c.structure)
+		c.send(strings.CRAFT.JETTISONED, count=count, type=car.type)
 	production.update(c.structure, send_updates=True)
 
 def handle_queue(c: Client, args: List[str]) -> None:
