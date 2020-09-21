@@ -106,11 +106,12 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		elif cargo.type == "Heavy Plating":
 			has_plating = cargo.count >= count
 			if not has_plating:
+				has_struct = True
 				break
 	if not has_struct:
 		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
 	if not has_plating:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=count)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
 	if not has_struct or not has_plating:
 		return
 	Cargo("Light Material", cost).remove(s)
@@ -225,6 +226,7 @@ def handle_expand(c: Client, args: List[str]) -> None:
 		elif cargo.type == "Heavy Plating":
 			has_plating = cargo.count >= count
 			if not has_plating:
+				has_struct = True
 				break
 	if not has_struct:
 		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
