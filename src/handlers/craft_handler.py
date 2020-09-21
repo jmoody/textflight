@@ -104,14 +104,14 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			if not has_struct:
 				break
 		elif cargo.type == "Heavy Plating":
-			has_plating = cargo.count >= outfit_space
+			has_plating = cargo.count >= count
 			if not has_plating:
 				break
 	if not has_struct:
 		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
-		return
 	if not has_plating:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=count)
+	if not has_struct or not has_plating:
 		return
 	Cargo("Light Material", cost).remove(s)
 	Cargo("Heavy Plating", outfit_space).remove(s)
