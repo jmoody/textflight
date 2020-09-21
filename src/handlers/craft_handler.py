@@ -252,18 +252,10 @@ def handle_jettison(c: Client, args: List[str]) -> None:
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
-	try:
-		cindex = int(args[0])
-		if cindex >= len(c.structure.cargo):
-			c.send(strings.MISC.NO_CARGO)
-			return
-		car = s.cargo[cindex]
-	except ValueError:
-		query = " ".join(args)
-		car = util.search_cargo(query, c.structure.cargo, c)
-		if car == None:
-			c.send(strings.MISC.NO_CARGO)
-			return
+	car = util.search_cargo(" ".join(args), c.structure.cargo, c)
+	if car == None:
+		c.send(strings.MISC.NO_CARGO)
+		return
 	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
 	else:

@@ -131,30 +131,21 @@ def handle_install(c: Client, args: List[str]):
 	if len(args) != 1:
 		c.send(strings.USAGE.INSTALL)
 		return
-	try:
-		cindex = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
-		return
-	if cindex >= len(c.structure.cargo):
+	cargo = util.search_cargo(" ".join(args), s.cargo, c)
+	if car == None:
 		c.send(strings.MISC.NO_CARGO)
-	else:
-		for o in c.structure.outfits:
-			if o.setting != 0:
-				c.send(strings.STRUCT.POWERED_DOWN)
-				return
-		cargo = c.structure.cargo[cindex]
-		if not cargo.type in outfittype.outfits:
-			c.send(strings.STRUCT.NOT_OUTFIT)
-			return
-		mark = int(cargo.extra)
-		report = production.update(c.structure)
-		if report.outfit_space < mark:
-			c.send(strings.STRUCT.NO_OUTFIT_SPACE)
-			return
-		Outfit(cargo.type, mark).install(c.structure)
-		cargo.less(1, c.structure)
-		c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
+		return
+	if not cargo.type in outfittype.outfits:
+		c.send(strings.STRUCT.NOT_OUTFIT)
+		return
+	mark = int(cargo.extra)
+	report = production.update(c.structure)
+	if report.outfit_space < mark:
+		c.send(strings.STRUCT.NO_OUTFIT_SPACE)
+		return
+	Outfit(cargo.type, mark).install(c.structure)
+	cargo.less(1, c.structure)
+	c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
 
 def handle_load(c: Client, args: List[str]):
 	
@@ -169,18 +160,10 @@ def handle_load(c: Client, args: List[str]):
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
-	try:
-		cindex = int(args[0])
-		if cindex >= len(s.cargo):
-			c.send(strings.MISC.NO_CARGO)
-			return
-		car = s.cargo[cindex]
-	except ValueError:
-		query = " ".join(args)
-		car = util.search_cargo(query, s.cargo, c)
-		if car == None:
-			c.send(strings.MISC.NO_CARGO)
-			return
+	car = util.search_cargo(" ".join(args), s.cargo, c)
+	if car == None:
+		c.send(strings.MISC.NO_CARGO)
+		return
 	production.update(s)
 	if count < 0:
 		c.send(strings.MISC.COUNT_GTZ)
@@ -219,19 +202,18 @@ def handle_set(c: Client, args: List[str]):
 		c.send(strings.USAGE.SET)
 		return
 	try:
-		oindex = int(args[0])
-		setting = int(args[1])
+		setting = int(args.pop(0))
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
-	if oindex >= len(c.structure.outfits):
+	outfit = util.search_outfits(" ".join(args), c.structure.outfits, c)
+	if outfit == None:
 		c.send(strings.STRUCT.NO_OUTFIT)
 	elif setting < 0:
 		c.send(strings.STRUCT.SET_GTZ)
 	elif setting > 1024:
 		c.send(strings.STRUCT.SET_LT)
 	else:
-		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.set_setting(setting)
 		c.send(strings.STRUCT.SET, name=c.translate(outfit.type.name), setting=setting)
@@ -319,21 +301,12 @@ def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:
 		c.send(strings.USAGE.UNINSTALL)
 		return
-	try:
-		oindex = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
-		return
-	if oindex >= len(c.structure.outfits):
+	outfit = util.search_outfits(" ".join(args), c.structure.outfits, c)
+	if outfit == None:
 		c.send(strings.STRUCT.NO_OUTFIT)
-	else:
-		for o in c.structure.outfits:
-			if o.setting != 0:
-				c.send(strings.STRUCT.POWERED_DOWN)
-				return
-		outfit = c.structure.outfits[oindex]
-		production.update(c.structure)
-		outfit.uninstall(c.structure)
-		Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
-		c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
+		return
+	production.update(c.structure)
+	outfit.uninstall(c.structure)
+	Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
+	c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
 
