@@ -310,7 +310,7 @@ def handle_swap(c: Client, args: List[str]):
 	c.structure.outfits[oindex2] = outfit1
 	id1 = outfit1.id
 	outfit1.id = outfit2.id
-	outfit2.id = outfit1.id
+	outfit2.id = id1
 	c.send(strings.STRUCT.SWAPPED)
 
 def handle_uninstall(c: Client, args: List[str]):
