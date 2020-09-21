@@ -104,7 +104,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			if not has_struct:
 				break
 		elif cargo.type == "Heavy Plating":
-			has_plating = cargo.count >= count
+			has_plating = cargo.count >= outfit_space
 			if not has_plating:
 				has_struct = True
 				break
