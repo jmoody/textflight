@@ -64,34 +64,16 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	index = 0
 	for link in sys.get_links():
 		lid, drag, xo, yo = link
-		if yo == -1:
-			if xo == -1:
-				direction = strings.INFO.NORTHWEST
-			elif xo == 1:
-				direction = strings.INFO.NORTHEAST
-			else:
-				direction = strings.INFO.NORTH
-		elif yo == 1:
-			if xo == -1:
-				direction = strings.INFO.SOUTHWEST
-			elif xo == 1:
-				direction = strings.INFO.SOUTHEAST
-			else:
-				direction = strings.INFO.SOUTH
-		elif xo == -1:
-			direction = strings.INFO.WEST
-		else:
-			direction = strings.INFO.EAST
 		target_sys = system.System(lid)
 		tfid, tname = territory.get_system(target_sys)
 		if tname != None:
 			tfact = faction.get_faction(tfid)
-			c.send(strings.INFO.LINK_NAMED, index=index, name=tname, faction=tfact.name, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK_NAMED, index=index, name=tname, faction=tfact.name, link_drag=drag)
 		elif tfid != None:
 			tfact = faction.get_faction(tfid)
-			c.send(strings.INFO.LINK_CLAIMED, index=index, faction=tfact.name, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK_CLAIMED, index=index, faction=tfact.name, link_drag=drag)
 		else:
-			c.send(strings.INFO.LINK, index=index, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK, index=index, link_drag=drag)
 		index+= 1
 	c.send(strings.INFO.PLANETS)
 	index = 0
