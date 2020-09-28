@@ -12,7 +12,7 @@ CRATE_MAX_OUTFIT = config.get_section("crafting").getint("CrateMaxOutfit")
 
 def handle_email(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.EMAIL)
+		c.send(strings.USAGE.EMAIL, error=True)
 		return
 	c.set_email(args[0])
 	c.send(strings.USER.UPDATED_EMAIL)
@@ -26,7 +26,7 @@ def handle_language(c: Client, args: List[str]) -> None:
 			c.send(lang)
 	elif len(args) == 1:
 		if args[0] != "client" and not args[0] in translations.languages:
-			c.send(strings.USER.NO_LANGUAGE, lang=args[0])
+			c.send(strings.USER.NO_LANGUAGE, lang=args[0], error=True)
 		else:
 			c.set_language(args[0])
 			c.send(strings.USER.UPDATED_LANGUAGE)
@@ -35,39 +35,39 @@ def handle_language(c: Client, args: List[str]) -> None:
 
 def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.PASSWD)
+		c.send(strings.USAGE.PASSWD, error=True)
 		return
 	c.set_password(" ".join(args))
 	c.send(strings.USER.UPDATED_PASSWORD)
 
 def handle_redeem(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.REDEEM)
+		c.send(strings.USAGE.REDEEM, error=True)
 	elif c.premium:
-		c.send(strings.USER.ALREADY_PREMIUM)
+		c.send(strings.USER.ALREADY_PREMIUM, error=True)
 	elif c.redeem_code(args[0]):
 		c.send(strings.USER.REDEEM_SUCCESS)
 	else:
-		c.send(strings.USER.REDEEM_FAIL)
+		c.send(strings.USER.REDEEM_FAIL, error=True)
 
 def handle_username(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.USERNAME)
+		c.send(strings.USAGE.USERNAME, error=True)
 	elif not c.checkvalid(args[0]):
-		c.send(strings.USER.ALPHANUM_USERNAME)
+		c.send(strings.USER.ALPHANUM_USERNAME, error=True)
 	elif c.set_username(args[0]):
 		c.send(strings.USER.UPDATED_USERNAME)
 	else:
-		c.send(strings.USER.USERNAME_TAKEN, username=args[0])
+		c.send(strings.USER.USERNAME_TAKEN, username=args[0], error=True)
 
 def handle_chat(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.CHAT)
+		c.send(strings.USAGE.CHAT, error=True)
 		return
 	try:
 		mode = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	chat_mode = None
 	if mode == 0:
@@ -79,27 +79,27 @@ def handle_chat(c: Client, args: List[str]) -> None:
 	elif mode == 3:
 		chat_mode = ChatMode.GLOBAL
 	else:
-		c.send(strings.USER.INVALID_CHAT)
+		c.send(strings.USER.INVALID_CHAT, error=True)
 		return
 	c.set_chat(chat_mode)
 	c.send(strings.USER.SET_CHAT)
 
 def handle_crate(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send(strings.USAGE.CRATE)
+		c.send(strings.USAGE.CRATE, error=True)
 		return
 	try:
 		cindex = int(args[0])
 		count = int(args[1])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if cindex >= len(c.structure.cargo):
-		c.send(strings.MISC.NO_CARGO)
+		c.send(strings.MISC.NO_CARGO, error=True)
 		return
 	cargo = c.structure.cargo[cindex]
 	if cargo.type != "Crate":
-		c.send(strings.USER.NOT_CRATE)
+		c.send(strings.USER.NOT_CRATE, error=True)
 		return
 	elif cargo.count < count:
 		c.send(strings.CRAFT.INSUFFICIENTS)

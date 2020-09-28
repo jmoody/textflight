@@ -19,7 +19,8 @@ class MISC:
  \__|\___|/_\_\ \__||_|  |_||_||___/ |_||_| \__|
 
 TEXTFLIGHT remote access protocol {version}.
-Protocol manual available for transfer: https://leagueh.xyz/tf/"""
+Protocol manual available for transfer: https://leagueh.xyz/tf/
+Chat with us on Freenode! irc://chat.freenode.net:6697/textflight"""
 	LOGGED_IN = "Logged in as '{username}'."
 	CLIENTS_CONNECTED = "{num} operators connected."
 	JOINED = "'{username}' connected to server."

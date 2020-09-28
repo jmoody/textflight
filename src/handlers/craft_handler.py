@@ -27,18 +27,18 @@ def handle_base(c: Client, args: List[str]) -> None:
 
 def handle_cancel(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send(strings.USAGE.CANCEL)
+		c.send(strings.USAGE.CANCEL, error=True)
 		return
 	try:
 		qindex = int(args[0])
 		count = int(args[1])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if count < 1:
-		c.send(strings.MISC.COUNT_GTZ)
+		c.send(strings.MISC.COUNT_GTZ, error=True)
 	elif qindex >= len(c.structure.craft_queue):
-		c.send(strings.CRAFT.NO_QUEUE)
+		c.send(strings.CRAFT.NO_QUEUE, error=True)
 	else:
 		c.structure.craft_queue[qindex].less(count, c.structure)
 		c.send(strings.CRAFT.CANCELLED, count=count)
@@ -49,20 +49,20 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	# Validate input
 	if len(args) < 2:
 		if base:
-			c.send(strings.USAGE.BASE)
+			c.send(strings.USAGE.BASE, error=True)
 		else:
-			c.send(strings.USAGE.CONSTRUCT)
+			c.send(strings.USAGE.CONSTRUCT, error=True)
 		return
 	try:
 		outfit_space = int(args.pop(0))
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if outfit_space < 1:
-		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
+		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ, error=True)
 		return
 	elif not base and outfit_space > MAX_OUTFIT_SPACE:
-		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=MAX_OUTFIT_SPACE)
+		c.send(strings.CRAFT.OUTFIT_SPACE_LT, max=MAX_OUTFIT_SPACE, error=True)
 		return
 	s = c.structure
 	report = production.update(s)
@@ -70,7 +70,7 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 	if base:
 		pmax = MAX_PLANET_SPACE
 		if s.planet_id == None or s.system.planets[s.planet_id].ptype == system.PlanetType.GAS:
-			c.send(strings.CRAFT.NEED_ROCKY)
+			c.send(strings.CRAFT.NEED_ROCKY, error=True)
 			return
 		elif s.system.planets[s.planet_id].ptype == system.PlanetType.HABITABLE:
 			pmax = MAX_HABITABLE_SPACE
@@ -78,13 +78,13 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 		for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 			total+= pbase["outfit_space"]
 		if total > pmax:
-			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax)
+			c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax, error=True)
 			return
 	elif outfit_space > report.shipyard:
 		if report.shipyard == 0:
-			c.send(strings.CRAFT.NEED_SHIPYARD)
+			c.send(strings.CRAFT.NEED_SHIPYARD, error=True)
 		else:
-			c.send(strings.CRAFT.SMALL_SHIPYARD)
+			c.send(strings.CRAFT.SMALL_SHIPYARD, error=True)
 		return
 	
 	# Determine the cost
@@ -109,10 +109,10 @@ def handle_construct(c: Client, args: List[str], base = False) -> None:
 			if not has_plating:
 				break
 	if not has_struct:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost, error=True)
 		return
 	if not has_plating:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=outfit_space, error=True)
 		return
 	Cargo("Light Material", cost).remove(s)
 	Cargo("Heavy Plating", outfit_space).remove(s)
@@ -134,7 +134,7 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			c.send(strings.CRAFT.RECIPE, index=rid, name=c.translate(q.type), count=q.count)
 	elif 1 < len(args) < 4:
 		if report.assembly_rate == 0:
-			c.send(strings.CRAFT.NO_ASSEMBLERS)
+			c.send(strings.CRAFT.NO_ASSEMBLERS, error=True)
 			return
 		
 		# Validate input
@@ -145,23 +145,23 @@ def handle_craft(c: Client, args: List[str]) -> None:
 			if len(args) > 2:
 				extra = int(args[2])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		if count < 1:
-			c.send(strings.MISC.COUNT_GTZ)
+			c.send(strings.MISC.COUNT_GTZ, error=True)
 			return
 		elif not index in available:
-			c.send(strings.CRAFT.NO_RECIPE)
+			c.send(strings.CRAFT.NO_RECIPE, error=True)
 			return
 		q = available[index]
 		if q.count < count * max(1, extra):
-			c.send(strings.CRAFT.INSUFFICIENTS)
+			c.send(strings.CRAFT.INSUFFICIENTS, error=True)
 			return
 		elif extra < 1 and q._rec.has_extra:
-			c.send(strings.CRAFT.MISSING_MARK)
+			c.send(strings.CRAFT.MISSING_MARK, error=True)
 			return
 		elif extra != 0 and not q._rec.has_extra:
-			c.send(strings.CRAFT.NO_MARK)
+			c.send(strings.CRAFT.NO_MARK, error=True)
 			return
 		
 		# Remove cargo and add to queue
@@ -175,25 +175,25 @@ def handle_craft(c: Client, args: List[str]) -> None:
 		production.update(c.structure, send_updates=True)
 		
 	else:
-		c.send(strings.USAGE.CRAFT)
+		c.send(strings.USAGE.CRAFT, error=True)
 
 def handle_expand(c: Client, args: List[str]) -> None:
 	
 	# Validate input
 	s = c.structure
 	if len(args) != 1:
-		c.send(strings.USAGE.EXPAND)
+		c.send(strings.USAGE.EXPAND, error=True)
 		return
 	try:
 		count = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if count < 1:
-		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ)
+		c.send(strings.CRAFT.OUTFIT_SPACE_GTZ, error=True)
 		return
 	elif s.type != "base":
-		c.send(strings.CRAFT.NOT_BASE)
+		c.send(strings.CRAFT.NOT_BASE, error=True)
 		return
 	outfit_space = s.outfit_space + count
 	
@@ -205,7 +205,7 @@ def handle_expand(c: Client, args: List[str]) -> None:
 	for pbase in conn.execute("SELECT outfit_space FROM structures WHERE type = 'base' AND sys_id = ? AND planet_id = ?", (s.system.id_db, s.planet_id)):
 		total+= pbase["outfit_space"]
 	if total > pmax:
-		c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax)
+		c.send(strings.CRAFT.TOTAL_SPACE_LT, max=pmax, error=True)
 		return
 	
 	# Determine the cost
@@ -228,9 +228,9 @@ def handle_expand(c: Client, args: List[str]) -> None:
 			if not has_plating:
 				break
 	if not has_struct:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Light Material"), count=cost, error=True)
 	if not has_plating:
-		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=count)
+		c.send(strings.CRAFT.INSUFFICIENT, material=c.translate("Heavy Plating"), count=count, error=True)
 	if not has_struct or not has_plating:
 		return
 	Cargo("Light Material", cost).remove(s)
@@ -245,19 +245,19 @@ def handle_expand(c: Client, args: List[str]) -> None:
 
 def handle_jettison(c: Client, args: List[str]) -> None:
 	if len(args) != 2:
-		c.send(strings.USAGE.JETTISON)
+		c.send(strings.USAGE.JETTISON, error=True)
 		return
 	try:
 		count = int(args.pop(0))
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	car = util.search_cargo(" ".join(args), c.structure.cargo, c)
 	if car == None:
-		c.send(strings.MISC.NO_CARGO)
+		c.send(strings.MISC.NO_CARGO, error=True)
 		return
 	if count < 0:
-		c.send(strings.MISC.COUNT_GTZ)
+		c.send(strings.MISC.COUNT_GTZ, error=True)
 	else:
 		if count == 0:
 			count = car.count

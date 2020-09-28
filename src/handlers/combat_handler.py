@@ -14,28 +14,28 @@ conn = database.conn
 
 def handle_capture(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.CAPTURE)
+		c.send(strings.USAGE.CAPTURE, error=True)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	s = structure.load_structure(sid)
 	now = time.time()
 	if s == None or s.system.id != c.structure.system.id:
-		c.send(strings.MISC.NO_STRUCT)
+		c.send(strings.MISC.NO_STRUCT, error=True)
 		return
 	elif now - s.created_at < combat.SPAWN_SAFE:
-		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
+		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at), error=True)
 		return
 	report = production.update(c.structure)
 	report2 = production.update(s)
 	if s.shield > 0:
-		c.send(strings.COMBAT.SHIELDS_UP)
+		c.send(strings.COMBAT.SHIELDS_UP, error=True)
 		return
 	elif report.crew < 1:
-		c.send(strings.COMBAT.NO_H2H)
+		c.send(strings.COMBAT.NO_H2H, error=True)
 		return
 	
 	# Determine casualties
@@ -70,7 +70,7 @@ def handle_capture(c: Client, args: List[str]) -> None:
 		outfit.set_counter(0)
 	
 	if report.crew < 1:
-		c.send(strings.COMBAT.CAPTURE_FAILED)
+		c.send(strings.COMBAT.CAPTURE_FAILED, error=True)
 	else:
 		s.owner_id = c.id
 		conn.execute("UPDATE structures SET owner_id = ? WHERE id = ?;", (c.id, s.id))
@@ -82,17 +82,17 @@ def handle_capture(c: Client, args: List[str]) -> None:
 
 def handle_destroy(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.DESTROY)
+		c.send(strings.USAGE.DESTROY, error=True)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	s = structure.load_structure(sid)
 	now = time.time()
 	if s == None or s.system.id != c.structure.system.id:
-		c.send(strings.MISC.NO_STRUCT)
+		c.send(strings.MISC.NO_STRUCT, error=True)
 		return
 	elif now - s.created_at < combat.SPAWN_SAFE:
 		c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
@@ -100,9 +100,9 @@ def handle_destroy(c: Client, args: List[str]) -> None:
 	report = production.update(c.structure)
 	report2 = production.update(s)
 	if s.shield > 0:
-		c.send(strings.COMBAT.SHIELDS_UP)
+		c.send(strings.COMBAT.SHIELDS_UP, error=True)
 	elif report.hull_damage < s.outfit_space:
-		c.send(strings.COMBAT.NOT_POWERFUL)
+		c.send(strings.COMBAT.NOT_POWERFUL, error=True)
 	else:
 		s._destroyed = True
 		conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ?;", (s.id,))
@@ -125,7 +125,7 @@ def handle_target(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		production.update(c.structure)
 		if len(c.structure.targets) < 1:
-			c.send(strings.COMBAT.NO_TARGETS)
+			c.send(strings.COMBAT.NO_TARGETS, error=True)
 			return
 		for target in c.structure.targets:
 			c.send(strings.COMBAT.TARGET, id=target.id, name=target.name)
@@ -133,13 +133,13 @@ def handle_target(c: Client, args: List[str]) -> None:
 		try:
 			sid = int(args[0])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 		now = time.time()
 		if sid == c.structure.id:
-			c.send(strings.COMBAT.TARGET_SELF)
+			c.send(strings.COMBAT.TARGET_SELF, error=True)
 			return
 		elif now - c.structure.created_at < combat.SPAWN_SAFE:
-			c.send(strings.COMBAT.SAFE_NOTARGET, remaining=round(combat.SPAWN_SAFE - now + c.structure.created_at))
+			c.send(strings.COMBAT.SAFE_NOTARGET, remaining=round(combat.SPAWN_SAFE - now + c.structure.created_at), error=True)
 			return
 		for struct in c.structure.targets:
 			if struct.id == sid:
@@ -147,15 +147,15 @@ def handle_target(c: Client, args: List[str]) -> None:
 				return
 		s = structure.load_structure(sid)
 		if s == None or s.system.id != c.structure.system.id:
-			c.send(strings.MISC.NO_STRUCT)
+			c.send(strings.MISC.NO_STRUCT, error=True)
 			return
 		elif now - s.created_at < combat.SPAWN_SAFE:
-			c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at))
+			c.send(strings.COMBAT.SAFE, remaining=round(combat.SPAWN_SAFE - now + s.created_at), error=True)
 			return
 		report = production.update(c.structure)
 		production.update(s, report.now)
 		if not report.has_weapons:
-			c.send(strings.COMBAT.NO_WEAPONS)
+			c.send(strings.COMBAT.NO_WEAPONS, error=True)
 			return
 		combat.add_target(c.structure, s)
 		faction.apply_penalty(c.id, c.faction_id, s.owner_id, faction.ATTACK_PENALTY)
@@ -164,5 +164,5 @@ def handle_target(c: Client, args: List[str]) -> None:
 		c.send(strings.COMBAT.TARGETING, id=s.id, name=s.name)
 		production.update(c.structure, send_updates=True)
 	else:
-		c.send(strings.USAGE.TARGET)
+		c.send(strings.USAGE.TARGET, error=True)
 

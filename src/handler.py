@@ -24,7 +24,7 @@ def handle_help(c: Client, args: List[str]) -> None:
 	else:
 		cmd = args[0]
 		if not cmd in COMMANDS:
-			c.send(strings.MISC.NO_COMMAND, command=cmd)
+			c.send(strings.MISC.NO_COMMAND, command=cmd, error=True)
 		else:
 			c.send("{command}: {description}", command=cmd, description=c.translate(COMMANDS[cmd][0]))
 
@@ -100,16 +100,16 @@ def handle_command(c: Client, cmd: str, args: List[str]) -> None:
 def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	if cmd == "login":
 		if len(args) < 2:
-			c.send(strings.USAGE.LOGIN)
+			c.send(strings.USAGE.LOGIN, error=True)
 			c.prompt()
 			return
 		username = args.pop(0)
 		if c.login(username, " ".join(args)):
 			for c2 in network.clients:
 				if c2 != c and c2.username == username:
-					c2.send(strings.MISC.DISCONNECTED_BY)
+					c2.send(strings.MISC.DISCONNECTED_BY, error=True)
 					c2.quitting = True
-					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip())
+					c.send(strings.MISC.DISCONNECTED_EXISTING, ip=c2.get_ip(), error=True)
 			c.send("\033[2J\033[H" + strings.MISC.WELCOME_MESSAGE, version=config.VERSION)
 			c.send(strings.MISC.LOGGED_IN, username=username)
 			c.send(strings.MISC.CLIENTS_CONNECTED, num=len(network.clients))
@@ -124,21 +124,21 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					message = cl.translate(strings.MISC.JOINED).format(username=c.username)
 					cl.chat(MessageType.GLOBAL, "", message)
 			if c.email == None:
-				c.send(strings.MISC.EMAIL_WARNING)
+				c.send(strings.MISC.EMAIL_WARNING, error=True)
 		elif c.quitting:
 			return
 		else:
 			logging.info("Failed login attempt from '%s', username '%s'.", c.get_ip(), username)
-			c.send(strings.MISC.INCORRECT_LOGIN)
+			c.send(strings.MISC.INCORRECT_LOGIN, error=True)
 	elif cmd == "register":
 		if len(args) < 2:
-			c.send(strings.USAGE.REGISTER)
+			c.send(strings.USAGE.REGISTER, error=True)
 			c.prompt()
 			return
 		if not c.checkvalid(args[0]):
-			c.send(strings.USER.ALPHANUM_USERNAME)
+			c.send(strings.USER.ALPHANUM_USERNAME, error=True)
 		elif database.get_user_by_username(args[0]) != None:
-			c.send(strings.USER.USERNAME_TAKEN, username=args[0])
+			c.send(strings.USER.USERNAME_TAKEN, username=args[0], error=True)
 		else:
 			username = args.pop(0)
 			client.register_user(username, " ".join(args))
@@ -154,6 +154,6 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 	c.prompt()
 
 def handle_death(c: Client) -> None:
-	c.send(strings.MISC.STRUCT_DESTROYED)
+	c.send(strings.MISC.STRUCT_DESTROYED, error=True)
 	c.quitting = True
 

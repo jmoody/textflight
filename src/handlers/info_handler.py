@@ -39,7 +39,7 @@ def handle_nav(c: Client, args: List[str]) -> None:
 		sys = system.System(system.to_system_id(sys.x + x, sys.y + y))
 		rows = conn.execute("SELECT * FROM map WHERE user_id = ? AND sys_id = ?;", (c.id, sys.id_db))
 		if len(rows.fetchall()) == 0:
-			c.send(strings.INFO.NOT_DISCOVERED)
+			c.send(strings.INFO.NOT_DISCOVERED, error=True)
 			return
 		remote = True
 	elif len(args) != 0:
@@ -124,14 +124,14 @@ def handle_scan(c: Client, args: List[str]) -> None:
 		try:
 			sid = int(args[0])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		s = structure.load_structure(sid)
 		if s == None or s.system.id != c.structure.system.id:
-			c.send(strings.MISC.NO_STRUCT)
+			c.send(strings.MISC.NO_STRUCT, error=True)
 			return
 	elif len(args) > 1:
-		c.send(strings.USAGE.SCAN)
+		c.send(strings.USAGE.SCAN, error=True)
 		return
 	production.update(s)
 	c.send(strings.INFO.CALLSIGN, id=s.id, name=s.name)
