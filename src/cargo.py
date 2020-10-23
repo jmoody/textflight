@@ -22,8 +22,8 @@ class Cargo:
 				conn.commit()
 				return
 		s.cargo.append(self)
-		c = conn.execute("INSERT INTO cargo (type, extra, count, structure_id) VALUES (?, ?, ?, ?)",
-			(self.type, self.extra, self.count, s.id))
+		c = conn.execute("INSERT INTO cargo (type, extra, theme, count, structure_id) VALUES (?, ?, ?, ?, ?)",
+			(self.type, self.extra, self.theme, self.count, s.id))
 		self.id = c.lastrowid
 		self.structure_id = s.id
 		conn.commit()

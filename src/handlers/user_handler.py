@@ -8,6 +8,8 @@ import crafting
 import config
 import database
 import production
+import outfittype
+import util
 from client import Client, ChatMode
 from cargo import Cargo
 
@@ -112,7 +114,7 @@ def handle_crate(c: Client, args: List[str]) -> None:
 	cargo.extra = int(cargo.extra)
 	for i in range(count):
 		if cargo.theme != None:
-			outfit = random.choice(outfittype.outfits.values())
+			outfit = random.choice(list(outfittype.outfits.values()))
 			Cargo(outfit.name, 1, cargo.extra, cargo.theme).add(c.structure)
 			c.send(strings.USER.CRATE_EXTRA, name=util.theme_str(outfit.name, cargo.theme), extra=cargo.extra)
 			continue

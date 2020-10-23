@@ -16,8 +16,8 @@ class Outfit:
 	
 	def install(self, s) -> None:
 		s.outfits.append(self)
-		c = conn.execute("INSERT INTO outfits (type, mark, setting, counter, structure_id) VALUES (?, ?, ?, ?, ?)",
-			(self.type.name, self.mark, self.setting, self.counter, s.id))
+		c = conn.execute("INSERT INTO outfits (type, mark, theme, setting, counter, structure_id) VALUES (?, ?, ?, ?, ?, ?)",
+			(self.type.name, self.mark, self.theme, self.setting, self.counter, s.id))
 		self.id = c.lastrowid
 		self.structure_id = s.id
 		conn.commit()
