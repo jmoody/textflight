@@ -126,6 +126,7 @@ def handle_login(c: Client, cmd: str, args: List[str]) -> None:
 					cl.chat(MessageType.GLOBAL, "", message)
 			if c.email == None:
 				c.send(strings.MISC.EMAIL_WARNING, error=True)
+			user_handler.handle_quest(c, [])
 		elif c.quitting:
 			return
 		else:
