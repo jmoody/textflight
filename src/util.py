@@ -4,6 +4,12 @@ import cargo
 import outfit
 import client
 
+def theme_str(s: str, theme: str):
+	if theme == None:
+		return s
+	elif theme == "halloween":
+		return "\033[48;5;202m\033[30m%s\033[0m" % s
+
 def search_cargo(query: str, cargos: List[cargo.Cargo], c: client.Client) -> cargo.Cargo:
 	try:
 		cindex = int(query)

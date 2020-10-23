@@ -132,7 +132,7 @@ def handle_install(c: Client, args: List[str]):
 		c.send(strings.USAGE.INSTALL, error=True)
 		return
 	cargo = util.search_cargo(" ".join(args), s.cargo, c)
-	if car == None:
+	if cargo == None:
 		c.send(strings.MISC.NO_CARGO, error=True)
 		return
 	if not cargo.type in outfittype.outfits:
@@ -143,7 +143,7 @@ def handle_install(c: Client, args: List[str]):
 	if report.outfit_space < mark:
 		c.send(strings.STRUCT.NO_OUTFIT_SPACE, error=True)
 		return
-	Outfit(cargo.type, mark).install(c.structure)
+	Outfit(cargo.type, mark, cargo.theme).install(c.structure)
 	cargo.less(1, c.structure)
 	c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
 
@@ -307,6 +307,6 @@ def handle_uninstall(c: Client, args: List[str]):
 		return
 	production.update(c.structure)
 	outfit.uninstall(c.structure)
-	Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
+	Cargo(outfit.type.name, 1, str(outfit.mark), outfit.theme).add(c.structure)
 	c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
 
