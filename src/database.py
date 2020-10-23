@@ -137,6 +137,13 @@ create_table("""keys (
 	id TEXT PRIMARY KEY
 );""")
 
+create_table("""quests (
+	user_id INTEGER NOT NULL,
+	quest TEXT,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+	PRIMARY KEY (user_id, quest)
+);""")
+
 try:
 	conn.execute("INSERT INTO factions (id, name, password) VALUES (0, '', '');")
 except sqlite3.IntegrityError:

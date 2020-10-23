@@ -72,6 +72,7 @@ COMMANDS = {
 	"locl": ("Broadcast a message to the local system.", social_handler.handle_locl),
 	"nav": ("Get navigation information.", info_handler.handle_nav),
 	"passwd": ("Change your password.", user_handler.handle_passwd),
+	"quest": ("Shows current quests.", user_handler.handle_quest),
 	"queue": ("List the assembly queue.", craft_handler.handle_queue),
 	"rdock": ("Remotely dock a structure.", ship_handler.handle_rdock),
 	"redeem": ("Redeems a code to unlock premium status.", user_handler.handle_redeem),

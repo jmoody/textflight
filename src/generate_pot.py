@@ -9,6 +9,7 @@ import strings
 import outfittype
 import crafting
 import system
+import quest
 
 header = """#, fuzzy
 msgid ""
@@ -41,6 +42,9 @@ for pt in system.PlanetType:
 	output.add(pt.name.lower().capitalize())
 for at in system.AsteroidType:
 	output.add(at.value)
+for quest in quest.quests.values():
+	output.add(quest.name)
+	output.add(quest.desc)
 
 # Write strings to POT file
 with open("messages.pot", "w") as f:

@@ -101,6 +101,9 @@ class USER:
 	NOT_CRATE = "This is not a crate."
 	CRATE_EXTRA = "Uncrated {name} ({extra})!"
 	CRATE = "Uncrated {name} x{count}!"
+	QUEST_COMPLETED = "Quest completed: {name}"
+	QUEST_ADDED = "Quest added: {name}"
+	QUEST = "Quest '{name}': {desc}"
 
 class COMBAT:
 	SHIELDS_UP = "Cannot destroy structure while its shields are up."

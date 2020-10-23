@@ -1,12 +1,17 @@
 from typing import List
+import random
 
+import quest
 import translations
 import strings
 import crafting
 import config
-import random
+import database
+import production
 from client import Client, ChatMode
 from cargo import Cargo
+
+conn = database.conn
 
 CRATE_MAX_OUTFIT = config.get_section("crafting").getint("CrateMaxOutfit")
 
@@ -116,4 +121,17 @@ def handle_crate(c: Client, args: List[str]) -> None:
 			Cargo(recipe.output, ccount).add(c.structure)
 			c.send(strings.USER.CRATE, name=recipe.output, count=ccount)
 	cargo.less(count, c.structure)
+
+def handle_quest(c: Client, args: List[str]) -> None:
+	report = production.update(c.structure)
+	for q in quest.get_quests(c.id):
+		if q.is_done(c.structure, report):
+			q.remove(c.id)
+			c.send(strings.USER.QUEST_COMPLETED, name=c.translate(q.name))
+			if q.next != None:
+				q.next.add(c.id)
+				c.send(strings.USER.QUEST_ADDED, name=c.translate(q.next.name))
+	conn.commit()
+	for q in quest.get_quests(c.id):
+		c.send(strings.USER.QUEST, name=c.translate(q.name), desc=c.translate(q.desc))
 
