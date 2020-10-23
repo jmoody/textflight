@@ -131,7 +131,7 @@ def handle_install(c: Client, args: List[str]):
 	if len(args) != 1:
 		c.send(strings.USAGE.INSTALL, error=True)
 		return
-	cargo = util.search_cargo(" ".join(args), s.cargo, c)
+	cargo = util.search_cargo(" ".join(args), c.structure.cargo, c)
 	if cargo == None:
 		c.send(strings.MISC.NO_CARGO, error=True)
 		return
