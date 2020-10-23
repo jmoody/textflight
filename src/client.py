@@ -5,6 +5,7 @@ import logging
 import math
 from enum import Enum
 from threading import Lock
+from datetime import datetime
 
 import combat
 import database
@@ -203,7 +204,12 @@ class Client:
 			self.streak+= 1
 			quality = int(pow(2, int(math.log2(self.streak))))
 			quality = max(quality, 2)
-			Cargo("Crate", 1, quality).add(self.structure)
+			today = datetime.today()
+			if today.month == 10 and today.day >= 24:
+				theme = "halloween"
+			else:
+				theme = None
+			Cargo("Crate", 1, quality, theme).add(self.structure)
 			self.display_streak_message = True
 		
 		# Update database
