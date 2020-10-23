@@ -167,9 +167,9 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	index = 0
 	for car in s.cargo:
 		if car.extra != None:
-			c.send(strings.INFO.CARGO_EXTRA, index=index, name=util.theme_str(c.translate(car.type), out.theme), extra=car.extra, count=car.count)
+			c.send(strings.INFO.CARGO_EXTRA, index=index, name=util.theme_str(c.translate(car.type), car.theme), extra=car.extra, count=car.count)
 		else:
-			c.send(strings.INFO.CARGO, index=index, name=util.theme_str(c.translate(car.type), out.theme), count=car.count)
+			c.send(strings.INFO.CARGO, index=index, name=util.theme_str(c.translate(car.type), car.theme), count=car.count)
 		index+= 1
 
 def handle_status(c: Client, args: List[str]) -> None:
