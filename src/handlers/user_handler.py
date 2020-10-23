@@ -111,15 +111,20 @@ def handle_crate(c: Client, args: List[str]) -> None:
 		return
 	cargo.extra = int(cargo.extra)
 	for i in range(count):
+		if cargo.theme != None:
+			outfit = random.choice(outfittype.outfits.values())
+			Cargo(outfit.name, 1, cargo.extra, cargo.theme).add(c.structure)
+			c.send(strings.USER.CRATE_EXTRA, name=util.theme_str(outfit.name, cargo.theme), extra=cargo.extra)
+			continue
 		recipe = random.choice(crafting.recipes)
 		if recipe.has_extra:
 			extra = min(random.randint(cargo.extra / 2, cargo.extra), CRATE_MAX_OUTFIT)
-			Cargo(recipe.output, 1, extra, cargo.theme).add(c.structure)
-			c.send(strings.USER.CRATE_EXTRA, name=util.theme_str(recipe.output, cargo.theme), extra=extra)
+			Cargo(recipe.output, 1, extra).add(c.structure)
+			c.send(strings.USER.CRATE_EXTRA, name=recipe.output, extra=extra)
 		else:
 			ccount = random.randint(cargo.extra / 2, cargo.extra)
-			Cargo(recipe.output, ccount, None, cargo.theme).add(c.structure)
-			c.send(strings.USER.CRATE, name=util.theme_str(recipe.output, cargo.theme), count=ccount)
+			Cargo(recipe.output, ccount, None).add(c.structure)
+			c.send(strings.USER.CRATE, name=recipe.output, count=ccount)
 	cargo.less(count, c.structure)
 
 def handle_quest(c: Client, args: List[str]) -> None:
