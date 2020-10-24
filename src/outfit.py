@@ -5,9 +5,10 @@ conn = database.conn
 
 class Outfit:
 	
-	def __init__(self, otype, mark, setting = 0, counter = 0, id = None, structure_id = None):
+	def __init__(self, otype, mark, theme = None, setting = 0, counter = 0, id = None, structure_id = None):
 		self.type = outfittype.outfits[otype]
 		self.mark = mark
+		self.theme = theme
 		self.setting = setting
 		self.counter = counter
 		self.id = id
@@ -15,8 +16,8 @@ class Outfit:
 	
 	def install(self, s) -> None:
 		s.outfits.append(self)
-		c = conn.execute("INSERT INTO outfits (type, mark, setting, counter, structure_id) VALUES (?, ?, ?, ?, ?)",
-			(self.type.name, self.mark, self.setting, self.counter, s.id))
+		c = conn.execute("INSERT INTO outfits (type, mark, theme, setting, counter, structure_id) VALUES (?, ?, ?, ?, ?, ?)",
+			(self.type.name, self.mark, self.theme, self.setting, self.counter, s.id))
 		self.id = c.lastrowid
 		self.structure_id = s.id
 		conn.commit()
@@ -64,6 +65,6 @@ class Outfit:
 		return self.type.properties[key] * self.mark + b
 
 def load_outfit(otup) -> Outfit:
-	outfit = Outfit(otup["type"], otup["mark"], otup["setting"], otup["counter"], otup["id"], otup["structure_id"])
+	outfit = Outfit(otup["type"], otup["mark"], otup["theme"], otup["setting"], otup["counter"], otup["id"], otup["structure_id"])
 	return outfit
 

@@ -8,6 +8,8 @@ The universe is vast, and bountiful. It is also home to countless other operator
 4. Construct a new, larger ship equipped with better outfits.
 5. Establish a colony and join a faction
 
+When you connect to the system for the first time, you will be entered into the automated training program. This will guide you through the basics, although you may still need access to the manual. Use the `quest` command to view your current task, or to submit results.
+
 The interface language can be changed using the `language` command. The account username and password can be changed using the `username` and `password` commands, and optionally an email address can be attached using the `email` command in case you ever need to reset your password.
 
 Every day you log in, your login streak will increase. Forgetting to log in for a day will result in your streak being reset to zero. Every day, you will receive one crate with a quality corresponding to your login streak, which can be opened using the `crate` command. Crates contain a random number of items, or a single outfit of a random mark. Higher quality crates contain more items and larger outfits.

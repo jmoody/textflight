@@ -29,10 +29,10 @@ def apply_format_codes(message: str) -> None:
 
 def handle_fact(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.FACT)
+		c.send(strings.USAGE.FACT, error=True)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.MISC.NOT_IN_FACTION)
+		c.send(strings.MISC.NOT_IN_FACTION, error=True)
 		return
 	message = validchars.sub("", " ".join(args))
 	if c.premium:
@@ -45,7 +45,7 @@ def handle_fact(c: Client, args: List[str]) -> None:
 
 def handle_glob(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.GLOB)
+		c.send(strings.USAGE.GLOB, error=True)
 		return
 	message = validchars.sub("", " ".join(args))
 	if c.premium:
@@ -58,13 +58,13 @@ def handle_glob(c: Client, args: List[str]) -> None:
 
 def handle_subs(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
-		c.send(strings.USAGE.SUBS)
+		c.send(strings.USAGE.SUBS, error=True)
 		return
 	username = args.pop(0)
 	for client in network.clients:
 		if client.id != None and client.username == username:
 			if client.chat_mode.value < ChatMode.DIRECT.value:
-				c.send(strings.SOCIAL.NO_CHAT)
+				c.send(strings.SOCIAL.NO_CHAT, error=True)
 				return
 			message = validchars.sub("", " ".join(args))
 			if c.premium:
@@ -73,11 +73,11 @@ def handle_subs(c: Client, args: List[str]) -> None:
 			logging.info("Subspace message '%s' sent by %d, to %d.", message, c.id, client.id)
 			c.send(strings.SOCIAL.SUBSPACE)
 			return
-	c.send(strings.MISC.NO_OP)
+	c.send(strings.MISC.NO_OP, error=True)
 
 def handle_locl(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.LOCL)
+		c.send(strings.USAGE.LOCL, error=True)
 		return
 	name = "%d %s" % (c.structure.id, c.structure.name)
 	message = validchars.sub("", " ".join(args))
@@ -91,20 +91,20 @@ def handle_locl(c: Client, args: List[str]) -> None:
 
 def handle_hail(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
-		c.send(strings.USAGE.HAIL)
+		c.send(strings.USAGE.HAIL, error=True)
 		return
 	try:
 		sid = int(args.pop(0))
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	for client in network.clients:
 		if client.id != None and client.structure.id == sid:
 			if client.structure.system.id != c.structure.system.id:
-				c.send(strings.MISC.NO_STRUCT)
+				c.send(strings.MISC.NO_STRUCT, error=True)
 				return
 			elif client.chat_mode.value < ChatMode.DIRECT.value:
-				c.send(strings.SOCIAL.NO_CHAT)
+				c.send(strings.SOCIAL.NO_CHAT, error=True)
 				return
 			message = validchars.sub("", " ".join(args))
 			if c.premium:
@@ -113,5 +113,5 @@ def handle_hail(c: Client, args: List[str]) -> None:
 			logging.info("Hail message '%s' sent by %d, to %d.", message, c.id, client.id)
 			c.send(strings.SOCIAL.HAIL, id=sid, name=client.structure.name)
 			return
-	c.send(strings.SOCIAL.NO_HAIL)
+	c.send(strings.SOCIAL.NO_HAIL, error=True)
 

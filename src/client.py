@@ -5,6 +5,7 @@ import logging
 import math
 from enum import Enum
 from threading import Lock
+from datetime import datetime
 
 import combat
 import database
@@ -28,6 +29,9 @@ SPAWN_TIME = ccf.getint("SpawnTime")
 conn = database.conn
 DAY = 60 * 60 * 24
 VALIDREGEX = re.compile(ccf.get("ValidateRegex"))
+
+ERROR_COLOUR = "\033[31m"
+RESET_COLOUR = "\033[0m"
 
 class MessageType(Enum):
 	SUBSPACE = "SUBS"
@@ -77,7 +81,7 @@ class Client:
 			msg = "[%s][%s] %s" % (mtype.value, author, message)
 		self.msg_buffer.append(msg)
 	
-	def send(self, message: str, args = None, **kwargs) -> None:
+	def send(self, message: str, error = False, args = None, **kwargs) -> None:
 		msg = ""
 		if self.client_mode:
 			msg+= message + "|" + self.translate(message)
@@ -87,6 +91,8 @@ class Client:
 		else:
 			msg+= self.translate(message) + "\n"
 			msg = msg.format(**kwargs)
+		if error:
+			msg = ERROR_COLOUR + msg + RESET_COLOUR
 		self.send_bytes(msg.encode("utf-8"))
 	
 	def prompt(self) -> None:
@@ -198,7 +204,12 @@ class Client:
 			self.streak+= 1
 			quality = int(pow(2, int(math.log2(self.streak))))
 			quality = max(quality, 2)
-			Cargo("Crate", 1, quality).add(self.structure)
+			today = datetime.today()
+			if today.month == 10 and today.day >= 24:
+				theme = "halloween"
+			else:
+				theme = None
+			Cargo("Crate", 1, quality, theme).add(self.structure)
 			self.display_streak_message = True
 		
 		# Update database

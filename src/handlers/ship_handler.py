@@ -14,29 +14,29 @@ conn = database.conn
 def handle_dock(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if len(args) != 1:
-		c.send(strings.USAGE.DOCK)
+		c.send(strings.USAGE.DOCK, error=True)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if sid == s.id:
-		c.send(strings.SHIP.SELF_DOCK)
+		c.send(strings.SHIP.SELF_DOCK, error=True)
 		return
 	elif s.type != "ship":
-		c.send(strings.SHIP.ONLY_SHIPS)
+		c.send(strings.SHIP.ONLY_SHIPS, error=True)
 		return
 	elif s.dock_parent != None or len(s.dock_children) > 0:
-		c.send(strings.SHIP.ALREADY_DOCKED)
+		c.send(strings.SHIP.ALREADY_DOCKED, error=True)
 		return
 	target = structure.load_structure(sid)
 	if target == None or target.system.id != s.system.id or target.planet_id != s.planet_id:
-		c.send(strings.MISC.NO_STRUCT)
+		c.send(strings.MISC.NO_STRUCT, error=True)
 	elif target.dock_parent != None:
-		c.send(strings.SHIP.TARGET_ALREADY_DOCKED)
+		c.send(strings.SHIP.TARGET_ALREADY_DOCKED, error=True)
 	elif not faction.has_permission(c, target, faction.DOCK_MIN):
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 	else:
 		target.dock_children.append(s)
 		s.dock_parent = target
@@ -47,28 +47,28 @@ def handle_dock(c: Client, args: List[str]) -> None:
 def handle_rdock(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if len(args) != 1:
-		c.send(strings.USAGE.RDOCK)
+		c.send(strings.USAGE.RDOCK, error=True)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if sid == s.id:
-		c.send(strings.SHIP.SELF_DOCK)
+		c.send(strings.SHIP.SELF_DOCK, error=True)
 		return
 	elif s.dock_parent != None:
-		c.send(strings.SHIP.ALREADY_DOCKED)
+		c.send(strings.SHIP.ALREADY_DOCKED, error=True)
 		return
 	target = structure.load_structure(sid)
 	if target == None or target.system.id != s.system.id:
-		c.send(strings.MISC.NO_STRUCT)
+		c.send(strings.MISC.NO_STRUCT, error=True)
 	elif target.type != "ship":
-		c.send(strings.SHIP.ONLY_SHIPS)
+		c.send(strings.SHIP.ONLY_SHIPS, error=True)
 	elif target.dock_parent != None or len(target.dock_children) > 0:
-		c.send(strings.SHIP.TARGET_ALREADY_DOCKED)
+		c.send(strings.SHIP.TARGET_ALREADY_DOCKED, error=True)
 	elif not faction.has_permission(c, target, faction.DOCK_MIN):
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 	else:
 		s.dock_children.append(target)
 		target.dock_parent = s
@@ -78,28 +78,28 @@ def handle_rdock(c: Client, args: List[str]) -> None:
 
 def handle_land(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.LAND)
+		c.send(strings.USAGE.LAND, error=True)
 		return
 	try:
 		pid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if pid > len(c.structure.system.planets) - 1:
-		c.send(strings.SHIP.NO_PLANET)
+		c.send(strings.SHIP.NO_PLANET, error=True)
 		return
 	elif c.structure.planet_id != None:
-		c.send(strings.SHIP.ALREADY_LANDED)
+		c.send(strings.SHIP.ALREADY_LANDED, error=True)
 		return
 	elif c.structure.dock_parent != None or len(c.structure.dock_children) > 0:
-		c.send(strings.SHIP.LAND_WHILE_DOCKED)
+		c.send(strings.SHIP.LAND_WHILE_DOCKED, error=True)
 		return
 	report = production.update(c.structure)
 	if report.mass > report.antigravity:
 		if report.antigravity == 0:
-			c.send(strings.SHIP.NO_ANTIGRAVITY)
+			c.send(strings.SHIP.NO_ANTIGRAVITY, error=True)
 		else:
-			c.send(strings.SHIP.LESS_ANTIGRAVITY)
+			c.send(strings.SHIP.LESS_ANTIGRAVITY, error=True)
 		return
 	c.structure.planet_id = pid
 	c.structure.mining_progress = 0
@@ -110,20 +110,20 @@ def handle_land(c: Client, args: List[str]) -> None:
 def handle_launch(c: Client, args: List[str]) -> None:
 	s = c.structure
 	if s.type != "ship":
-		c.send(strings.SHIP.ONLY_SHIPS_LAUNCH)
+		c.send(strings.SHIP.ONLY_SHIPS_LAUNCH, error=True)
 		return
 	elif s.planet_id == None:
-		c.send(strings.SHIP.NOT_LANDED)
+		c.send(strings.SHIP.NOT_LANDED, error=True)
 		return
 	elif s.dock_parent != None or len(s.dock_children) > 0:
-		c.send(strings.SHIP.LAUNCH_WHILE_DOCKED)
+		c.send(strings.SHIP.LAUNCH_WHILE_DOCKED, error=True)
 		return
 	report = production.update(s)
 	if report.mass > report.antigravity:
 		if report.antigravity == 0:
-			c.send(strings.SHIP.NO_ANTIGRAVITY)
+			c.send(strings.SHIP.NO_ANTIGRAVITY, error=True)
 		else:
-			c.send(strings.SHIP.LESS_ANTIGRAVITY)
+			c.send(strings.SHIP.LESS_ANTIGRAVITY, error=True)
 		return
 	s.planet_id = None
 	s.mining_progress = 0
@@ -136,13 +136,13 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	# Validate input
 	s = c.structure
 	if len(args) < 1:
-		c.send(strings.USAGE.JUMP)
+		c.send(strings.USAGE.JUMP, error=True)
 		return
 	elif s.planet_id != None:
-		c.send(strings.SHIP.WARP_ON_PLANET)
+		c.send(strings.SHIP.WARP_ON_PLANET, error=True)
 		return
 	elif s.dock_parent != None or len(s.dock_children) > 0:
-		c.send(strings.SHIP.WARP_WHILE_DOCKED)
+		c.send(strings.SHIP.WARP_WHILE_DOCKED, error=True)
 		return
 	sids = []
 	try:
@@ -150,15 +150,15 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		for arg in args:
 			sids.append(int(arg))
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	links = s.system.get_links()
 	if lindex >= len(links):
-		c.send(strings.SHIP.NO_SYSTEM)
+		c.send(strings.SHIP.NO_SYSTEM, error=True)
 		return
 	report = production.update(s)
 	if s.warp_charge < report.mass:
-		c.send(strings.SHIP.NO_CHARGE)
+		c.send(strings.SHIP.NO_CHARGE, error=True)
 		return
 	
 	# Make sure all ships are ready to jump
@@ -166,17 +166,17 @@ def handle_jump(c: Client, args: List[str]) -> None:
 	for sid in sids:
 		fship = structure.load_structure(sid)
 		if fship == None or fship.system.id != s.system.id:
-			c.send(strings.SHIP.NO_STRUCTURE_X, id=sid)
+			c.send(strings.SHIP.NO_STRUCTURE_X, id=sid, error=True)
 			return
 		elif conn.execute("SELECT id FROM users WHERE structure_id = ?;", (sid,)).fetchone() != None:
-			c.send(strings.SHIP.PERMISSION_DENIED_X, id=sid, name=fship.name)
+			c.send(strings.SHIP.PERMISSION_DENIED_X, id=sid, name=fship.name, error=True)
 			return
 		elif not faction.has_permission(c, fship, faction.JUMP_MIN):
-			c.send(strings.SHIP.PERMISSION_DENIED_X, id=sid, name=fship.name)
+			c.send(strings.SHIP.PERMISSION_DENIED_X, id=sid, name=fship.name, error=True)
 			return
 		freport = production.update(fship)
 		if fship.warp_charge < freport.mass:
-			c.send(strings.SHIP.NO_CHARGE_X, id=sid, name=fship.name)
+			c.send(strings.SHIP.NO_CHARGE_X, id=sid, name=fship.name, error=True)
 			return
 		ships[fship] = report.mass
 	

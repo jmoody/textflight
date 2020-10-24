@@ -1,0 +1,53 @@
+Powering Up
+	description Welcome to Textflight! Let's start by powering up your ship. Use `set 16 fusion` and `set 16 coolant` to power on your Fusion Reactor and Coolant Pump. To see how much power you have, run `status` to see information on how your ship is running. When you're done, run `quest` to complete the quest.
+	next Getting Around
+	condition report heat_rate -3
+
+Getting Around
+	description Great job! Now let's try jumping your ship to another system. Power up your warp engines with `set 16 warp`. Use the `nav` command to list hyperspace links, then jump with `jump south`.
+	next Finding Resources
+	condition sys -1 -1
+	condition sys -1 0
+	condition sys -1 1
+	condition sys 0 -1
+	condition sys 0 1
+	condition sys 1 -1
+	condition sys 1 0
+	condition sys 1 1
+
+Finding Resources
+	description Now that you know how to fly, let's try mining some ore. First shut down your warp engines with `set 0 warp` to save power, then start up your Mining Beam with `set 16 mining`. You can use the `nav` command to see what kind of ore is available in this system, and dense it is. The higher the better!
+	next Crafting Supplies
+	condition item 1 Iron Ore
+	condition item 1 Carbon Ore
+	condition item 1 Copper Ore
+	condition item 1 Silicon Ore
+	condition item 1 Uranium Ore
+
+Crafting Supplies
+	description Once you have some ore, try refining it into useful material. Shut down your Mining Beam with `set 0 mining` and power on your Assembler with `set 16 assembler`. Next, use `craft` to list available crafting recipes, and then `craft <ID> <count>` to craft an item of your choice. Once you've selected an item to be crafted, it will be added to the crafting queue, which you can view with `queue`. Items are automatically deposited into your cargo hold when they're finished crafting.
+	next Refueling
+	condition item 1 Iron
+	condition item 1 Carbon
+	condition item 1 Copper
+	condition item 1 Silicon
+	condition item 1 Uranium
+
+Refueling
+	description You may have noticed that your Fusion Reactor is consuming your Hydrogen Fuel cells. You can see your cargo with `scan` to check how much you have left. In order to get more, you'll need to find a gas giant. Navigate to a system with a gas giant, then power on your Antigravity Engine with `set 16 antigravity`. Once your engines are online, land on a gas giant with the `land` command. Finally, power on your Mining Beams to begin collecting gas, remembering to check your power usage with `status` and shut down unnecessary outfits. Once you have some gas, you can craft new Hydrogen Fuel Cells from the Empty Cells in your cargo.
+	next Base Building
+	condition item 8 Hydrogen Fuel Cell
+
+Base Building
+	description Congratulations, you now understand the basics of the game. Let's start working on some base building. In order to construct a base, you'll need to find a planet (any planet except gas giants!) to build one on, and collect enough Light Material and Heavy Plating for the construction. Once you have the supplies and have landed on a suitable planet, use the `base` command to construct your base. You can use your new base as a storage facility for your items, to reduce the mass of your ship. Later on you may want to construct more ships; the process is similar, but you'll need to use a Shipyard and the `construct` command instead.
+	next Starting Colonies
+	condition struct type base
+
+Starting Colonies
+	description You've almost reached the end of the tutorial; soon you'll be free to explore the universe at your leisure. There are many other things to learn and discover, but for your final task, let's start a colony. You'll need Living Spaces and a Distribution Center to house your colonists. It may be a good idea to build your colony on a planet, so you can take advantage of Geothermal Pumps and Heat Sinks. You'll also need Supply Packages to sustain your colony. With one Distribution Center, your colony will consume one Supply Package every 24 hours, so you should craft at least 30 packages before starting your colony to ensure they don't run out of food.
+	next Tutorial Completed
+	condition report crew 4
+
+Tutorial Completed
+	description Congratulations, you've now completed the tutorial, and have your very own colony! Remember to restock their Supply Packages on your travels, so they don't die in your absence. The universe is now yours to explore, and there is still much to learn. Good luck, and have fun!
+

@@ -101,6 +101,7 @@ create_table("""outfits (
 	id INTEGER PRIMARY KEY,
 	type TEXT NOT NULL,
 	mark INTEGER NOT NULL,
+	theme TEXT,
 	setting INTEGER DEFAULT 0 NOT NULL,
 	counter REAL DEFAULT 0 NOT NULL,
 	structure_id INTEGER NOT NULL,
@@ -111,6 +112,7 @@ create_table("""cargo (
 	id INTEGER PRIMARY KEY,
 	type TEXT NOT NULL,
 	extra TEXT,
+	theme TEXT,
 	count INTEGER NOT NULL,
 	structure_id INTEGER NOT NULL,
 	FOREIGN KEY(structure_id) REFERENCES structures(id) ON DELETE CASCADE
@@ -135,6 +137,13 @@ create_table("""map (
 
 create_table("""keys (
 	id TEXT PRIMARY KEY
+);""")
+
+create_table("""quests (
+	user_id INTEGER NOT NULL,
+	quest TEXT,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+	PRIMARY KEY (user_id, quest)
 );""")
 
 try:

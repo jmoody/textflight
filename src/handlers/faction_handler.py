@@ -13,19 +13,19 @@ conn = database.conn
 
 def handle_chown(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.FACTION_CHOWN)
+		c.send(strings.USAGE.FACTION_CHOWN, error=True)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.MISC.NOT_IN_FACTION)
+		c.send(strings.MISC.NOT_IN_FACTION, error=True)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 		return
 	utup = conn.execute("SELECT id FROM users WHERE faction_id = ? AND username = ?;",
 		(fact.id, args[0])).fetchone()
 	if utup == None:
-		c.send(strings.FACTION.NO_MEMBER)
+		c.send(strings.FACTION.NO_MEMBER, error=True)
 		return
 	conn.execute("UPDATE factions SET owner_id = ? WHERE id = ?;", (utup["id"], fact.id))
 	conn.commit()
@@ -34,52 +34,52 @@ def handle_chown(c: Client, args: List[str]) -> None:
 
 def handle_claim(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	if c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
-			c.send(strings.FACTION.ALREADY_CLAIMED)
+			c.send(strings.FACTION.ALREADY_CLAIMED, error=True)
 			return
 		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ?;",
 			(c.structure.system.id_db, c.faction_id,)).fetchall())
 		if rowcount > 0:
-			c.send(strings.FACTION.CANNOT_CLAIM)
+			c.send(strings.FACTION.CANNOT_CLAIM, error=True)
 		else:
 			territory.set_system(c.structure.system, c.faction_id, name)
 			if name != None:
-				c.send(strings.FACTION.CLAIMED, name=name)
+				c.send(strings.FACTION.CLAIMED, name=name, error=True)
 			else:
-				c.send(strings.FACTION.CLAIMED_SYSTEM)
+				c.send(strings.FACTION.CLAIMED_SYSTEM, error=True)
 	else:
 		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
-			c.send(strings.FACTION.ALREADY_CLAIMED)
+			c.send(strings.FACTION.ALREADY_CLAIMED, error=True)
 			return
 		rowcount = len(conn.execute("SELECT structures.id FROM structures INNER JOIN users ON users.structure_id = structures.id WHERE sys_id = ? AND faction_id != ? AND planet_id = ?;",
 			(c.structure.system.id_db, c.faction_id, c.structure.planet_id)).fetchall())
 		if rowcount > 0:
-			c.send(strings.FACTION.CANNOT_CLAIM)
+			c.send(strings.FACTION.CANNOT_CLAIM, error=True)
 		else:
 			territory.set_planet(c.structure.system, c.structure.planet_id, c.faction_id, name)
 			if name != None:
-				c.send(strings.FACTION.CLAIMED, name=name)
+				c.send(strings.FACTION.CLAIMED, name=name, error=True)
 			else:
-				c.send(strings.FACTION.CLAIMED_PLANET)
+				c.send(strings.FACTION.CLAIMED_PLANET, error=True)
 
 def handle_info(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		if c.faction_id == 0:
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 			return
 		fact = faction.get_faction(c.faction_id)
 	elif len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 			return
 	else:
-		c.send(strings.USAGE.FACTION_INFO)
+		c.send(strings.USAGE.FACTION_INFO, error=True)
 		return
 	c.send(strings.FACTION.NAME, faction_name=fact.name)
 	if c.id == fact.owner_id:
@@ -93,13 +93,13 @@ def handle_info(c: Client, args: List[str]) -> None:
 
 def handle_join(c: Client, args: List[str]) -> None:
 	if len(args) < 2:
-		c.send(strings.USAGE.FACTION_JOIN)
+		c.send(strings.USAGE.FACTION_JOIN, error=True)
 		return
 	elif not c.checkvalid(args[0]):
-		c.send(strings.FACTION.ALPHANUM_ONLY)
+		c.send(strings.FACTION.ALPHANUM_ONLY, error=True)
 		return
 	elif c.faction_id != 0:
-		c.send(strings.FACTION.ALREADY_IN_FACTION)
+		c.send(strings.FACTION.ALREADY_IN_FACTION, error=True)
 		return
 	name = args.pop(0)
 	password = " ".join(args)
@@ -110,7 +110,7 @@ def handle_join(c: Client, args: List[str]) -> None:
 		fact = faction.get_faction_by_name(name)
 		logging.info("User %d created faction '%s'.", c.id, name)
 	elif fact.password != password:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 		return
 	c.faction_id = fact.id
 	conn.execute("UPDATE users SET faction_id = ? WHERE id = ?;", (fact.id, c.id))
@@ -119,14 +119,14 @@ def handle_join(c: Client, args: List[str]) -> None:
 
 def handle_kick(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.FACTION_KICK)
+		c.send(strings.USAGE.FACTION_KICK, error=True)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 		return
 	rowcount = conn.execute("UPDATE users SET faction_id = 0 WHERE faction_id = ? AND username = ? AND id != ?;",
 		(fact.id, args[0], c.id)).rowcount
@@ -137,7 +137,7 @@ def handle_kick(c: Client, args: List[str]) -> None:
 				client.faction_id = 0
 		c.send(strings.FACTION.KICKED, username=args[0])
 	else:
-		c.send(strings.FACTION.NO_MEMBER)
+		c.send(strings.FACTION.NO_MEMBER, error=True)
 
 def handle_leaderboard(c: Client, args: List[str]) -> None:
 	c.send(strings.FACTION.LEADERBOARD_FACTIONS)
@@ -156,7 +156,7 @@ def handle_leave(c: Client, args: List[str]) -> None:
 	fact = faction.get_faction(c.faction_id)
 	members = fact.list_members()
 	if fact.owner_id == c.id and len(members) > 1:
-		c.send(strings.FACTION.HAS_MEMBERS)
+		c.send(strings.FACTION.HAS_MEMBERS, error=True)
 		return
 	c.faction_id = 0;
 	conn.execute("UPDATE users SET faction_id = 0 WHERE id = ?;", (c.id,))
@@ -176,11 +176,11 @@ def handle_list(c: Client, args: List[str]) -> None:
 
 def handle_name(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.FACTION_NAME)
+		c.send(strings.USAGE.FACTION_NAME, error=True)
 	elif not c.checkvalid(" ".join(args)):
-		c.send(strings.FACTION.ALPHANUM_ONLY)
+		c.send(strings.FACTION.ALPHANUM_ONLY, error=True)
 	elif c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 	elif c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
@@ -189,7 +189,7 @@ def handle_name(c: Client, args: List[str]) -> None:
 			logging.info("User %d renamed system to '%s'.", c.id, name)
 			c.send(strings.FACTION.RENAMED_SYSTEM, name=name)
 		else:
-			c.send(strings.FACTION.NO_CLAIM)
+			c.send(strings.FACTION.NO_CLAIM, error=True)
 	else:
 		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
@@ -198,18 +198,18 @@ def handle_name(c: Client, args: List[str]) -> None:
 			logging.info("User %d renamed planet to '%s'.", c.id, name)
 			c.send(strings.FACTION.RENAMED_PLANET, name=name)
 		else:
-			c.send(strings.FACTION.NO_CLAIM)
+			c.send(strings.FACTION.NO_CLAIM, error=True)
 
 def handle_passwd(c: Client, args: List[str]) -> None:
 	if len(args) < 1:
-		c.send(strings.USAGE.FACTION_PASSWD)
+		c.send(strings.USAGE.FACTION_PASSWD, error=True)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 	else:
 		conn.execute("UPDATE factions SET password = ? WHERE id = ?;", (" ".join(args), fact.id,))
 		conn.commit()
@@ -217,35 +217,35 @@ def handle_passwd(c: Client, args: List[str]) -> None:
 
 def handle_release(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 	elif c.structure.planet_id == None:
 		fid, name = territory.get_system(c.structure.system)
 		if fid == c.faction_id:
 			territory.del_system(c.structure.system)
 			c.send(strings.FACTION.RELEASED_SYSTEM)
 		else:
-			c.send(strings.FACTION.NO_CLAIM)
+			c.send(strings.FACTION.NO_CLAIM, error=True)
 	else:
 		fid, name = territory.get_planet(c.structure.system, c.structure.planet_id)
 		if fid == c.faction_id:
 			territory.del_planet(c.structure.system, c.structure.planet_id)
 			c.send(strings.FACTION.RELEASED_PLANET)
 		else:
-			c.send(strings.FACTION.NO_CLAIM)
+			c.send(strings.FACTION.NO_CLAIM, error=True)
 
 def handle_rename(c: Client, args: List[str]) -> None:
 	if len(args) != 1:
-		c.send(strings.USAGE.FACTION_RENAME)
+		c.send(strings.USAGE.FACTION_RENAME, error=True)
 		return
 	elif not c.checkvalid(args[0]):
-		c.send(strings.FACTION.ALPHANUM_ONLY)
+		c.send(strings.FACTION.ALPHANUM_ONLY, error=True)
 		return
 	elif c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	fact = faction.get_faction(c.faction_id)
 	if fact.owner_id != c.id:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 	else:
 		conn.execute("UPDATE factions SET name = ? WHERE id = ?;", (args[0], fact.id))
 		conn.commit()
@@ -254,45 +254,45 @@ def handle_rename(c: Client, args: List[str]) -> None:
 
 def handle_frepf(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	own = faction.get_faction(c.faction_id)
 	if len(args) > 0 and args[0] == own.name:
-		c.send(strings.FACTION.SELF_REPUTATION)
+		c.send(strings.FACTION.SELF_REPUTATION, error=True)
 		return
 	if len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 		else:
 			c.send(strings.FACTION.REPUTATION_OF, name=fact.name, reputation=own.get_reputation(fact.id))
 			c.send(strings.FACTION.REPUTATION_WITH, name=fact.name, reputation=fact.get_reputation(own.id))
 	elif len(args) == 2:
 		if own.owner_id != c.id:
-			c.send(strings.MISC.PERMISSION_DENIED)
+			c.send(strings.MISC.PERMISSION_DENIED, error=True)
 			return
 		try:
 			value = int(args[1])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None or fact.name == "":
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 		else:
 			own.set_reputation(fact.id, value)
 			combat.update_targets(c.structure.system.id)
 			c.send(strings.FACTION.SET_REPUTATION, name=fact.name, reputation=value)
 	else:
-		c.send(strings.USAGE.FACTION_REPF)
+		c.send(strings.USAGE.FACTION_REPF, error=True)
 
 def handle_repf(c: Client, args: List[str]) -> None:
 	if len(args) == 1:
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None:
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 		elif fact.id == c.faction_id:
-			c.send(strings.FACTION.SELF_REPUTATION)
+			c.send(strings.FACTION.SELF_REPUTATION, error=True)
 		else:
 			c.send(strings.FACTION.PERSONAL_REPUTATION_OF, name=fact.name, reputation=fact.get_user_reputation(c.id, False))
 			c.send(strings.FACTION.PERSONAL_REPUTATION_WITH, name=fact.name, reputation=fact.get_user_reputation(c.id, True))
@@ -300,28 +300,28 @@ def handle_repf(c: Client, args: List[str]) -> None:
 		try:
 			value = int(args[1])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		fact = faction.get_faction_by_name(args[0])
 		if fact == None or fact.name == "":
-			c.send(strings.FACTION.NO_FACTION)
+			c.send(strings.FACTION.NO_FACTION, error=True)
 		elif fact.id == c.faction_id:
-			c.send(strings.FACTION.SELF_REPUTATION)
+			c.send(strings.FACTION.SELF_REPUTATION, error=True)
 		else:
 			fact.set_user_reputation(c.id, False, value)
 			combat.update_targets(c.structure.system.id)
 			c.send(strings.FACTION.SET_PERSONAL_REPUTATION, name=fact.name, reputation=value)
 	else:
-		c.send(strings.USAGE.REPF)
+		c.send(strings.USAGE.REPF, error=True)
 
 def handle_rep(c: Client, args: List[str]) -> None:
 	if len(args) > 0 and args[0] == c.username:
-		c.send(strings.FACTION.SELF_REPUTATION)
+		c.send(strings.FACTION.SELF_REPUTATION, error=True)
 		return
 	if len(args) == 1:
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:
-			c.send(strings.MISC.NO_OP)
+			c.send(strings.MISC.NO_OP, error=True)
 		else:
 			uid = utup["id"]
 			c.send(strings.FACTION.PERSONAL_REPUTATION_OF, name=args[0], reputation=faction.get_personal_reputation(c.id, uid))
@@ -330,22 +330,22 @@ def handle_rep(c: Client, args: List[str]) -> None:
 		try:
 			value = int(args[1])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:
-			c.send(strings.MISC.NO_OP)
+			c.send(strings.MISC.NO_OP, error=True)
 		else:
 			faction.set_personal_reputation(c.id, utup["id"], value)
 			combat.update_targets(c.structure.system.id)
 			c.send(strings.FACTION.SET_PERSONAL_REPUTATION, name=args[0], reputation=value)
 	else:
-		c.send(strings.USAGE.REP)
+		c.send(strings.USAGE.REP, error=True)
 
 
 def handle_frep(c: Client, args: List[str]) -> None:
 	if c.faction_id == 0:
-		c.send(strings.FACTION.NO_FACTION)
+		c.send(strings.FACTION.NO_FACTION, error=True)
 		return
 	elif len(args) > 0 and args[0] == c.username:
 		c.send(strings.FACTION.SELF_REPUTATION)
@@ -354,27 +354,27 @@ def handle_frep(c: Client, args: List[str]) -> None:
 	if len(args) == 1:
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:
-			c.send(strings.MISC.NO_OP)
+			c.send(strings.MISC.NO_OP, error=True)
 		else:
 			uid = utup["id"]
 			c.send(strings.FACTION.REPUTATION_OF, name=args[0], reputation=own.get_user_reputation(uid, True))
 			c.send(strings.FACTION.REPUTATION_WITH, name=args[0], reputation=own.get_user_reputation(uid, False))
 	elif len(args) == 2:
 		if own.owner_id != c.id:
-			c.send(strings.MISC.PERMISSION_DENIED)
+			c.send(strings.MISC.PERMISSION_DENIED, error=True)
 			return
 		try:
 			value = int(args[1])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		utup = conn.execute("SELECT id FROM users WHERE username = ?;", (args[0],)).fetchone()
 		if utup == None:
-			c.send(strings.MISC.NO_OP)
+			c.send(strings.MISC.NO_OP, error=True)
 		else:
 			own.set_user_reputation(utup["id"], True, value)
 			combat.update_targets(c.structure.system.id)
 			c.send(strings.FACTION.SET_REPUTATION, name=args[0], reputation=value)
 	else:
-		c.send(strings.USAGE.FACTION_REP)
+		c.send(strings.USAGE.FACTION_REP, error=True)
 

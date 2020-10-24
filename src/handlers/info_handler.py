@@ -9,6 +9,7 @@ import production
 import faction
 import territory
 import strings
+import util
 from client import Client
 
 conn = database.conn
@@ -39,7 +40,7 @@ def handle_nav(c: Client, args: List[str]) -> None:
 		sys = system.System(system.to_system_id(sys.x + x, sys.y + y))
 		rows = conn.execute("SELECT * FROM map WHERE user_id = ? AND sys_id = ?;", (c.id, sys.id_db))
 		if len(rows.fetchall()) == 0:
-			c.send(strings.INFO.NOT_DISCOVERED)
+			c.send(strings.INFO.NOT_DISCOVERED, error=True)
 			return
 		remote = True
 	elif len(args) != 0:
@@ -64,34 +65,16 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	index = 0
 	for link in sys.get_links():
 		lid, drag, xo, yo = link
-		if yo == -1:
-			if xo == -1:
-				direction = strings.INFO.NORTHWEST
-			elif xo == 1:
-				direction = strings.INFO.NORTHEAST
-			else:
-				direction = strings.INFO.NORTH
-		elif yo == 1:
-			if xo == -1:
-				direction = strings.INFO.SOUTHWEST
-			elif xo == 1:
-				direction = strings.INFO.SOUTHEAST
-			else:
-				direction = strings.INFO.SOUTH
-		elif xo == -1:
-			direction = strings.INFO.WEST
-		else:
-			direction = strings.INFO.EAST
 		target_sys = system.System(lid)
 		tfid, tname = territory.get_system(target_sys)
 		if tname != None:
 			tfact = faction.get_faction(tfid)
-			c.send(strings.INFO.LINK_NAMED, index=index, name=tname, faction=tfact.name, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK_NAMED, index=index, name=tname, faction=tfact.name, link_drag=drag)
 		elif tfid != None:
 			tfact = faction.get_faction(tfid)
-			c.send(strings.INFO.LINK_CLAIMED, index=index, faction=tfact.name, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK_CLAIMED, index=index, faction=tfact.name, link_drag=drag)
 		else:
-			c.send(strings.INFO.LINK, index=index, direction=c.translate(direction), link_drag=drag)
+			c.send(strings.INFO.LINK, index=index, link_drag=drag)
 		index+= 1
 	c.send(strings.INFO.PLANETS)
 	index = 0
@@ -142,14 +125,14 @@ def handle_scan(c: Client, args: List[str]) -> None:
 		try:
 			sid = int(args[0])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		s = structure.load_structure(sid)
 		if s == None or s.system.id != c.structure.system.id:
-			c.send(strings.MISC.NO_STRUCT)
+			c.send(strings.MISC.NO_STRUCT, error=True)
 			return
 	elif len(args) > 1:
-		c.send(strings.USAGE.SCAN)
+		c.send(strings.USAGE.SCAN, error=True)
 		return
 	production.update(s)
 	c.send(strings.INFO.CALLSIGN, id=s.id, name=s.name)
@@ -178,15 +161,15 @@ def handle_scan(c: Client, args: List[str]) -> None:
 	c.send(strings.INFO.OUTFITS)
 	index = 0
 	for out in s.outfits:
-		c.send(strings.INFO.OUTFIT, index=index, name=c.translate(out.type.name), mark=out.mark, setting=out.setting)
+		c.send(strings.INFO.OUTFIT, index=index, name=util.theme_str(c.translate(out.type.name), out.theme), mark=out.mark, setting=out.setting)
 		index+= 1
 	c.send(strings.INFO.CARGOS)
 	index = 0
 	for car in s.cargo:
 		if car.extra != None:
-			c.send(strings.INFO.CARGO_EXTRA, index=index, name=c.translate(car.type), extra=car.extra, count=car.count)
+			c.send(strings.INFO.CARGO_EXTRA, index=index, name=util.theme_str(c.translate(car.type), car.theme), extra=car.extra, count=car.count)
 		else:
-			c.send(strings.INFO.CARGO, index=index, name=c.translate(car.type), count=car.count)
+			c.send(strings.INFO.CARGO, index=index, name=util.theme_str(c.translate(car.type), car.theme), count=car.count)
 		index+= 1
 
 def handle_status(c: Client, args: List[str]) -> None:

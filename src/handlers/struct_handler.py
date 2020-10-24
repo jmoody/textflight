@@ -1,6 +1,7 @@
 import copy
 from typing import List
 
+import util
 import outfittype
 import production
 import database
@@ -16,10 +17,10 @@ conn = database.conn
 
 def handle_airlock(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send(strings.USAGE.AIRLOCK)
+		c.send(strings.USAGE.AIRLOCK, error=True)
 		return
 	elif c.structure.owner_id != c.id:
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 		return
 	rc = conn.execute("UPDATE users SET structure_id = NULL WHERE structure_id = ? AND username = ?;",
 		(c.structure.id, args[0],)).rowcount
@@ -31,22 +32,22 @@ def handle_airlock(c: Client, args: List[str]):
 				break
 		c.send(strings.STRUCT.AIRLOCK, username=args[0])
 	else:
-		c.send(strings.MISC.NO_OP)
+		c.send(strings.MISC.NO_OP, error=True)
 
 def handle_beam(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send(strings.USAGE.BEAM)
+		c.send(strings.USAGE.BEAM, error=True)
 		return
 	try:
 		sid = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	s = structure.load_structure(sid)
 	if s == None or s.system.id != c.structure.system.id:
-		c.send(strings.MISC.NO_STRUCT)
+		c.send(strings.MISC.NO_STRUCT, error=True)
 	elif not faction.has_permission(c, s, faction.TRANS_MIN):
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 	else:
 		c.structure = s
 		conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
@@ -58,12 +59,12 @@ def handle_trans(c: Client, args: List[str]):
 		s = c.structure.dock_parent
 	else:
 		if len(args) != 1:
-			c.send(strings.USAGE.TRANS)
+			c.send(strings.USAGE.TRANS, error=True)
 			return
 		try:
 			sid = int(args[0])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		s = None
 		for struct in c.structure.dock_children:
@@ -71,10 +72,10 @@ def handle_trans(c: Client, args: List[str]):
 				s = struct
 				break
 		if s == None:
-			c.send(strings.STRUCT.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK, error=True)
 			return
 	if not faction.has_permission(c, s, faction.TRANS_MIN):
-		c.send(strings.MISC.PERMISSION_DENIED)
+		c.send(strings.MISC.PERMISSION_DENIED, error=True)
 		return
 	c.structure = s
 	conn.execute("UPDATE users SET structure_id = ? WHERE id = ?;", (s.id, c.id))
@@ -112,7 +113,7 @@ def handle_eject(c: Client, args: List[str]):
 				production.update(c.structure, send_updates=True)
 				c.send(strings.STRUCT.EJECT)
 			else:
-				c.send(strings.STRUCT.NO_DOCK)
+				c.send(strings.STRUCT.NO_DOCK, error=True)
 		else:
 			for ship in s.dock_children:
 				if ship.id == sid:
@@ -122,114 +123,97 @@ def handle_eject(c: Client, args: List[str]):
 					production.update(c.structure, send_updates=True)
 					c.send(strings.STRUCT.EJECTED, id=ship.id, name=ship.name)
 					return
-			c.send(strings.STRUCT.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK, error=True)
 	else:
-		c.send(strings.USAGE.EJECT)
+		c.send(strings.USAGE.EJECT, error=True)
 
 def handle_install(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send(strings.USAGE.INSTALL)
+		c.send(strings.USAGE.INSTALL, error=True)
 		return
-	try:
-		cindex = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
+	cargo = util.search_cargo(" ".join(args), c.structure.cargo, c)
+	if cargo == None:
+		c.send(strings.MISC.NO_CARGO, error=True)
 		return
-	if cindex >= len(c.structure.cargo):
-		c.send(strings.MISC.NO_CARGO)
-	else:
-		for o in c.structure.outfits:
-			if o.setting != 0:
-				c.send(strings.STRUCT.POWERED_DOWN)
-				return
-		cargo = c.structure.cargo[cindex]
-		if not cargo.type in outfittype.outfits:
-			c.send(strings.STRUCT.NOT_OUTFIT)
-			return
-		mark = int(cargo.extra)
-		report = production.update(c.structure)
-		if report.outfit_space < mark:
-			c.send(strings.STRUCT.NO_OUTFIT_SPACE)
-			return
-		Outfit(cargo.type, mark).install(c.structure)
-		cargo.less(1, c.structure)
-		c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
+	if not cargo.type in outfittype.outfits:
+		c.send(strings.STRUCT.NOT_OUTFIT, error=True)
+		return
+	mark = int(cargo.extra)
+	report = production.update(c.structure)
+	if report.outfit_space < mark:
+		c.send(strings.STRUCT.NO_OUTFIT_SPACE, error=True)
+		return
+	Outfit(cargo.type, mark, cargo.theme).install(c.structure)
+	cargo.less(1, c.structure)
+	c.send(strings.STRUCT.INSTALLED, mark=mark, name=c.translate(cargo.type))
 
 def handle_load(c: Client, args: List[str]):
 	
 	# Validate input
 	s = c.structure
-	if len(args) < 2:
-		c.send(strings.USAGE.LOAD)
+	if len(args) < 3:
+		c.send(strings.USAGE.LOAD, error=True)
 		return
 	try:
-		cindex = int(args[0])
-		count = int(args[1])
+		count = int(args.pop(0))
+		sid = int(args.pop(0))
 	except ValueError:
 		c.send(strings.MISC.NAN)
 		return
+	car = util.search_cargo(" ".join(args), s.cargo, c)
+	if car == None:
+		c.send(strings.MISC.NO_CARGO, error=True)
+		return
 	production.update(s)
 	if count < 0:
-		c.send(strings.MISC.COUNT_GTZ)
-		return
-	elif cindex >= len(s.cargo):
-		c.send(strings.MISC.NO_CARGO)
+		c.send(strings.MISC.COUNT_GTZ, error=True)
 		return
 	
 	# Find docked target
 	if s.dock_parent != None:
 		target = s.dock_parent
+		if target.id != sid:
+			c.send(strings.STRUCT.NO_DOCK, error=True)
+			return
 	else:
-		if len(args) != 3:
-			c.send(strings.USAGE.LOAD)
-			return
-		try:
-			sid = int(args[2])
-		except ValueError:
-			c.send(strings.MISC.NAN)
-			return
 		target = None
 		for ship in s.dock_children:
 			if ship.id == sid:
 				target = ship
 				break
 		if target == None:
-			c.send(strings.STRUCT.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK, error=True)
 			return
 	
 	# Move the cargo
-	car = copy.copy(s.cargo[cindex])
+	car2 = copy.copy(car)
 	if count == 0:
-		count = car.count
-	elif car.count < count:
-		count = car.count
-		if count < 0:
-			c.send(strings.CRAFT.INSUFFICIENTS)
-			return
-	s.cargo[cindex].less(count, s)
-	car.count = count
-	car.add(target)
+		count = car2.count
+	elif car2.count < count:
+		count = car2.count
+	car.less(count, s)
+	car2.count = count
+	car2.add(target)
 	c.send(strings.STRUCT.LOADED, count=count, type=c.translate(car.type), id=target.id, name=target.name)
 	production.update(c.structure, send_updates=True)
 
 def handle_set(c: Client, args: List[str]):
 	if len(args) != 2:
-		c.send(strings.USAGE.SET)
+		c.send(strings.USAGE.SET, error=True)
 		return
 	try:
-		oindex = int(args[0])
-		setting = int(args[1])
+		setting = int(args.pop(0))
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
-	if oindex >= len(c.structure.outfits):
-		c.send(strings.STRUCT.NO_OUTFIT)
+	outfit = util.search_outfits(" ".join(args), c.structure.outfits, c)
+	if outfit == None:
+		c.send(strings.STRUCT.NO_OUTFIT, error=True)
 	elif setting < 0:
-		c.send(strings.STRUCT.SET_GTZ)
+		c.send(strings.STRUCT.SET_GTZ, error=True)
 	elif setting > 1024:
-		c.send(strings.STRUCT.SET_LT)
+		c.send(strings.STRUCT.SET_LT, error=True)
 	else:
-		outfit = c.structure.outfits[oindex]
 		production.update(c.structure)
 		outfit.set_setting(setting)
 		c.send(strings.STRUCT.SET, name=c.translate(outfit.type.name), setting=setting)
@@ -237,20 +221,20 @@ def handle_set(c: Client, args: List[str]):
 
 def handle_supply(c: Client, args: List[str]):
 	if len(args) < 1:
-		c.send(strings.USAGE.SUPPLY)
+		c.send(strings.USAGE.SUPPLY, error=True)
 		return
 	s = c.structure
 	try:
 		count = int(args[0])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	production.update(s)
 	if count < 1:
-		c.send(strings.STRUCT.ENERGY_GTZ)
+		c.send(strings.STRUCT.ENERGY_GTZ, error=True)
 		return
 	elif count > s.energy:
-		c.send(strings.STRUCT.NO_ENERGY)
+		c.send(strings.STRUCT.NO_ENERGY, error=True)
 		return
 	
 	# Find docked target
@@ -258,12 +242,12 @@ def handle_supply(c: Client, args: List[str]):
 		target = s.dock_parent
 	else:
 		if len(args) != 2:
-			c.send(strings.USAGE.SUPPLY)
+			c.send(strings.USAGE.SUPPLY, error=True)
 			return
 		try:
 			sid = int(args[1])
 		except ValueError:
-			c.send(strings.MISC.NAN)
+			c.send(strings.MISC.NAN, error=True)
 			return
 		target = None
 		for ship in s.dock_children:
@@ -271,7 +255,7 @@ def handle_supply(c: Client, args: List[str]):
 				target = ship
 				break
 		if target == None:
-			c.send(strings.STRUCT.NO_DOCK)
+			c.send(strings.STRUCT.NO_DOCK, error=True)
 			return
 	report = production.update(target)
 	if count > report.max_energy - target.energy:
@@ -294,10 +278,10 @@ def handle_swap(c: Client, args: List[str]):
 		oindex1 = int(args[0])
 		oindex2 = int(args[1])
 	except ValueError:
-		c.send(strings.MISC.NAN)
+		c.send(strings.MISC.NAN, error=True)
 		return
 	if oindex1 >= len(c.structure.outfits) or oindex2 >= len(c.structure.outfits):
-		c.send(strings.STRUCT.NO_OUTFIT)
+		c.send(strings.STRUCT.NO_OUTFIT, error=True)
 		return
 	outfit1 = c.structure.outfits[oindex1]
 	outfit2 = c.structure.outfits[oindex2]
@@ -315,23 +299,14 @@ def handle_swap(c: Client, args: List[str]):
 
 def handle_uninstall(c: Client, args: List[str]):
 	if len(args) != 1:
-		c.send(strings.USAGE.UNINSTALL)
+		c.send(strings.USAGE.UNINSTALL, error=True)
 		return
-	try:
-		oindex = int(args[0])
-	except ValueError:
-		c.send(strings.MISC.NAN)
+	outfit = util.search_outfits(" ".join(args), c.structure.outfits, c)
+	if outfit == None:
+		c.send(strings.STRUCT.NO_OUTFIT, error=True)
 		return
-	if oindex >= len(c.structure.outfits):
-		c.send(strings.STRUCT.NO_OUTFIT)
-	else:
-		for o in c.structure.outfits:
-			if o.setting != 0:
-				c.send(strings.STRUCT.POWERED_DOWN)
-				return
-		outfit = c.structure.outfits[oindex]
-		production.update(c.structure)
-		outfit.uninstall(c.structure)
-		Cargo(outfit.type.name, 1, str(outfit.mark)).add(c.structure)
-		c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
+	production.update(c.structure)
+	outfit.uninstall(c.structure)
+	Cargo(outfit.type.name, 1, str(outfit.mark), outfit.theme).add(c.structure)
+	c.send(strings.STRUCT.UNINSTALLED, name=c.translate(outfit.type.name))
 
