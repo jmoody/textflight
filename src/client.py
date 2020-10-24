@@ -235,5 +235,6 @@ def create_starter_ship(uid, username) -> structure.Structure:
 def register_user(username, password) -> None:
 	passwd = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 	user_id = conn.execute("INSERT INTO users (username, passwd) VALUES (?, ?);", (username, passwd)).lastrowid
+	quest.quests["Powering Up"].add(user_id)
 	conn.commit()
 
