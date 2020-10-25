@@ -14,6 +14,7 @@ import config
 import system
 import strings
 import translations
+import quest
 from outfit import Outfit
 from cargo import Cargo
 
