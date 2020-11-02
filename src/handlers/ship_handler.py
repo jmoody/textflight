@@ -153,7 +153,7 @@ def handle_jump(c: Client, args: List[str]) -> None:
 		c.send(strings.MISC.NAN, error=True)
 		return
 	links = s.system.get_links()
-	if lindex >= len(links):
+	if lindex >= len(links) or links[lindex] == None:
 		c.send(strings.SHIP.NO_SYSTEM, error=True)
 		return
 	report = production.update(s)

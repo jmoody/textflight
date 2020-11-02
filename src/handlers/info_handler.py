@@ -64,6 +64,9 @@ def handle_nav(c: Client, args: List[str]) -> None:
 	c.send(strings.INFO.LINKS)
 	index = 0
 	for link in sys.get_links():
+		if link == None:
+			index+= 1
+			continue
 		lid, drag, xo, yo = link
 		target_sys = system.System(lid)
 		tfid, tname = territory.get_system(target_sys)

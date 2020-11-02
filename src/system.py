@@ -64,6 +64,8 @@ class System:
 				drag = get_link_drag(self.id, lid)
 				if drag != 0:
 					links.append((lid, drag, xo, yo))
+				else:
+					links.append(None)
 		return links
 
 class Planet:
