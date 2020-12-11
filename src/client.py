@@ -117,9 +117,12 @@ class Client:
 		self.email = email
 	
 	def set_language(self, lang: str) -> None:
-		if lang == "client":
+		if lang == "client" or lang == "client-on":
 			self.client_mode = True
 			self.language = translations.languages["en"]
+			return
+		if lang == "client-off":
+			self.client_mode = False
 			return
 		conn.execute("UPDATE users SET language = ? WHERE id = ?;", (lang, self.id))
 		conn.commit()

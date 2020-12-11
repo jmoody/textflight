@@ -24,8 +24,8 @@ Below is a table relating link IDs to headings:
 - `3`: 270 degrees, X=-1, Y=0 (west)
 - `4`: 90 degrees, X=1, Y=0 (east)
 - `5`: 225 degrees, X=-1, Y=1 (southwest)
-- `6`: 180 degrees, X=0, Y=-1 (south)
-- `7`: 135 degrees, X=1, Y=-1 (southeast)
+- `6`: 180 degrees, X=0, Y=1 (south)
+- `7`: 135 degrees, X=1, Y=1 (southeast)
 
 The `jump` command can also be given the IDs of other ships as arguments, if you wish to jump an entire fleet at once. Remote jump initiation will not function if you do not have high enough reputation with the ship's owner, or if an operator has transferred their control core to the ship.
 

@@ -20,7 +20,7 @@ If you don't know how to add the PO file and create a pull request, email the fi
 
 ## Client development
 
-The `language client` command can be used to set the session into client mode. In this mode, normal output will be sent in the format `format string|translated format string|param 1| param 2| param 3`. This allows the development of clients which parse the output from the server. Note that you still need to handle the prompt (`>`) and chat messages, keeping in mind that chat messages can contain vertical bars. Status reports will also be sent, which are essentially more verbose copies of the output from `status`. They begin with `STATUSREPORT BEGIN` and end with `STATUSREPORT END`. Each line of the report contains a field in the format `NAME: VALUE`. Most of the values are floating point numbers.
+The `language client-on` command can be used to set the session into client mode. In this mode, normal output will be sent in the format `format string|translated format string|param 1| param 2| param 3`. This allows the development of clients which parse the output from the server. Note that you still need to handle the prompt (`>`) and chat messages, keeping in mind that chat messages can contain vertical bars. Status reports will also be sent, which are essentially more verbose copies of the output from `status`. They begin with `STATUSREPORT BEGIN` and end with `STATUSREPORT END`. Each line of the report contains a field in the format `NAME: VALUE`. Most of the values are floating point numbers. Use `language client-off` to leave client mode.
 
 ## Building the manual
 
