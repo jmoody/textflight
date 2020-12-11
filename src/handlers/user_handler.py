@@ -27,12 +27,21 @@ def handle_email(c: Client, args: List[str]) -> None:
 def handle_exit(c: Client, args: List[str]) -> None:
 	c.quit()
 
+def is_language_client(lang_arg):
+	return lang_arg == "client" or lang_arg == "client-on" or lang_arg == "client-off"
+
+def is_translated_language(lang_arg):
+	return lang_arg in translations.languages
+
+def is_known_language_arg(lang_arg):
+	return is_language_client or is_translated_language
+
 def handle_language(c: Client, args: List[str]) -> None:
 	if len(args) == 0:
 		for lang in translations.languages.keys():
 			c.send(lang)
 	elif len(args) == 1:
-		if args[0] != "client" and not args[0] in translations.languages:
+		if not is_known_language_arg(args[0]):
 			c.send(strings.USER.NO_LANGUAGE, lang=args[0], error=True)
 		else:
 			c.set_language(args[0])
